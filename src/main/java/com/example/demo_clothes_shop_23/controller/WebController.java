@@ -51,9 +51,17 @@ public class WebController {
         return "web/sign-up";
     }
 
-    @GetMapping("/discount")
-    public String discount(Model model) {
-        model.addAttribute("backgroundImageUrl", "https://im.uniqlo.com/global-cms/spa/res9d99ea00692f887774d1ae9bd825f07dfr.jpg");
+    @GetMapping("/discount/{id}")
+    public String discount(
+        @PathVariable int id,
+        @RequestParam(required = false,defaultValue = "1") int page,
+        @RequestParam(required = false,defaultValue = "24") int pageSize,
+        Model model
+    ) {
+        model.addAttribute("discount", discountService.getDiscountById(id));
+        Page<Product> pageData = productService.getByDiscount_IdAndStatus(id, true, page, pageSize);
+        model.addAttribute("pageData", pageData);
+        model.addAttribute("currentPage",page);
         return "web/discount";
     }
 

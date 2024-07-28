@@ -107,5 +107,10 @@ public class ProductService {
             .orElse(null);
     }
 
+    public Page<Product> getByDiscount_IdAndStatus(Integer discountId, Boolean status, int page, int pageSize) {
+        PageRequest pageRequest = PageRequest.of(page-1, pageSize, Sort.by("createdAt").descending());
+        return productRepository.findByDiscount_IdAndStatus(discountId, status, pageRequest);
+    }
+
 
 }

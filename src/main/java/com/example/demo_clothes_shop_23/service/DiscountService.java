@@ -19,4 +19,9 @@ public class DiscountService {
     public List<Discount> getDiscountByActive(Boolean active) {
         return discountRepository.findByActive(active);
     }
+
+    public Discount getDiscountById(Integer id) {
+        return discountRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Discount not found"));
+    }
 }

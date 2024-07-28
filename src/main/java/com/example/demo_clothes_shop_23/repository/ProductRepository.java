@@ -42,4 +42,6 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
     @Query("SELECT DISTINCT p FROM Product p JOIN p.category c WHERE c.id = ?1 AND p.status=true")
     List<Product> findByCategoryId(Integer categoryId);
 
+    Page<Product> findByDiscount_IdAndStatus(Integer discount_id, Boolean status, Pageable pageable);
+
 }
