@@ -21,13 +21,16 @@ public class Address {
 
     @Column(nullable = false)
     String receiverName;
-
+    @Column(nullable = false)
     String phone;
 
+    @Column(nullable = false)
     String province;
+    @Column(nullable = false)
     String district;
+    @Column(nullable = false)
     String ward;
-    @Column(columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "TEXT")
     String addressDetail;
     Boolean chosen;
 

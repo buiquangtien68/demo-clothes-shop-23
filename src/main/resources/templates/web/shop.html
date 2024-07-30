@@ -337,9 +337,13 @@
     </th:block>
 
     <th:block id="js">
+
         <script src="/web-assets/js/jquery.nice-select.min.js"></script>
         <script src="/web-assets/js/main.js"></script>
         <script th:inline="javascript">
+            /*Nice select*/
+            $("select").niceSelect();
+
             /*Xử lý lọc category*/
             function UpdateCategoryParent (categoryId){
                 var url = new URL(window.location.href);

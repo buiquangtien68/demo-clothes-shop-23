@@ -20,11 +20,12 @@ public class Blog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
+    @Column(nullable = false)
     String title;
     String slug;
     @Column(columnDefinition = "TEXT")
     String description;
-    @Column(columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "TEXT")
     String content;
     String thumbnail;
     Boolean status;

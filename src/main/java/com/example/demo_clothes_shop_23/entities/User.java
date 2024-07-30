@@ -36,11 +36,11 @@ public class User {
     @Enumerated(EnumType.STRING)
     UserRole role;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "user_coupon",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "coupon_id")
+        name = "user_coupon",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "coupon_id")
     )
     List<Coupon> coupons;
 

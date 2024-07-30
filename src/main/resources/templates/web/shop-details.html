@@ -80,7 +80,7 @@
                                         <i class="fa fa-star-half-o mr-1" th:if="${product.rating % 1 != 0}"></i>
                                         <!-- Empty stars for ratings less than or equal to 4 -->
                                         <th:block th:if="${product.rating <= 4}">
-                                            <th:block th:each="star, iterStat : ${#numbers.sequence(T(java.lang.Math).ceil(product.rating), 5)}">
+                                            <th:block th:each="star, iterStat : ${#numbers.sequence(T(java.lang.Math).ceil(product.rating)+1, 5)}">
                                                 <i class="fa fa-star-o mr-1"></i>
                                             </th:block>
                                         </th:block>
@@ -97,7 +97,7 @@
                                     with placket.</p>
 
                                 <div class="product__details__option">
-                                    <div class="product__details__option__size" th:if="${sizes.size()>0}">
+                                    <div class="product__details__option__size">
                                         <span>Size:</span>
                                         <label th:each="size : ${sizes}" th:for="${size.sizeName}" th:text="${size.sizeName}">xxl
                                             <input type="radio" th:id="${size.sizeName}">
@@ -116,10 +116,24 @@
                                             <input type="text" value="1">
                                         </div>
                                     </div>
-                                    <a href="#" class="primary-btn">add to cart</a>
+                                    <a href="#" class="primary-btn">Thêm vào giỏ </a>
                                 </div>
-                                <div class="product__details__btns__option">
-                                    <a href="#"><i class="fa fa-heart"></i> add to wishlist</a>
+                                <div class="product__details__btns__option btnFavoriteGroup">
+                                    <a sec:authorize="isAuthenticated()"
+                                       id="favoriteButton"
+                                       class="favorite-btn"
+                                       th:onclick="${favorite != null} ? 'toggleFavorite(' + ${product.getId()} + ')' : 'toggleFavorite()'"
+                                       th:style="${favorite != null} ? 'cursor: pointer; color: red' : 'cursor: pointer;'">
+                                        <i class="fa fa-heart"></i>
+                                        <th:block th:if="${favorite != null}">Bỏ yêu thích</th:block>
+                                        <th:block th:unless="${favorite != null}">Yêu thích</th:block>
+                                    </a>
+                                    <a sec:authorize="!isAuthenticated()"
+                                       id="favoriteButtonAnnotation"
+                                       class="favorite-btn"
+                                       style="cursor: pointer">
+                                        <i class="fa fa-heart"></i>  Yêu thích
+                                    </a>
                                 </div>
                             </div>
 
@@ -271,7 +285,7 @@
 
                             <div class="product__item__text">
                                 <h6 th:text="${product.name}">Piqué Biker Jacket</h6>
-                                <a href="#" class="add-cart">+ Add To Cart</a>
+                                <a href="#" class="add-cart">+ Thêm vào giỏ</a>
                                 <div class="rating d-flex">
                                     <!-- Loop for full stars -->
                                     <i class="fa fa-star mr-1 text-warning " th:each="star, iterStat : ${#numbers.sequence(1, T(java.lang.Math).floor(product.rating))}"></i>
@@ -300,137 +314,89 @@
     </th:block>
 
     <th:block id="js">
+        <div sec:authorize="isAuthenticated()">
+            <script>
+
+                let userId = [[${#authentication.principal.user.id}]];
+                console.log("User ID:", userId); // Example usage
+            </script>
+        </div>
         <script th:inline="javascript">
-            let productId = [[${product.id}]]
-            /*<![CDATA[*/
-            document.addEventListener('DOMContentLoaded', function() {
-                var labels = document.querySelectorAll('.product__details__option__color label');
-                labels.forEach(function(label) {
-                    label.addEventListener('click', function(event) {
-                        // Xóa class 'selected' của tất cả các label trước khi chọn lại
-                        labels.forEach(function(l) {
-                            l.classList.remove('selected');
-                        });
-                        // Thêm class 'selected' vào label được chọn
-                        label.classList.add('selected');
-
-                        // Lấy giá trị id của màu đã chọn
-                        var input = label.querySelector('.product__details__option__color label input[type="radio"]');
-                        if (input && input.checked) {
-                            var colorId = input.value;
-                            console.log('Đã chọn màu có id: ' + colorId);
-                            changeImage(colorId,productId)
-                        }
-                    });
-                });
-            });
-            /*]]>*/
-
-            /*Gọi api*/
-            const changeImage = async (colorId, productId) =>{
-                try {
-                    const changeImg = await axios.get(`/api/images/${colorId}/${productId}`)
-                    console.log("Sự kiện đổi ảnh")
-                    console.log(changeImg.data)
-                    renderImages(changeImg.data)
-                } catch (error) {
-                    console.log(error)
+            let productId = [[${product.id}]];
+            let favorites =[[${favorites}]]
+            let favorite =[[${favorite}]]
+            console.log(favorite)
+            console.log(favorites)
+        </script>
+        <script src="/web-assets/js/shop-detail.js"></script>
+        <script src="/web-assets/js/review.js"></script>
+        <script th:inline="javascript">
+            const toggleFavorite = async (id)=>{
+                if (favorites.some(favorite => favorite.product.id === productId)) {
+                    await deleteFavorite(id)
+                } else {
+                    await createFavorite()
                 }
             }
+            const btnFavoriteGroup =document.querySelector(".btnFavoriteGroup")
 
-            //Render lại ảnh khi ấn màu
-            let imgListEl = document.querySelector(".img-list");
-            let imgListTabEl = document.querySelector(".img-list-tab")
-            const renderImages = images =>{
-                let html1 = "";
-                let html2 = "";
-                images.forEach((img,index) =>{
-                    if (index===0){
-                        html1+=`
-                           <li class="nav-item">
-                                    <a class="nav-link active" data-toggle="tab" href="#tabs-${index}" role="tab">
-                                        <div class="product__thumb__pic set-bg rounded-4" data-setbg="${img.imgUrl}" style="background-image: url('${img.imgUrl}');">
-                                        </div>
-                                    </a>
-                                </li>
-                        `
-                        html2+=`
-                         <div class="tab-pane active" id="tabs-${index}" role="tabpanel">
-                                    <div class="product__details__pic__item ">
-                                        <img class="rounded-4" src="${img.imgUrl}" alt="">
-                                    </div>
-                                </div>
-                        `
-                    }else {
-                        html1+=`
-                          <li class="nav-item">
-                                    <a class="nav-link" data-toggle="tab" href="#tabs-${index}" role="tab">
-                                        <div class="product__thumb__pic set-bg rounded-4" data-setbg="${img.imgUrl}" style="background-image: url('${img.imgUrl}');">
-                                        </div>
-                                    </a>
-                                </li>
-                       `
-                        html2+=`
-                         <div class="tab-pane" id="tabs-${index}" role="tabpanel">
-                                    <div class="product__details__pic__item ">
-                                        <img class="rounded-4" src="${img.imgUrl}" alt="">
-                                    </div>
-                                </div>
-                        `
+            const renderFavorites = favorites =>{
+                let html = "";
+                if (favorites.some(favorite => favorite.product.id === productId)) {
+                    html = `
+            <a id="favoriteButton" class="favorite-btn" onclick="toggleFavorite(productId)" style=" cursor: pointer; color: red"><i class="fa fa-heart"></i>  Bỏ yêu thích</a>
+        `;
+                } else {
+                    html = `
+            <a id="favoriteButton" class="favorite-btn" onclick="toggleFavorite()" style="cursor: pointer;"><i class="fa fa-heart"></i>  Yêu thích</a>
+        `;
+                }
+                btnFavoriteGroup.innerHTML = html;
+            }
+
+            const createFavorite = async () =>{
+                const data = {
+                    userId: userId,
+                    productId: productId
+                }
+                console.log(userId)
+                console.log(productId)
+                try {
+                    let res = await axios.put("/api/favorites", data);
+                    toastr.success("Đã thêm vào danh sách yêu thích thành công")
+                    favorites.unshift(res.data)
+                    console.log(favorites)
+                    renderFavorites(favorites)
+
+                } catch (e) {
+                    console.log(e)
+                }
+
+            }
+
+            const deleteFavorite = async (id) =>{
+                const confirm = window.confirm("Bạn có chắc chắn muốn xóa ko")
+                if(confirm){
+                    try {
+                        const deleteFavor = await axios.delete(`/api/favorites/${id}`)
+                        console.log("Sự kiện xóa Favor")
+                        favorites=favorites.filter(f=>f.product.id !==id)
+                        console.log(favorites)
+                        renderFavorites(favorites)
+                        toastr.success("Xóa khỏi danh sách yêu thích thành công")
+                    } catch (error) {
+                        console.log(error)
                     }
+                }
+            }
+            const btnFavoriteAnnotation=document.getElementById("favoriteButtonAnnotation");
+            if (btnFavoriteAnnotation){
+                btnFavoriteAnnotation.addEventListener("click", ()=>{
+                    toastr.error("Cần phải đăng nhập mới thêm được vào danh sách yêu thích")
                 })
-                imgListEl.innerHTML=html1;
-                imgListTabEl.innerHTML=html2;
             }
-
-            /*rating star*/
-            const stars = document.querySelectorAll(".star");
-            const ratingValue = document.getElementById("rating-value");
-
-            let currentRating = null;
-            let ratingHidden=document.getElementById('rating-input');
-            ratingHidden.value = currentRating;
-            console.log(ratingHidden)
-            stars.forEach((star) => {
-                star.addEventListener("mouseover", () => {
-                    resetStars();
-                    const rating = parseInt(star.getAttribute("data-rating"));
-                    highlightStars(rating);
-                });
-
-                star.addEventListener("mouseout", () => {
-                    resetStars();
-                    highlightStars(currentRating);
-                });
-
-                star.addEventListener("click", () => {
-                    currentRating = parseInt(star.getAttribute("data-rating"));
-                    ratingValue.textContent = `Bạn đã đánh giá ${currentRating} sao.`;
-                    highlightStars(currentRating);
-                    ratingHidden.value = currentRating; // Cập nhật giá trị của trường input ẩn
-                    console.log(ratingHidden)
-                    $('#form-review').valid();
-                });
-            });
-
-            function resetStars() {
-                stars.forEach((star) => {
-                    star.classList.remove("active");
-                });
-            }
-
-            function highlightStars(rating) {
-                stars.forEach((star) => {
-                    const starRating = parseInt(star.getAttribute("data-rating"));
-                    if (starRating <= rating) {
-                        star.classList.add("active");
-                    }
-                });
-            }
-
-
-
         </script>
+
     </th:block>
 
 </body>

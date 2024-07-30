@@ -6,18 +6,17 @@ import com.example.demo_clothes_shop_23.repository.*;
 import com.example.demo_clothes_shop_23.service.ProductService;
 import com.github.javafaker.Faker;
 import com.github.slugify.Slugify;
-import jakarta.transaction.Transactional;
-import org.hibernate.Hibernate;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.text.DecimalFormat;
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.TreeSet.*;
+
 
 @SpringBootTest
 class DemoClothesShop23ApplicationTests {
@@ -62,6 +61,8 @@ class DemoClothesShop23ApplicationTests {
 	private BannerRepository bannerRepository;
 	@Autowired
 	private ProductService productService;
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 
 	@Test
@@ -82,12 +83,6 @@ class DemoClothesShop23ApplicationTests {
 		Category categoryParent3 = Category.builder()
 				.name("Giày")
 				.slug(slugify.slugify("Giày"))
-				.createdAt(LocalDateTime.now())
-				.updatedAt(LocalDateTime.now())
-				.build();
-		Category categoryParent4 = Category.builder()
-				.name("Phụ kiện")
-				.slug(slugify.slugify("Phụ kiện"))
 				.createdAt(LocalDateTime.now())
 				.updatedAt(LocalDateTime.now())
 				.build();
@@ -154,38 +149,10 @@ class DemoClothesShop23ApplicationTests {
 				.createdAt(LocalDateTime.now())
 				.updatedAt(LocalDateTime.now())
 				.build();
-		Category category10 = Category.builder()
-				.name("Mũ")
-				.slug(slugify.slugify("Mũ"))
-				.parentId(4)
-				.createdAt(LocalDateTime.now())
-				.updatedAt(LocalDateTime.now())
-				.build();
-		Category category11 = Category.builder()
-				.name("Thắt Lưng")
-				.slug(slugify.slugify("Thắt Lưng"))
-				.parentId(4)
-				.createdAt(LocalDateTime.now())
-				.updatedAt(LocalDateTime.now())
-				.build();
-		Category category12 = Category.builder()
-				.name("Kính")
-				.slug(slugify.slugify("Kính"))
-				.parentId(4)
-				.createdAt(LocalDateTime.now())
-				.updatedAt(LocalDateTime.now())
-				.build();
-		Category category13 = Category.builder()
-				.name("Túi")
-				.slug(slugify.slugify("Túi"))
-				.parentId(4)
-				.createdAt(LocalDateTime.now())
-				.updatedAt(LocalDateTime.now())
-				.build();
+
 		categoryRepository.save(categoryParent1);
 		categoryRepository.save(categoryParent2);
 		categoryRepository.save(categoryParent3);
-		categoryRepository.save(categoryParent4);
 		categoryRepository.save(category1);
 		categoryRepository.save(category2);
 		categoryRepository.save(category3);
@@ -195,10 +162,6 @@ class DemoClothesShop23ApplicationTests {
 		categoryRepository.save(category7);
 		categoryRepository.save(category8);
 		categoryRepository.save(category9);
-		categoryRepository.save(category10);
-		categoryRepository.save(category11);
-		categoryRepository.save(category12);
-		categoryRepository.save(category13);
 	}
 
 	@Test
@@ -370,7 +333,7 @@ class DemoClothesShop23ApplicationTests {
 					.startDate(LocalDateTime.now())
 					.endDate(LocalDateTime.now().plusYears(1))
 					.active(i != 0)
-					.imageUrl("https://placehold.co/600x100?text=" +String.valueOf(name.charAt(0)).toUpperCase())
+					.imageUrl("https://placehold.co/1920x800?text=" +String.valueOf(name.charAt(0)).toUpperCase())
 					.createdAt(LocalDateTime.now())
 					.updatedAt(LocalDateTime.now())
 					.build();
@@ -480,7 +443,7 @@ class DemoClothesShop23ApplicationTests {
 		Color blackColor = colorRepository.findById(1).orElseThrow(() -> new RuntimeException("Color with ID 1 not found"));
 		SizeType[] sizeTypes = SizeType.values();
 
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 50; i++) {
 			String name = faker.book().title();
 			double price = 300000 + (random.nextDouble() * (1000000 - 300000));
 			double roundedPrice = Math.round(price / 100.0) * 100.0;
@@ -493,15 +456,12 @@ class DemoClothesShop23ApplicationTests {
                 rdColors.add(rdColor);
 			}
 			Set<Size> rdSizes = new HashSet<>();
-			if (Arrays.asList(5,6,7,8,9,10,11).contains(rdCategory.getId())) {
+			if (Arrays.asList(4,5,6,7,8,9,10).contains(rdCategory.getId())) {
 				Set<Size> rdSizes1 = sizeRepository.findSizeByTypeOrderByOrdersAsc(SizeType.CLOTHES_SIZE);
 				rdSizes.addAll(rdSizes1);
-			}else if (Arrays.asList(12,13).contains(rdCategory.getId())){
+			}else if (Arrays.asList(11,12).contains(rdCategory.getId())){
 				Set<Size> rdSizes2 = sizeRepository.findSizeByTypeOrderByOrdersAsc(SizeType.SHOES_SIZE);
 				rdSizes.addAll(rdSizes2);
-			}else {
-				Set<Size> rdSizes3 = new HashSet<>();
-				rdSizes.addAll(rdSizes3);
 			}
 
 			Product product = Product.builder()
@@ -509,7 +469,7 @@ class DemoClothesShop23ApplicationTests {
 					.slug(slugify.slugify(name))
 					.description(faker.lorem().paragraph())
 					.price(roundedPrice)
-					.status(i < 90)
+					.status(i < 40)
 					.discount(rdDiscount)
 					.category(rdCategory)
 					.colors(rdColors)
@@ -567,7 +527,7 @@ class DemoClothesShop23ApplicationTests {
 		Banner banner1 = Banner.builder()
 				.name("Banner 1")
 				.status(true)
-				.thumbnail("https://placehold.co/600x600?text=B1")
+				.thumbnail("https://placehold.co/1920x800?text=B1")
 				.orders(1)
 				.createdAt(LocalDateTime.now())
 				.updatedAt(LocalDateTime.now())
@@ -575,7 +535,7 @@ class DemoClothesShop23ApplicationTests {
 		Banner banner2 = Banner.builder()
 				.name("Banner 2")
 				.status(true)
-				.thumbnail("https://placehold.co/600x600?text=B2")
+				.thumbnail("https://placehold.co/1920x800?text=B2")
 				.orders(2)
 				.createdAt(LocalDateTime.now())
 				.updatedAt(LocalDateTime.now())
@@ -583,7 +543,7 @@ class DemoClothesShop23ApplicationTests {
 		Banner banner3 = Banner.builder()
 				.name("Banner 3")
 				.status(false)
-				.thumbnail("https://placehold.co/600x600?text=B3")
+				.thumbnail("https://placehold.co/1920x800?text=B3")
 				.orders(3)
 				.createdAt(LocalDateTime.now())
 				.updatedAt(LocalDateTime.now())
@@ -805,7 +765,6 @@ class DemoClothesShop23ApplicationTests {
 		productService.updatePosters();
 	}
 
-
 	@Test
 	void update_newPrice(){
 		List<Product> products = productRepository.findAll();
@@ -841,5 +800,13 @@ class DemoClothesShop23ApplicationTests {
 		}
 	}
 
+	@Test
+	void updatePrivatePassword(){
+		List<User> users = userRepository.findAll();
+		for (User user : users) {
+			user.setPassword(passwordEncoder.encode("123"));
+			userRepository.save(user);
+		}
+	}
 
 }

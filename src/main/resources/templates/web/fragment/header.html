@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <style>
+
+    </style>
 </head>
 <body>
 <div class="content">
@@ -10,8 +13,21 @@
     <div class="offcanvas-menu-overlay"></div>
     <div class="offcanvas-menu-wrapper">
         <div class="offcanvas__option">
-            <div class="offcanvas__links">
-                <a href="#">Đăng Nhập</a>
+            <div class="offcanvas__links" sec:authorize="!isAuthenticated()">
+                <a th:href="@{/login}">Đăng nhập</a>
+            </div>
+            <div class="offcanvas__links" sec:authorize="isAuthenticated()">
+                <div class="dropdown">
+                    <a class="btn bg-dark dropdown-toggle nav-link text-white " href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" th:text="${#authentication.principal.user.name}">
+                        Dropdown link
+                    </a>
+                    <ul class="dropdown-menu text-decoration-none">
+                        <li sec:authorize="hasRole('ADMIN')"><a class="dropdown-item" th:href="@{/admin/dashboard}">Trang quản trị</a></li>
+                        <li><a class="dropdown-item " th:href="@{/thong-tin-ca-nhan}">Thông tin cá nhân</a></li>
+                        <li><a class="dropdown-item" href="#">Lịch sử mua hàng</a></li>
+                        <li><a class="dropdown-item"  th:href="@{/logout}">Đăng xuất</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
         <div class="offcanvas__nav__option">
@@ -36,8 +52,21 @@
                     </div>
                     <div class="col-lg-6 col-md-5">
                         <div class="header__top__right">
-                            <div class="header__top__links">
-                                <a th:href="@{/sign-in}">Đăng nhập</a>
+                            <div class="header__top__links" sec:authorize="!isAuthenticated()">
+                                <a th:href="@{/login}">Đăng nhập</a>
+                            </div>
+                            <div class="header__top__links" sec:authorize="isAuthenticated()">
+                                <div class="dropdown">
+                                    <a class="btn bg-dark dropdown-toggle nav-link text-white " href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" th:text="${#authentication.principal.user.name}">
+                                        Dropdown link
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li sec:authorize="hasRole('ADMIN')"><a class="dropdown-item text-black" th:href="@{/admin/dashboard}"  >Trang quản trị</a></li>
+                                        <li><a class="dropdown-item text-black" th:href="@{/thong-tin-ca-nhan}">Thông tin cá nhân</a></li>
+                                        <li><a class="dropdown-item text-black " href="#">Lịch sử mua hàng</a></li>
+                                        <li><a class="dropdown-item text-black"  th:href="@{/logout}">Đăng xuất</a></li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>

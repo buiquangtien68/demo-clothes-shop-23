@@ -2,9 +2,14 @@ package com.example.demo_clothes_shop_23.controller;
 
 import com.example.demo_clothes_shop_23.entities.*;
 import com.example.demo_clothes_shop_23.model.enums.SizeType;
+import com.example.demo_clothes_shop_23.model.model.ImageProductDetailModel;
+import com.example.demo_clothes_shop_23.repository.FavoriteRepository;
+import com.example.demo_clothes_shop_23.security.CustomUserDetails;
 import com.example.demo_clothes_shop_23.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +32,7 @@ public class WebController {
     private final TagService tagService;
     private final DiscountService discountService;
     private final BannerService bannerService;
+    private final FavoriteService favoriteService;
 
     @GetMapping("/")
     public String index(Model model) {
@@ -36,19 +42,19 @@ public class WebController {
         model.addAttribute("newArrivals", productService.getByStatusOrderByCreatedAtDesc(true));
         model.addAttribute("clothesBanner", productService.getOneProductByCategoryId(5).getPoster());
         model.addAttribute("shoesBanner", productService.getOneProductByCategoryId(12).getPoster());
-        model.addAttribute("accessoriesBanner", productService.getOneProductByCategoryId(16).getPoster());
+        model.addAttribute("pantsBanner", productService.getOneProductByCategoryId(10).getPoster());
         model.addAttribute("latestBlog", blogService.getByTagIdAndStatusOrderByCreatedAtDesc(2,true));
         return "web/index";
     }
 
-    @GetMapping("/sign-in")
-    public String signIn(Model model) {
-        return "web/sign-in";
+    @GetMapping("/login")
+    public String login(Model model) {
+        return "web/login";
     }
 
-    @GetMapping("/sign-up")
-    public String signUp(Model model) {
-        return "web/sign-up";
+    @GetMapping("/register")
+    public String register(Model model) {
+        return "web/register";
     }
 
     @GetMapping("/discount/{id}")
@@ -73,34 +79,43 @@ public class WebController {
         model.addAttribute("reviews",reviewService.findByProduct_IdOrderByCreatedAtDesc(id));
 
         //Sắp xếp size
-        if (product.getSizes()!=null){
-            Set<Size> sizes = product.getSizes();
-            Set<Size> sortedSizes = new TreeSet<>(Comparator.comparingInt(Size::getOrders));
-            sortedSizes.addAll(sizes);
-            model.addAttribute("sizes",sortedSizes);
+        Set<Size> sizes = product.getSizes();
+        Set<Size> sortedSizes = new TreeSet<>(Comparator.comparingInt(Size::getOrders));
+        sortedSizes.addAll(sizes);
+        model.addAttribute("sizes",sortedSizes);
 
-            // Kiểm tra nếu có size với type
-            boolean hasSizeType1 = product.getSizes().stream().anyMatch(size -> size.getType().toString().equals("CLOTHES_SIZE"));
-            model.addAttribute("hasSizeType1", hasSizeType1);
-            boolean hasSizeType2 = product.getSizes().stream().anyMatch(size -> size.getType().toString().equals("SHOES_SIZE"));
-            model.addAttribute("hasSizeType2", hasSizeType2);
-        }
+        // Kiểm tra nếu có size với type
+        boolean hasSizeType1 = product.getSizes().stream().anyMatch(size -> size.getType().toString().equals("CLOTHES_SIZE"));
+        model.addAttribute("hasSizeType1", hasSizeType1);
+        boolean hasSizeType2 = product.getSizes().stream().anyMatch(size -> size.getType().toString().equals("SHOES_SIZE"));
+        model.addAttribute("hasSizeType2", hasSizeType2);
+
 
         //Sắp xếp màu
         Set<Color> colors = product.getColors();
         Set<Color> sortedColor = new TreeSet<>(Comparator.comparingInt(Color::getId));
         sortedColor.addAll(colors);
         model.addAttribute("colors",sortedColor);
-
-        //Tính giá sau khi discount
-        model.addAttribute("newPrice",product.getNewPrice());
+        ;
 
         //Lấy thông tin màu để lấy hình ảnh
-            List<Image> images = imageService.getAllByColor_IdAndProduct_Id(sortedColor.iterator().next().getId(),product.getId());
-            model.addAttribute("images",images);
+        List<ImageProductDetailModel> images = imageService.getAllByColor_IdAndProduct_Id(sortedColor.iterator().next().getId(),product.getId());
+        model.addAttribute("images",images);
 
         //Danh sách gợi ý sản phẩm
-            model.addAttribute("ListProductDeCu",productService.findByCategoryIdOrderByCreatedAtDescExcludingProductId(product.getCategory().getId(), product.getId()));
+        model.addAttribute("ListProductDeCu",productService.findByCategoryIdOrderByCreatedAtDescExcludingProductId(product.getCategory().getId(), product.getId()));
+
+        //Lấy danh sách yêu thích và kểm tra xem sản phẩm này có trong danh sách không
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails customUserDetails) {
+            User user = (User) customUserDetails.getUser();
+            model.addAttribute("favorites", favoriteService.getByUser_IdOrderByCreatedAtDesc(user.getId()));
+            Favorite favorite = favoriteService.getByUser_IdOrderByCreatedAtDesc(user.getId()).stream()
+                .filter(f -> f.getProduct().getId() == id)
+                .findFirst()
+                .orElse(null); // hoặc giá trị mặc định khác nếu cần
+            model.addAttribute("favorite", favorite);
+        }
         return "web/shop-details";
     }
 
