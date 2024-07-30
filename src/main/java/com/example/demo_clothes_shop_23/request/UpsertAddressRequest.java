@@ -1,8 +1,6 @@
 package com.example.demo_clothes_shop_23.request;
 
 import jakarta.persistence.Column;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -12,7 +10,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UpsertAddress {
+public class UpsertAddressRequest {
     @Column(nullable = false)
     String receiverName;
 

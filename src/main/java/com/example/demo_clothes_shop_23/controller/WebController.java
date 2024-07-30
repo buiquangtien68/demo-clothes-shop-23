@@ -44,6 +44,10 @@ public class WebController {
         model.addAttribute("shoesBanner", productService.getOneProductByCategoryId(12).getPoster());
         model.addAttribute("pantsBanner", productService.getOneProductByCategoryId(10).getPoster());
         model.addAttribute("latestBlog", blogService.getByTagIdAndStatusOrderByCreatedAtDesc(2,true));
+        List<Integer> favoriteProductIds = favoriteService.getByUser_IdOrderByCreatedAtDesc().stream().map(f->f.getProduct().getId()).toList();
+        if (!favoriteProductIds.isEmpty()) {
+            model.addAttribute("favoriteProductIds",favoriteProductIds);
+        }else model.addAttribute("favoriteProductIds",new ArrayList<>());
         return "web/index";
     }
 
@@ -68,7 +72,23 @@ public class WebController {
         Page<Product> pageData = productService.getByDiscount_IdAndStatus(id, true, page, pageSize);
         model.addAttribute("pageData", pageData);
         model.addAttribute("currentPage",page);
+        List<Integer> favoriteProductIds = favoriteService.getByUser_IdOrderByCreatedAtDesc().stream().map(f->f.getProduct().getId()).toList();
+        if (!favoriteProductIds.isEmpty()) {
+            model.addAttribute("favoriteProductIds",favoriteProductIds);
+        }else model.addAttribute("favoriteProductIds",new ArrayList<>());
         return "web/discount";
+    }
+
+    @GetMapping("/favorite")
+    public String favorite(
+        Model model
+    ) {
+        model.addAttribute("favorites", favoriteService.getByUser_IdOrderByCreatedAtDesc());
+        List<Integer> favoriteProductIds = favoriteService.getByUser_IdOrderByCreatedAtDesc().stream().map(f->f.getProduct().getId()).toList();
+        if (!favoriteProductIds.isEmpty()) {
+            model.addAttribute("favoriteProductIds",favoriteProductIds);
+        }else model.addAttribute("favoriteProductIds",new ArrayList<>());
+        return "web/favorite";
     }
 
     /*Trang chi tiết sản phẩm*/
@@ -106,16 +126,13 @@ public class WebController {
         model.addAttribute("ListProductDeCu",productService.findByCategoryIdOrderByCreatedAtDescExcludingProductId(product.getCategory().getId(), product.getId()));
 
         //Lấy danh sách yêu thích và kểm tra xem sản phẩm này có trong danh sách không
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails customUserDetails) {
-            User user = (User) customUserDetails.getUser();
-            model.addAttribute("favorites", favoriteService.getByUser_IdOrderByCreatedAtDesc(user.getId()));
-            Favorite favorite = favoriteService.getByUser_IdOrderByCreatedAtDesc(user.getId()).stream()
-                .filter(f -> f.getProduct().getId() == id)
-                .findFirst()
-                .orElse(null); // hoặc giá trị mặc định khác nếu cần
-            model.addAttribute("favorite", favorite);
-        }
+        model.addAttribute("favorites", favoriteService.getByUser_IdOrderByCreatedAtDesc());
+        model.addAttribute("favorite", favoriteService.getByProduct_Id(id));
+        List<Integer> favoriteProductIds = favoriteService.getByUser_IdOrderByCreatedAtDesc().stream().map(f->f.getProduct().getId()).toList();
+        if (!favoriteProductIds.isEmpty()) {
+            model.addAttribute("favoriteProductIds",favoriteProductIds);
+        }else model.addAttribute("favoriteProductIds",new ArrayList<>());
+
         return "web/shop-details";
     }
 
@@ -142,6 +159,13 @@ public class WebController {
         Page<Product> pageData = productService.findAllProductsWithSpec(page,pageSize,sizeId,colorId,true,nameKeyword,categoryParentId,categoryChildId,sortProduct,startPrice,endPrice);
         model.addAttribute("pageData",pageData);
         model.addAttribute("currentPage",page);
+        //Lấy danh sách yêu thích và kểm tra xem sản phẩm này có trong danh sách không
+        model.addAttribute("favorites", favoriteService.getByUser_IdOrderByCreatedAtDesc());
+        List<Integer> favoriteProductIds = favoriteService.getByUser_IdOrderByCreatedAtDesc().stream().map(f->f.getProduct().getId()).toList();
+        if (!favoriteProductIds.isEmpty()) {
+            model.addAttribute("favoriteProductIds",favoriteProductIds);
+        }else model.addAttribute("favoriteProductIds",new ArrayList<>());
+
         return "web/shop";
     }
 
@@ -163,7 +187,7 @@ public class WebController {
     public String blogDetail(@PathVariable int id, @PathVariable String slug, Model model) {
         Blog blog = blogService.getByIdAndSlugAndStatus(id,slug,true);
         model.addAttribute("blog", blog);
-        model.addAttribute("comments", commentService.getByBlog_Id(id));
+        model.addAttribute("comments", commentService.getByBlog_IdOrderByCreatedAtDesc(id));
         return "web/blog-details";
     }
 

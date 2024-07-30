@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -26,11 +27,27 @@ public class FavoriteService {
     private final FavoriteRepository favoriteRepository;
     private final ProductRepository productRepository;
 
-    public List<Favorite> getByUser_IdOrderByCreatedAtDesc(Integer userId) {
-        return favoriteRepository.findByUser_IdOrderByCreatedAtDesc(userId);
+    public List<Favorite> getByUser_IdOrderByCreatedAtDesc() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails customUserDetails) {
+            User user = (User) customUserDetails.getUser();
+           return favoriteRepository.findByUser_IdOrderByCreatedAtDesc(user.getId());
+        }else return new ArrayList<>();
     }
 
-    //TODO: sử dụng SecurityContextHolder để lấy user
+    public Favorite getByProduct_Id(Integer productId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails customUserDetails) {
+            User user = (User) customUserDetails.getUser();
+            return favoriteRepository.findByUser_IdOrderByCreatedAtDesc(user.getId())
+                .stream()
+                .filter(f -> Objects.equals(f.getProduct().getId(), productId))
+                .findFirst()
+                .orElse(null);
+        }else return null;
+    }
+
+    //Sử dụng SecurityContextHolder để lấy user
     public Favorite createFavorite(FavoriteRequest favoriteRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();

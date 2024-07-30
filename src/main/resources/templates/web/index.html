@@ -12,7 +12,7 @@
     <th:block id="css">
         <style>
             .break-banner {
-                height: 200px;
+                height: 400px;
                 overflow: hidden;
                 position: relative;
             }
@@ -144,15 +144,26 @@
                             <div class="product__item">
                                 <a th:href="@{/product/{id}/{slug}(id=${newArrivals.get(i).id}, slug=${newArrivals.get(i).slug})}">
                                     <div class="product__item__pic set-bg" th:data-setbg="${newArrivals.get(i).poster}">
-                                        <span th:if="${newArrivals.get(i).discount!=null}" class="label">Sale</span>
+                                        <span th:if="${newArrivals.get(i).discount!=null}" class="label">Khuyến mại</span>
                                         <ul class="product__hover">
-                                            <li><div><img src="/web-assets/img/icon/heart.png" alt=""></div></li>
+                                            <li class="btnFavorite" sec:authorize="isAuthenticated()">
+                                                <!-- Sử dụng div thay vì button và bắt sự kiện click -->
+                                                <button class="border-0 push-favorite bg-white text-center pt-2 pb-2 pl-3 pr-3" th:data-product-id="${newArrivals.get(i).id}">
+                                                    <i class="fas fa-heart text-danger" th:if="${#lists.contains(favoriteProductIds, newArrivals.get(i).id)}"></i>
+                                                    <i class="far fa-heart text-danger" th:unless="${#lists.contains(favoriteProductIds, newArrivals.get(i).id)}"></i>
+                                                </button>
+                                            </li>
+                                            <li sec:authorize="!isAuthenticated()">
+                                                <button class="border-0 push-favorite bg-white text-center pt-2 pb-2 pl-3 pr-3" >
+                                                    <i class="far fa-heart text-danger favoriteButtonAnnotation" ></i>
+                                                </button>
+                                            </li>
                                         </ul>
                                     </div>
                                 </a>
                                 <div class="product__item__text">
                                     <h6 th:text="${newArrivals.get(i).name}">Piqué Biker Jacket</h6>
-                                    <a href="#" class="add-cart">+ Add To Cart</a>
+                                    <a href="#" class="add-cart">+ Thêm vào giỏ</a>
                                     <div class="rating d-flex">
                                         <!-- Loop for full stars -->
                                         <i class="fa fa-star mr-1 text-warning " th:each="star, iterStat : ${#numbers.sequence(1, T(java.lang.Math).floor(newArrivals.get(i).rating))}"></i>
@@ -178,15 +189,26 @@
                             <div class="product__item">
                                 <a th:href="@{/product/{id}/{slug}(id=${hotSales.get(i).id}, slug=${hotSales.get(i).slug})}">
                                     <div class="product__item__pic set-bg" th:data-setbg="${hotSales.get(i).poster}">
-                                        <span th:if="${hotSales.get(i).discount!=null}" class="label">Sale</span>
+                                        <span th:if="${hotSales.get(i).discount!=null}" class="label">Khuyến mại</span>
                                         <ul class="product__hover">
-                                            <li><div><img src="/web-assets/img/icon/heart.png" alt=""></div></li>
+                                            <li class="btnFavorite" sec:authorize="isAuthenticated()">
+                                                <!-- Sử dụng div thay vì button và bắt sự kiện click -->
+                                                <button class="border-0 push-favorite bg-white text-center pt-2 pb-2 pl-3 pr-3" th:data-product-id="${hotSales.get(i).id}">
+                                                    <i class="fas fa-heart text-danger" th:if="${#lists.contains(favoriteProductIds, hotSales.get(i).id)}"></i>
+                                                    <i class="far fa-heart text-danger" th:unless="${#lists.contains(favoriteProductIds, hotSales.get(i).id)}"></i>
+                                                </button>
+                                            </li>
+                                            <li sec:authorize="!isAuthenticated()">
+                                                <button class="border-0 push-favorite bg-white text-center pt-2 pb-2 pl-3 pr-3" >
+                                                    <i class="far fa-heart text-danger favoriteButtonAnnotation" ></i>
+                                                </button>
+                                            </li>
                                         </ul>
                                     </div>
                                 </a>
                                 <div class="product__item__text">
                                     <h6 th:text="${hotSales.get(i).name}">Piqué Biker Jacket</h6>
-                                    <a href="#" class="add-cart">+ Add To Cart</a>
+                                    <a href="#" class="add-cart">+ Thêm vào giỏ</a>
                                     <div class="rating d-flex">
                                         <!-- Loop for full stars -->
                                         <i class="fa fa-star mr-1 text-warning " th:each="star, iterStat : ${#numbers.sequence(1, T(java.lang.Math).floor(hotSales.get(i).rating))}"></i>
@@ -253,9 +275,14 @@
     </th:block>
 
     <th:block id="js">
-        <script th:inline="javascript">
-
-        </script>
+        <div sec:authorize="isAuthenticated()">
+            <script>
+                let userId = [[${#authentication.principal.user.id}]];
+                console.log("User ID:", userId); // Example usage
+                let favoriteProductIds = [[${favoriteProductIds}]]
+            </script>
+        </div>
+        <script src="/web-assets/js/favorite.js"></script>
     </th:block>
 </body>
 

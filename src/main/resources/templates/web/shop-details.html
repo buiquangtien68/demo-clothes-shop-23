@@ -31,6 +31,10 @@
             .nav-link.active {
                 color: black !important;
             }
+
+            .login-link:hover{
+                color: red!important;
+            }
         </style>
     </th:block>
 
@@ -72,7 +76,7 @@
                         <div class="col-lg-5 col-md-3 rounded-5 bg-light">
                             <div class="product__details__text mt-5">
                                 <h4 th:text="${product.name}"></h4>
-                                <div class="rating d-flex align-items-center justify-content-center">
+                                <div class="rating d-flex align-items-center justify-content-center rating-product-detail">
                                     <div class="d-flex">
                                         <!-- Loop for full stars -->
                                         <i class="fa fa-star mr-1" th:each="star, iterStat : ${#numbers.sequence(1, T(java.lang.Math).floor(product.rating))}"></i>
@@ -85,7 +89,7 @@
                                             </th:block>
                                         </th:block>
                                     </div>
-                                    <span class="m-1" th:text="${reviews.size()} + ' Reviews'"></span>
+                                    <span class="m-1" th:text="${reviews.size()} + ' Đánh giá'"></span>
                                 </div>
                                 <h3 th:if="${product.discount!=null}"> <th:block th:text="${product.newPrice +' VNĐ'}"></th:block>
                                     <span th:text="${product.price+ ' VNĐ'}"></span>
@@ -174,7 +178,14 @@
                                         <div class="product__details__tab__content">
                                             <div class="product__details__tab__content__item">
                                                 <div class="d-flex justify-content-center">
-                                                    <button type="button" class="btn btn-dark text-white rounded" data-bs-toggle="modal" data-bs-target="#review-modal">
+                                                    <p sec:authorize="!isAuthenticated()">
+                                                        Để viết bình luận cần <span><a class="login-link" th:href="@{/login}">đăng nhập</a></span>
+                                                    </p>
+                                                    <button sec:authorize="isAuthenticated()"
+                                                            type="button"
+                                                            class="btn btn-dark text-white rounded"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#review-modal">
                                                         Bình luận
                                                     </button>
                                                 </div>
@@ -224,31 +235,36 @@
                                                         </div>
                                                     </div>
                                                 </div>
-
-                                                <div class="comment-info bg-light-subtle rounded-5 p-3 mt-3" th:each="review :${reviews}">
-                                                    <div class="d-flex align-items-center">
-                                                        <img th:src="${review.getUser().getAvatar()}" alt="Avatar" class="rounded-circle " style="width: 50px; height: 50px;">
-                                                        <div class="mt-2 ml-2" >
-                                                            <h5 class=" ml-1 mt-1" th:text="${review.getUser().getName()}">Người Bình Luận</h5>
-                                                            <div class="rating ml-1 mt-n2">
-                                                                <div class="d-flex">
-                                                                    <i class="fa fa-star mr-1 text-warning" th:each="star, iterStat : ${#numbers.sequence(1, T(java.lang.Math).floor(review.rating))}"></i>
-                                                                    <th:block th:if="${review.rating <= 4}">
-                                                                        <th:block th:each="star, iterStat : ${#numbers.sequence(T(java.lang.Math).ceil(review.rating)+1, 5)}">
-                                                                            <i class="fa fa-star-o mr-1 text-warning"></i>
+                                                <div class="review-list">
+                                                    <div class="comment-info bg-light-subtle rounded-5 p-3 mt-3" th:each="review :${reviews}">
+                                                        <div class="d-flex align-items-center">
+                                                            <img th:src="${review.getUser().getAvatar()}" alt="Avatar" class="rounded-circle " style="width: 50px; height: 50px;">
+                                                            <div class="mt-2 ml-2" >
+                                                                <h5 class=" ml-1 mt-1" th:text="${review.getUser().getName()}">Người Bình Luận</h5>
+                                                                <div class="rating ml-1 mt-n2">
+                                                                    <div class="d-flex">
+                                                                        <i class="fa fa-star mr-1 text-warning" th:each="star, iterStat : ${#numbers.sequence(1, T(java.lang.Math).floor(review.rating))}"></i>
+                                                                        <th:block th:if="${review.rating <= 4}">
+                                                                            <th:block th:each="star, iterStat : ${#numbers.sequence(T(java.lang.Math).ceil(review.rating)+1, 5)}">
+                                                                                <i class="fa fa-star-o mr-1 text-warning"></i>
+                                                                            </th:block>
                                                                         </th:block>
-                                                                    </th:block>
+                                                                    </div>
                                                                 </div>
                                                             </div>
+                                                            <div class="ml-auto">
+                                                                <p class="pr-2 mt-2 text-body-tertiary" th:text="${#temporals.format(review.createdAt,'dd/MM/yyyy')}"></p>
+                                                            </div>
                                                         </div>
-                                                        <div class="ml-auto">
-                                                            <p class="pr-2 mt-2 text-body-tertiary" th:text="${#temporals.format(review.createdAt,'dd/MM/yyyy')}"><small>2 ngày trước</small></p>
+                                                        <div class="comment-content ps-1 pt-2" >
+                                                            <p th:text="${review.getContent()}">Phim diễn biến chậm. Được mấy tập cuối là cuốn. Mấy tập đầu tới giũa tua nhanh chút.</p>
                                                         </div>
+                                                        <div class="mt-2" sec:authorize="isAuthenticated()" th:if="${#authentication.principal.user.id==review.user.id}">
+                                                            <button  th:onclick="'openEditModal('+${review.getId()}+')'" style="border: none">Sửa</button>
+                                                            <button  th:onclick="'deleteRv('+${review.getId()}+')'"  style="border: none">Xóa</button>
+                                                        </div>
+                                                        <hr>
                                                     </div>
-                                                    <div class="comment-content ps-1 pt-2" th:text="${review.getContent()}">
-                                                        <p>Phim diễn biến chậm. Được mấy tập cuối là cuốn. Mấy tập đầu tới giũa tua nhanh chút.</p>
-                                                    </div>
-                                                    <hr>
                                                 </div>
                                             </div>
                                         </div>
@@ -276,9 +292,20 @@
                         <div class="product__item">
                             <a th:href="@{/product/{id}/{slug}(id=${product.id}, slug=${product.slug})}">
                                 <div class="product__item__pic set-bg" th:data-setbg="${product.poster}">
-                                    <span th:if="${product.discount!=null}" class="label">Sale</span>
+                                    <span th:if="${product.discount!=null}" class="label">Khuyến mại</span>
                                     <ul class="product__hover">
-                                        <li><div><img src="/web-assets/img/icon/heart.png" alt=""></div></li>
+                                        <li class="btnFavorite" sec:authorize="isAuthenticated()">
+                                            <!-- Sử dụng div thay vì button và bắt sự kiện click -->
+                                            <button class="border-0 push-favorite bg-white text-center pt-2 pb-2 pl-3 pr-3" th:data-product-id="${product.id}">
+                                                <i class="fas fa-heart text-danger" th:if="${#lists.contains(favoriteProductIds, product.id)}"></i>
+                                                <i class="far fa-heart text-danger" th:unless="${#lists.contains(favoriteProductIds, product.id)}"></i>
+                                            </button>
+                                        </li>
+                                        <li sec:authorize="!isAuthenticated()">
+                                            <button class="border-0 push-favorite bg-white text-center pt-2 pb-2 pl-3 pr-3" >
+                                                <i class="far fa-heart text-danger favoriteButtonAnnotation" ></i>
+                                            </button>
+                                        </li>
                                     </ul>
                                 </div>
                             </a>
@@ -316,87 +343,23 @@
     <th:block id="js">
         <div sec:authorize="isAuthenticated()">
             <script>
-
                 let userId = [[${#authentication.principal.user.id}]];
                 console.log("User ID:", userId); // Example usage
+                let favoriteProductIds = [[${favoriteProductIds}]]
             </script>
         </div>
         <script th:inline="javascript">
             let productId = [[${product.id}]];
+            let product =[[${product}]]
             let favorites =[[${favorites}]]
             let favorite =[[${favorite}]]
-            console.log(favorite)
-            console.log(favorites)
+            let reviews = [[${reviews}]]
+
         </script>
+        <script src="/web-assets/js/favorite.js"></script>
         <script src="/web-assets/js/shop-detail.js"></script>
         <script src="/web-assets/js/review.js"></script>
-        <script th:inline="javascript">
-            const toggleFavorite = async (id)=>{
-                if (favorites.some(favorite => favorite.product.id === productId)) {
-                    await deleteFavorite(id)
-                } else {
-                    await createFavorite()
-                }
-            }
-            const btnFavoriteGroup =document.querySelector(".btnFavoriteGroup")
-
-            const renderFavorites = favorites =>{
-                let html = "";
-                if (favorites.some(favorite => favorite.product.id === productId)) {
-                    html = `
-            <a id="favoriteButton" class="favorite-btn" onclick="toggleFavorite(productId)" style=" cursor: pointer; color: red"><i class="fa fa-heart"></i>  Bỏ yêu thích</a>
-        `;
-                } else {
-                    html = `
-            <a id="favoriteButton" class="favorite-btn" onclick="toggleFavorite()" style="cursor: pointer;"><i class="fa fa-heart"></i>  Yêu thích</a>
-        `;
-                }
-                btnFavoriteGroup.innerHTML = html;
-            }
-
-            const createFavorite = async () =>{
-                const data = {
-                    userId: userId,
-                    productId: productId
-                }
-                console.log(userId)
-                console.log(productId)
-                try {
-                    let res = await axios.put("/api/favorites", data);
-                    toastr.success("Đã thêm vào danh sách yêu thích thành công")
-                    favorites.unshift(res.data)
-                    console.log(favorites)
-                    renderFavorites(favorites)
-
-                } catch (e) {
-                    console.log(e)
-                }
-
-            }
-
-            const deleteFavorite = async (id) =>{
-                const confirm = window.confirm("Bạn có chắc chắn muốn xóa ko")
-                if(confirm){
-                    try {
-                        const deleteFavor = await axios.delete(`/api/favorites/${id}`)
-                        console.log("Sự kiện xóa Favor")
-                        favorites=favorites.filter(f=>f.product.id !==id)
-                        console.log(favorites)
-                        renderFavorites(favorites)
-                        toastr.success("Xóa khỏi danh sách yêu thích thành công")
-                    } catch (error) {
-                        console.log(error)
-                    }
-                }
-            }
-            const btnFavoriteAnnotation=document.getElementById("favoriteButtonAnnotation");
-            if (btnFavoriteAnnotation){
-                btnFavoriteAnnotation.addEventListener("click", ()=>{
-                    toastr.error("Cần phải đăng nhập mới thêm được vào danh sách yêu thích")
-                })
-            }
-        </script>
-
+        <script src="/web-assets/js/shop-detail-favorite.js"></script>
     </th:block>
 
 </body>

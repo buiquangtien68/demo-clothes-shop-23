@@ -112,5 +112,9 @@ public class ProductService {
         return productRepository.findByDiscount_IdAndStatus(discountId, status, pageRequest);
     }
 
+    public Product getById(Integer id) {
+        return productRepository.findById(id).orElse(null);
+    }
+
 
 }
