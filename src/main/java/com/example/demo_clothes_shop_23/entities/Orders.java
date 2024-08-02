@@ -22,6 +22,9 @@ public class Orders {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
+    @Column(unique = true)
+    String vnPayId;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     User user;
