@@ -47,6 +47,18 @@ public class SecurityConfig {
 
         //TODO: cấu hình path dựa trn role
         http.authorizeHttpRequests(auth->{
+            auth.requestMatchers(
+                "/cart/**",
+                "/favorite/**",
+                "/checkout/**",
+                "payment-success/**")
+                .authenticated();
+            auth.requestMatchers(
+                "/api/cart/**",
+                "/api/reviews/**",
+                "/api/comments/**",
+                "/api/favorites/**")
+                .authenticated();
             auth.anyRequest().permitAll();
 
 

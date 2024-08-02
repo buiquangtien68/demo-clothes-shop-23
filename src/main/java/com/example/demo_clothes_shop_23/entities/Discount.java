@@ -24,7 +24,7 @@ public class Discount {
     String description;
 
     DiscountType type;
-    Integer amount;
+    Long amount;
 
     LocalDateTime startDate;
     LocalDateTime endDate;

@@ -5,6 +5,7 @@ import lombok.*;
 
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Builder
 @NoArgsConstructor
@@ -25,6 +26,11 @@ public class Coupon {
     LocalDateTime endDate;
     Boolean active;
     Integer quantity;
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "coupon_user_ids", joinColumns = @JoinColumn(name = "coupon_id"))
+    @Column(name = "user_id")
+    List<Integer> listUserIdUsed;
 
     LocalDateTime createdAt;
     LocalDateTime updatedAt;

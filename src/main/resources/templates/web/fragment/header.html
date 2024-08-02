@@ -33,9 +33,8 @@
         <div class="offcanvas__nav__option">
             <a th:href="@{/}" class="search-switch"><img src="/web-assets/img/icon/search.png" alt=""></a>
             <th:block sec:authorize="isAuthenticated()">
-                <a th:href="@{/favorite}" class="text-decoration-none"><i class="far fa-heart text-black link-favorite"></i> </a>
-                <a href="#"><img src="/web-assets/img/icon/cart.png" alt=""> <span>0</span></a>
-                <div class="price">0.0 VNĐ</div>
+                <a th:href="@{/favorite}" class="text-decoration-none"><i class="fas fa-heart text-black link-favorite"></i> </a>
+                <a th:href="@{/cart}"><i class="fas fa-shopping-bag text-black link-cart"></i></a>
             </th:block>
         </div>
         <div id="mobile-menu-wrap"></div>
@@ -64,7 +63,6 @@
                                     </a>
                                     <ul class="dropdown-menu">
                                         <li sec:authorize="hasRole('ADMIN')"><a class="dropdown-item text-black" th:href="@{/admin/dashboard}"  >Trang quản trị</a></li>
-                                        <li><a class="dropdown-item text-black" th:href="@{/thong-tin-ca-nhan}">Thông tin cá nhân</a></li>
                                         <li><a class="dropdown-item text-black " href="#">Lịch sử mua hàng</a></li>
                                         <li><a class="dropdown-item text-black"  th:href="@{/logout}">Đăng xuất</a></li>
                                     </ul>
@@ -103,7 +101,6 @@
                             <li id="blog-menu">
                                 <a th:href="@{/blog}">Bài Viết</a>
                             </li>
-                            <li><a href="">Thông Tin Liên Hệ</a></li>
                         </ul>
                     </nav>
                 </div>
@@ -111,19 +108,41 @@
                     <div class="header__nav__option">
                         <a href="#" class="search-switch"><img src="/web-assets/img/icon/search.png" alt=""></a>
                         <th:block sec:authorize="isAuthenticated()">
-                            <a th:href="@{/favorite}" class="text-decoration-none"><i class="far fa-heart text-black link-favorite"></i> </a>
-                            <a href="#"><img src="/web-assets/img/icon/cart.png" alt=""> <span>0</span></a>
-                            <div class="price">0.0 VNĐ</div>
+                            <a th:href="@{/favorite}" class="text-decoration-none"><i class="fas fa-heart text-black link-favorite"></i> </a>
+                            <a th:href="@{/cart}"><i class="fas fa-shopping-bag text-black link-cart"></i></a>
                         </th:block>
                     </div>
                 </div>
             </div>
             <div class="canvas__open"><i class="fa fa-bars"></i></div>
         </div>
+        <!-- Search Begin -->
+        <div class="search-model">
+            <div class="h-100 d-flex align-items-center justify-content-center">
+                <div class="search-close-switch">+</div>
+                <form class="search-model-form">
+                    <input type="text" id="search-input" placeholder="Tìm kiếm tại đây">
+                </form>
+            </div>
+        </div>
+        <!-- Search End -->
     </header>
     <!-- Header Section End -->
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+            integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script th:inline="javascript">
+        $(document).ready(function() {
+            $('#search-input').on('keydown', function(event) {
+                // Kiểm tra nếu phím nhấn là Enter (key code 13)
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    let searchValue = $(this).val();
+                    window.location.href = `/product-shop?nameKeyword=${searchValue}&page=1`
+                }
+            });
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
             var currentUrl = window.location.pathname;
 
@@ -139,7 +158,14 @@
                     el.classList.remove('text-black')
                     el.classList.add('text-danger');
                 })
+            }else if (currentUrl.includes('/cart')){
+                document.querySelectorAll(".link-cart").forEach(el=>{
+                    el.classList.remove('text-black')
+                    el.classList.add('text-warning');
+                })
             }
+
+
         });
     </script>
 </div>

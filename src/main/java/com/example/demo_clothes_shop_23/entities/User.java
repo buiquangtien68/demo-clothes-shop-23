@@ -32,19 +32,10 @@ public class User {
     @Column(nullable = false)
     String password;
 
-
     @Enumerated(EnumType.STRING)
     UserRole role;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "user_coupon",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "coupon_id")
-    )
-    List<Coupon> coupons;
-
-
     LocalDateTime createdAt;
+
     LocalDateTime updatedAt;
 }

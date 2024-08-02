@@ -94,8 +94,6 @@ const renderFavoritesBtn = (favoriteProductIds) => {
         btn.innerHTML = html;
     });
 
-
-
     attachFavoriteButtonEvents(); // Gán sự kiện click cho các nút sau khi cập nhật HTML
 };
 

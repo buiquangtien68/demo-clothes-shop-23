@@ -48,7 +48,7 @@
                 <div class="container">
                     <div class="row">
                         <div class="product__details__breadcrumb d-flex justify-content-start">
-                            <a href="./index.html">Trang Chủ</a>
+                            <a th:href="@{/}">Trang Chủ</a>
                             <a th:href="@{/product-shop}">Sản Phẩm</a>
                             <span th:text="${product.name}"></span>
                         </div>
@@ -102,14 +102,14 @@
 
                                 <div class="product__details__option">
                                     <div class="product__details__option__size">
-                                        <span>Size:</span>
-                                        <label th:each="size : ${sizes}" th:for="${size.sizeName}" th:text="${size.sizeName}">xxl
-                                            <input type="radio" th:id="${size.sizeName}">
+                                        <span>Kích thước:</span>
+                                        <label th:each="size : ${sizes}" th:for="${'size_'+size.id}" th:text="${size.sizeName}" th:data-size-id="${size.id}">xxl
+                                            <input type="radio" th:id="${'size_'+size.id}" th:value="${size.id}" >
                                         </label>
                                     </div>
                                     <div class="product__details__option__color">
-                                        <span>Color:</span>
-                                        <label th:each="color : ${colors}" th:style="'background: ' + ${color.colorCode}" th:for="${'color_' + color.id}">
+                                        <span>Màu sắc:</span>
+                                        <label th:each="color : ${colors}" th:style="'background: ' + ${color.colorCode}" th:for="${'color_' + color.id}" th:data-color-id="${color.id}">
                                             <input type="radio" th:id="${'color_' + color.id}" th:value="${color.id}">
                                         </label>
                                     </div>
@@ -117,10 +117,13 @@
                                 <div class="product__details__cart__option">
                                     <div class="quantity">
                                         <div class="pro-qty">
+                                            <span class="fa fa-angle-up inc qtybtn"></span>
                                             <input type="text" value="1">
+                                            <span class="fa fa-angle-down dec qtybtn"></span>
                                         </div>
                                     </div>
-                                    <a href="#" class="primary-btn">Thêm vào giỏ </a>
+                                    <a sec:authorize="isAuthenticated()" href="#" class="primary-btn" onclick="createCart()">Thêm vào giỏ </a>
+                                    <a sec:authorize="!isAuthenticated()" href="#" class="primary-btn" onclick="annotationCart()">Thêm vào giỏ </a>
                                 </div>
                                 <div class="product__details__btns__option btnFavoriteGroup">
                                     <a sec:authorize="isAuthenticated()"
@@ -312,7 +315,7 @@
 
                             <div class="product__item__text">
                                 <h6 th:text="${product.name}">Piqué Biker Jacket</h6>
-                                <a href="#" class="add-cart">+ Thêm vào giỏ</a>
+                                <a th:href="@{/product/{id}/{slug}(id=${product.id}, slug=${product.slug})}" class="add-cart">Xem chi tiết</a>
                                 <div class="rating d-flex">
                                     <!-- Loop for full stars -->
                                     <i class="fa fa-star mr-1 text-warning " th:each="star, iterStat : ${#numbers.sequence(1, T(java.lang.Math).floor(product.rating))}"></i>

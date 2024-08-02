@@ -27,9 +27,17 @@ public class OrdersDetail {
     @JoinColumn(name = "product_id")
     Product product;
 
+    @ManyToOne
+    @JoinColumn(name = "color_id")
+    Color color;
+
+    @ManyToOne
+    @JoinColumn(name = "size_id")
+    Size size;
+
     Integer quantity;
 
-    Double price;
+    Long price;
 
     LocalDateTime createdAt;
     LocalDateTime updatedAt;

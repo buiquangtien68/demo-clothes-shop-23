@@ -1,6 +1,5 @@
 package com.example.demo_clothes_shop_23.request;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -10,9 +9,10 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class FavoriteRequest {
-    @NotNull(message = "không được để trống")
-    Integer userId;
-    @NotNull(message = "không được để trống")
+public class CreateOrderDetailRequest {
+    Integer orderId;
     Integer productId;
+    Integer colorId;
+    Integer sizeId;
+    Integer quantity;
 }

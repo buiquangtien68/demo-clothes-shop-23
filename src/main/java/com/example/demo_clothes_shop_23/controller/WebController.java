@@ -33,7 +33,10 @@ public class WebController {
     private final DiscountService discountService;
     private final BannerService bannerService;
     private final FavoriteService favoriteService;
+    private final CartService cartService;
+    private final AddressService addressService;
 
+    /*Trang chủ*/
     @GetMapping("/")
     public String index(Model model) {
         model.addAttribute("allDiscounts", discountService.getDiscountByActive(true));
@@ -51,16 +54,19 @@ public class WebController {
         return "web/index";
     }
 
+    /*Trang đăng nhập*/
     @GetMapping("/login")
     public String login(Model model) {
         return "web/login";
     }
 
+    /*Trang đăng ký*/
     @GetMapping("/register")
     public String register(Model model) {
         return "web/register";
     }
 
+    /*Trang danh sách sản phẩm được giảm giá theo chương trình*/
     @GetMapping("/discount/{id}")
     public String discount(
         @PathVariable int id,
@@ -72,17 +78,20 @@ public class WebController {
         Page<Product> pageData = productService.getByDiscount_IdAndStatus(id, true, page, pageSize);
         model.addAttribute("pageData", pageData);
         model.addAttribute("currentPage",page);
+
+        //Lấy danh sách favoriteProductIds để kiểm tra xem product nàd đã được yêu thích
         List<Integer> favoriteProductIds = favoriteService.getByUser_IdOrderByCreatedAtDesc().stream().map(f->f.getProduct().getId()).toList();
         if (!favoriteProductIds.isEmpty()) {
             model.addAttribute("favoriteProductIds",favoriteProductIds);
         }else model.addAttribute("favoriteProductIds",new ArrayList<>());
         return "web/discount";
     }
-
+    /*Trang danh sách yêu thích*/
     @GetMapping("/favorite")
     public String favorite(
         Model model
     ) {
+        //Lấy danh sách favoriteProductIds để kiểm tra xem product nàd đã được yêu thích
         model.addAttribute("favorites", favoriteService.getByUser_IdOrderByCreatedAtDesc());
         List<Integer> favoriteProductIds = favoriteService.getByUser_IdOrderByCreatedAtDesc().stream().map(f->f.getProduct().getId()).toList();
         if (!favoriteProductIds.isEmpty()) {
@@ -141,7 +150,7 @@ public class WebController {
     public String productShop(
         Model model,
         @RequestParam(required = false,defaultValue = "1") int page,
-        @RequestParam(required = false,defaultValue = "12") int pageSize,
+        @RequestParam(required = false,defaultValue = "9") int pageSize,
         @RequestParam(required = false) Integer sizeId,
         @RequestParam(required = false) Integer colorId,
         @RequestParam(required = false) String nameKeyword,
@@ -169,12 +178,32 @@ public class WebController {
         return "web/shop";
     }
 
+    @GetMapping("/cart")
+    public String cart(Model model) {
+        model.addAttribute("cartsByUserId", cartService.getByUser_IdOrderByCreatedAt());
+        return "web/shopping-cart";
+    }
+
+    @GetMapping("/checkout")
+    public String checkOut(Model model) {
+        model.addAttribute("cartsByUserId", cartService.getByUser_IdOrderByCreatedAt());
+        model.addAttribute("addressesByUserId", addressService.getByUser_Id());
+        model.addAttribute("addressChosen", addressService.getByUser_IdAndChosen());
+        model.addAttribute("cartsByUserId", cartService.getByUser_IdOrderByCreatedAt());
+        return "web/checkout";
+    }
+
+    @GetMapping("payment-success")
+    public String paymentSuccess(Model model) {
+        return "web/payment-success";
+    }
+
     /*Trang danh sách blog*/
     @GetMapping("/blog")
     public String blog(
         Model model,
         @RequestParam(required = false,defaultValue = "1") int page,
-        @RequestParam(required = false,defaultValue = "9") int pageSize
+        @RequestParam(required = false,defaultValue = "6") int pageSize
     ) {
         Page<Blog> pageData = blogService.getByStatusOrderByCreatedAt(true,page,pageSize);
         model.addAttribute("pageData",pageData);
@@ -191,7 +220,7 @@ public class WebController {
         return "web/blog-details";
     }
 
-    /*Trang chi tiết blog*/
+    /*Trang danh sách blog theo tag*/
     @GetMapping("/blog/tag/{id}")
     public String blogTag(
         Model model,

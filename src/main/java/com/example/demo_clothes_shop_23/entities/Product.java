@@ -25,11 +25,11 @@ public class Product {
     String slug;
     @Column(columnDefinition = "TEXT")
     String description;
-    Double price;
+    Long price;
     Boolean status;
     Double rating;
     String poster;
-    Double newPrice;
+    Long newPrice;
 
     @ManyToOne
     @JoinColumn(name = "discount_id")
@@ -39,19 +39,19 @@ public class Product {
     @JoinColumn(name = "category_id")
     Category category;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "product_color",
-            joinColumns = @JoinColumn(name = "product_id"),
-            inverseJoinColumns = @JoinColumn(name = "color_id")
+        name = "product_color",
+        joinColumns = @JoinColumn(name = "product_id"),
+        inverseJoinColumns = @JoinColumn(name = "color_id")
     )
     Set<Color> colors;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "product_size",
-            joinColumns = @JoinColumn(name = "product_id"),
-            inverseJoinColumns = @JoinColumn(name = "size_id")
+        name = "product_size",
+        joinColumns = @JoinColumn(name = "product_id"),
+        inverseJoinColumns = @JoinColumn(name = "size_id")
     )
     Set<Size> sizes;
 

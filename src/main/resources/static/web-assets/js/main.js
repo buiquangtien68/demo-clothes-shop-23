@@ -153,46 +153,6 @@
         type: 'iframe'
     });
 
-    /*-------------------
-          Quantity change
-      --------------------- */
-    var proQty = $('.pro-qty');
-    proQty.prepend('<span class="fa fa-angle-up inc qtybtn"></span>'); // Place up arrow before input
-    proQty.append('<span class="fa fa-angle-down dec qtybtn"></span>'); // Place down arrow after input
-    proQty.on('click', '.qtybtn', function () {
-        var $button = $(this);
-        var oldValue = $button.parent().find('input').val();
-        if ($button.hasClass('inc')) {
-            var newVal = parseFloat(oldValue) + 1;
-        } else {
-            // Don't allow decrementing below zero
-            if (oldValue > 1) { // Adjusted to prevent decrementing below 1 (assuming quantity 1 is the minimum)
-                var newVal = parseFloat(oldValue) - 1;
-            } else {
-                newVal = 1; // Minimum quantity set to 1
-            }
-        }
-        $button.parent().find('input').val(newVal);
-    });
-
-    var proQty2 = $('.pro-qty-2');
-    proQty2.prepend('<span class="fa fa-angle-left dec qtybtn"></span>');
-    proQty2.append('<span class="fa fa-angle-right inc qtybtn"></span>');
-    proQty2.on('click', '.qtybtn', function () {
-        var $button = $(this);
-        var oldValue = $button.parent().find('input').val();
-        if ($button.hasClass('inc')) {
-            var newVal = parseFloat(oldValue) + 1;
-        } else {
-            // Don't allow decrementing below zero
-            if (oldValue > 0) {
-                var newVal = parseFloat(oldValue) - 1;
-            } else {
-                newVal = 0;
-            }
-        }
-        $button.parent().find('input').val(newVal);
-    });
     /*------------------
         Achieve Counter
     --------------------*/

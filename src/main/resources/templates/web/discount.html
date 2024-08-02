@@ -118,7 +118,7 @@
 
                         <div class="product__item__text">
                             <h6 th:text="${product.name}">Piqué Biker Jacket</h6>
-                            <a href="#" class="add-cart">+ Thêm vào giỏ</a>
+                            <a th:href="@{/product/{id}/{slug}(id=${product.id}, slug=${product.slug})}" class="add-cart">Xem chi tiết</a>
                             <div class="rating d-flex">
                                 <!-- Loop for full stars -->
                                 <i class="fa fa-star mr-1 text-warning " th:each="star, iterStat : ${#numbers.sequence(1, T(java.lang.Math).floor(product.rating))}"></i>

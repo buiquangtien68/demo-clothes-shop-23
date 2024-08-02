@@ -387,13 +387,7 @@ class DemoClothesShop23ApplicationTests {
 		Faker faker = new Faker();
 		Random random = new Random();
 		List<Coupon> coupons = couponRepository.findAll();
-		List<Coupon> rdCoupons = new ArrayList<>();
-		for (int j = 0; j < random.nextInt(4)+1; j++) {
-			Coupon rdCoupon = coupons.get(random.nextInt(coupons.size()));
-			if (!rdCoupons.contains(rdCoupon)) {
-				rdCoupons.add(rdCoupon);
-			}
-		}
+		Coupon rdCoupon = coupons.get(random.nextInt(coupons.size()));
 		for (int i = 0; i < 50; i++) {
 			String name = faker.name().fullName();
 			User user =User.builder()
@@ -402,7 +396,6 @@ class DemoClothesShop23ApplicationTests {
 					.avatar("https://placehold.co/600x600?text=" +String.valueOf(name.charAt(0)).toUpperCase())
 					.password("123")
 					.role(i==0 || i==1 ? UserRole.ADMIN : UserRole.USER)
-					.coupons(rdCoupons)
 					.createdAt(LocalDateTime.now())
 					.updatedAt(LocalDateTime.now())
 					.build();
@@ -642,7 +635,6 @@ class DemoClothesShop23ApplicationTests {
 						.user(user)
 						.product(product)
 						.quantity(quantity)
-						.price(product.getPrice()*quantity)
 						.createdAt(LocalDateTime.now())
 						.updatedAt(LocalDateTime.now())
 						.build();
@@ -809,4 +801,94 @@ class DemoClothesShop23ApplicationTests {
 		}
 	}
 
+	@Test
+	void updateColorIdAndSizeIdForCart(){
+		// Lấy tất cả giỏ hàng từ cơ sở dữ liệu
+		List<Cart> carts = cartRepository.findAll();
+
+		for (Cart cart : carts) {
+			try {
+				// Lấy ID của màu đầu tiên trong danh sách màu sắc của sản phẩm
+				Integer colorId = cart.getProduct().getColors()
+					.stream()
+					.findFirst()
+					.orElseThrow(() -> new IllegalStateException("No colors found for product"))
+					.getId();
+
+				// Lấy ID của kích thước đầu tiên trong danh sách kích thước của sản phẩm
+				Integer sizeId = cart.getProduct().getSizes()
+					.stream()
+					.findFirst()
+					.orElseThrow(() -> new IllegalStateException("No sizes found for product"))
+					.getId();
+
+				// Tìm màu sắc tương ứng trong cơ sở dữ liệu và cập nhật vào giỏ hàng
+				Color color = colorRepository.findById(colorId)
+					.orElseThrow(() -> new IllegalStateException("Color not found with ID: " + colorId));
+				cart.setColor(color);
+
+				// Tìm kích thước tương ứng trong cơ sở dữ liệu và cập nhật vào giỏ hàng
+				Size size = sizeRepository.findById(sizeId)
+					.orElseThrow(() -> new IllegalStateException("Size not found with ID: " + sizeId));
+				cart.setSize(size);
+
+				// Lưu giỏ hàng đã được cập nhật
+				cartRepository.save(cart);
+
+			} catch (Exception e) {
+				// Ghi lại lỗi hoặc xử lý theo yêu cầu
+				System.err.println("Error updating cart: " + e.getMessage());
+			}
+		}
+	}
+
+	@Test
+	void updateColorIdAndSizeIdForOrderDetail(){
+		// Lấy tất cả giỏ hàng từ cơ sở dữ liệu
+		List<OrdersDetail> ordersDetails = ordersDetailRepository.findAll();
+
+		for (OrdersDetail ordersDetail : ordersDetails) {
+			try {
+				// Lấy ID của màu đầu tiên trong danh sách màu sắc của sản phẩm
+				Integer colorId = ordersDetail.getProduct().getColors()
+					.stream()
+					.findFirst()
+					.orElseThrow(() -> new IllegalStateException("No colors found for product"))
+					.getId();
+
+				// Lấy ID của kích thước đầu tiên trong danh sách kích thước của sản phẩm
+				Integer sizeId = ordersDetail.getProduct().getSizes()
+					.stream()
+					.findFirst()
+					.orElseThrow(() -> new IllegalStateException("No sizes found for product"))
+					.getId();
+
+				// Tìm màu sắc tương ứng trong cơ sở dữ liệu và cập nhật vào giỏ hàng
+				Color color = colorRepository.findById(colorId)
+					.orElseThrow(() -> new IllegalStateException("Color not found with ID: " + colorId));
+				ordersDetail.setColor(color);
+
+				// Tìm kích thước tương ứng trong cơ sở dữ liệu và cập nhật vào giỏ hàng
+				Size size = sizeRepository.findById(sizeId)
+					.orElseThrow(() -> new IllegalStateException("Size not found with ID: " + sizeId));
+				ordersDetail.setSize(size);
+
+				// Lưu giỏ hàng đã được cập nhật
+				ordersDetailRepository.save(ordersDetail);
+
+			} catch (Exception e) {
+				// Ghi lại lỗi hoặc xử lý theo yêu cầu
+				System.err.println("Error updating ordersDetail: " + e.getMessage());
+			}
+		}
+	}
+
+	@Test
+	void updatePriceForOrderDetail(){
+		List<OrdersDetail> ordersDetails = ordersDetailRepository.findAll();
+		ordersDetails.forEach(ordersDetail -> {
+			ordersDetail.setPrice(ordersDetail.getProduct().getPrice()*ordersDetail.getQuantity());
+			ordersDetailRepository.save(ordersDetail);
+		});
+	}
 }

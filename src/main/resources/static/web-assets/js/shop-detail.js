@@ -1,27 +1,71 @@
+// Xử lý nút thêm vào giỏ nhg ko đăng nập
+const annotationCart=()=>{
+    toastr.error("Cần phải đăng nhập mới thêm được vào giỏ hàng")
+}
 
-/*<![CDATA[*/
-document.addEventListener('DOMContentLoaded', function() {
-    var labels = document.querySelectorAll('.product__details__option__color label');
-    labels.forEach(function(label) {
-        label.addEventListener('click', function(event) {
-            // Xóa class 'selected' của tất cả các label trước khi chọn lại
-            labels.forEach(function(l) {
-                l.classList.remove('selected');
-            });
-            // Thêm class 'selected' vào label được chọn
-            label.classList.add('selected');
+// Khai báo các biến toàn cục
+var colorId = null;
+var sizeId = null;
+var quantity = 1; // Giá trị mặc định của số lượng
 
-            // Lấy giá trị id của màu đã chọn
-            var input = label.querySelector('.product__details__option__color label input[type="radio"]');
-            if (input && input.checked) {
-                var colorId = input.value;
-                console.log('Đã chọn màu có id: ' + colorId);
-                changeImage(colorId,productId)
-            }
-        });
-    });
+// Xử lý sự kiện thay đổi số lượng
+$('.pro-qty').on('click', '.qtybtn', function() {
+    var $button = $(this);
+    var $input = $button.siblings('input');
+    quantity = parseFloat($input.val());
+
+    if ($button.hasClass('inc')) {
+        quantity++;
+    } else {
+        quantity = quantity > 1 ? quantity - 1 : 1;
+    }
+
+    $input.val(quantity);
+    console.log('Quantity:', quantity);
 });
-/*]]>*/
+
+// Xử lý sự kiện chọn size
+$('.product__details__option__size label').on('click', function() {
+    sizeId = $(this).data('size-id'); // Lấy sizeId từ thuộc tính data
+    console.log('Size ID:', sizeId);
+});
+
+// Xử lý sự kiện chọn màu
+$('.product__details__option__color label').on('click', function() {
+    $('.product__details__option__color label').removeClass('selected');
+    $(this).addClass('selected')
+    colorId = $(this).data('color-id');
+    console.log('color ID:', colorId);
+    changeImage(colorId,productId)
+});
+
+
+//tạo ra cart
+const createCart= async ()=>{
+    if (colorId==null){
+        toastr.error("Bạn chưa chọn màu")
+        return
+
+    }
+    if (sizeId==null){
+        toastr.error("Bạn chưa chọn kích thước")
+        return
+    }
+    const data = {
+        userId: userId,
+        productId: productId,
+        colorId: colorId,
+        sizeId: sizeId,
+        quantity: quantity
+    }
+    try {
+        let res =await axios.put("/api/cart",data)
+        console.log(res)
+        toastr.success("Thêm vào giỏ thành công")
+    }catch (e){
+       console.log(e)
+    }
+}
 
 /*Gọi api*/
 const changeImage = async (colorId, productId) =>{

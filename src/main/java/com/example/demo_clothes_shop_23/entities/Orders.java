@@ -27,17 +27,29 @@ public class Orders {
     User user;
 
     @Column(nullable = false)
+    String email;
+
+    @Column(nullable = false)
     String receiverName;
 
+    @Column(nullable = false)
     String phone;
 
+    @Column(nullable = false)
     String province;
+    @Column(nullable = false)
     String district;
+    @Column(nullable = false)
     String ward;
     @Column(columnDefinition = "TEXT")
     String addressDetail;
 
-    Double totalPrice;
+    @Column(nullable = false)
+    Long totalPrice;
+
+    Long discountAmount;
+    @Column(nullable = false)
+    Long finalTotal;
 
     OrdersStatus status;
     PaymentType payment;

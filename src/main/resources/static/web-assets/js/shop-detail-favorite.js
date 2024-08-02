@@ -36,7 +36,7 @@ const createFavorite = async () =>{
         renderFavorites(favorites)
 
     } catch (e) {
-        console.log(e)
+       console.log(e)
     }
 
 }

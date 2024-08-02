@@ -365,9 +365,9 @@
                 email: $('#input-email').val(),
                 receiverName: $('#input-nameCustomer').val(),
                 phone: $('#input-phone').val(),
-                province: getSelectedOptionDataName(document.getElementById('input-province')),
-                district: getSelectedOptionDataName(document.getElementById('input-district')),
-                ward: getSelectedOptionDataName(document.getElementById('input-ward')),
+                province: document.getElementById('input-province').value,
+                district: document.getElementById('input-district').value,
+                ward: document.getElementById('input-ward').value,
                 addressDetail: $('#input-addressDetail').val(),
                 password: $('#input-password').val(),
                 confirmPassword: $('#input-confirm-password').val()
@@ -386,10 +386,6 @@
             }
         });
 
-        function getSelectedOptionDataName(selectElement) {
-            const selectedOption = selectElement.options[selectElement.selectedIndex];
-            return selectedOption.getAttribute('data-name');
-        }
 
         // Hàm kiểm tra và ẩn hiện biểu tượng mắt
         function togglePasswordVisibility() {
