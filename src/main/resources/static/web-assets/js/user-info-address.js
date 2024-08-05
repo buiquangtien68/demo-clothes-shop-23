@@ -1,4 +1,4 @@
-// Lấy thông tin địa chỉ qua API
+// Lấy thông tin địa chỉ để lắp vào bảng
 $(document).ready(function() {
     const apiCities = 'https://esgoo.net/api-tinhthanh/1/0.htm';
     const apiDistricts = idProvince => `https://esgoo.net/api-tinhthanh/2/${idProvince}.htm`;

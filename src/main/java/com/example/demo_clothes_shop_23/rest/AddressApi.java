@@ -40,4 +40,10 @@ public class AddressApi {
         List<Address> addresses = addressService.deleteAddress(id);
         return ResponseEntity.ok(addresses); //200
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getAddressById(@PathVariable Integer id) {
+        Address address = addressService.getAddressById(id);
+        return ResponseEntity.ok(address);
+    }
 }

@@ -214,7 +214,13 @@
                                     <p>Email<span>*</span></p>
                                     <input type="text" id="input-email" name="email" placeholder="Email" th:value="${#authentication.principal.user.email}">
                                 </div>
-
+                                <button
+                                        type="button"
+                                        class="btn btn-dark text-white rounded mb-3"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#address-modal">
+                                    Chọn địa chỉ giao hàng
+                                </button>
                                 <div class="checkout__input">
                                     <p>Tên người nhận<span>*</span></p>
                                     <input type="text" id="input-nameCustomer" name="nameCustomer" placeholder="Tên khách hàng" th:value="${addressChosen.receiverName}">
@@ -313,6 +319,43 @@
             </div>
         </section>
         <!-- Checkout Section End -->
+
+        <!--Modal-->
+        <div class="modal fade" id="address-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Chọn địa chỉ giao hàng</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>Thông tin địa chỉ</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody id="address-list">
+                            <!-- Ví dụ địa chỉ -->
+                            <tr th:each="address : ${addressesByUserId}">
+                                <td class="align-middle">
+                                    <h5>[[${address.receiverName}]] | [[${address.phone}]]&nbsp;
+                                        <span th:if="${address.chosen}"><strong>(Mặc định)</strong></span>
+                                    </h5>
+                                    <p class="m-0">[[${address.addressDetail}]]</p>
+                                    <p class="m=0 address-w-d-p">[[${address.ward}]] - [[${address.district}]] - [[${address.province}]]</p>
+                                </td>
+                                <td class="text-end">
+                                    <button  type="button" class="btn btn-success text-white btn-sm" th:onclick="'pickAddress('+${address.id}+')'"><i class="fas fa-check"></i></button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </th:block>
 
     <th:block id="js">
@@ -323,6 +366,7 @@
                 let cartsByUserId = [[${cartsByUserId}]]
             </script>
         </div>
+
        <script th:inline="javascript">
             //Xử lý phần giá tiền
             let couponCode="";
@@ -448,296 +492,13 @@
                     updateTotals(); // Cập nhật tổng giá và tổng tiền
                 });
             });
-
-
             //Xử lý lấy địa chỉ
             let province = [[${addressChosen.province}]]
             let district = [[${addressChosen.district}]]
             let ward = [[${addressChosen.ward}]]
-            const districtSelect = document.getElementById('input-district');
-            const wardSelect = document.getElementById('input-ward');
-
-            //Xử lý sự kiện thay đổi địa chỉ trong danh sách
-
-
-            //Tự động lấy địa chỉ là mặc định
-            $(document).ready(function() {
-                const apiCities = 'https://esgoo.net/api-tinhthanh/1/0.htm';
-                const apiDistricts = idProvince => `https://esgoo.net/api-tinhthanh/2/${idProvince}.htm`;
-                const apiWards = idDistrict => `https://esgoo.net/api-tinhthanh/3/${idDistrict}.htm`;
-
-                // Hàm tạo các tùy chọn cho các trường select
-                function populateOptions(selectElement, data, placeholder) {
-                    selectElement.innerHTML = `<option value="">${placeholder}</option>`;
-                    data.forEach(item => {
-                        const option = document.createElement('option');
-                        option.value = item.id;
-                        option.textContent = item.name;
-                        selectElement.appendChild(option);
-                    });
-                }
-
-                // Hàm điền dữ liệu vào các trường select
-                function setSelectedValue(selectElement, value) {
-                    selectElement.value = value;
-                }
-
-                // Lấy và hiển thị danh sách các tỉnh/thành phố
-                axios.get(apiCities)
-                    .then(response => {
-                        const provinceSelect = document.getElementById('input-province');
-                        populateOptions(provinceSelect, response.data.data, 'Chọn Tỉnh/Thành Phố');
-
-                        // Điền giá trị vào trường tỉnh/thành phố nếu có dữ liệu
-                        if (province) {
-                            setSelectedValue(provinceSelect, province);
-                            $('#input-province').trigger('change');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Lỗi khi lấy danh sách tỉnh/thành phố:', error);
-                    });
-
-                // Xử lý sự kiện khi chọn tỉnh/thành phố
-                $('#input-province').on('change', function() {
-                    const provinceCode = this.value;
-                    if (provinceCode) {
-                        axios.get(apiDistricts(provinceCode))
-                            .then(response => {
-                                populateOptions(districtSelect, response.data.data, 'Chọn Quận/Huyện');
-                                districtSelect.disabled = false;
-                                wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
-                                wardSelect.disabled = true;
-
-                                let exists = response.data.data.some(d => d.id == district);
-
-                                // Điền giá trị vào trường quận/huyện nếu có dữ liệu
-                                if (exists) {
-                                    setSelectedValue(districtSelect, district);
-                                    $('#input-district').trigger('change');
-                                }else {
-                                    districtSelect.disabled=false;
-                                    districtSelect.innerHTML='<option value="">Chọn Quận/Huyện</option>';
-                                    populateOptions(districtSelect, response.data.data, 'Chọn Quận/Huyện');
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Lỗi khi lấy danh sách quận/huyện:', error);
-                            });
-                    } else {
-                        districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
-                        districtSelect.disabled = true;
-                        wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
-                        wardSelect.disabled = true;
-                    }
-                });
-
-                // Xử lý sự kiện khi chọn quận/huyện
-                $('#input-district').on('change', function() {
-                    const districtCode = this.value;
-
-                    if (districtCode) {
-                        axios.get(apiWards(districtCode))
-                            .then(response => {
-                                populateOptions(wardSelect, response.data.data, 'Chọn Phường/Xã');
-                                wardSelect.disabled = false;
-
-                                let exists = response.data.data.some(w => w.id == ward);
-
-                                // Điền giá trị vào trường phường/xã nếu có dữ liệu
-                                if (exists) {
-                                    setSelectedValue(wardSelect, ward);
-                                }else {
-                                    wardSelect.disabled = false;
-                                    wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
-                                    populateOptions(wardSelect, response.data.data, 'Chọn Phường/Xã');
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Lỗi khi lấy danh sách phường/xã:', error);
-                            });
-                    } else {
-                        wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
-                        wardSelect.disabled = true;
-                    }
-                });
-            });
-
-            //Xử lý phần validate
-            $(document).ready(function() {
-                $('#form-checkout').validate({
-                    rules: {
-                        nameCustomer: {
-                            required: true,
-                        },
-                        email: {
-                            required: true,
-                            email: true,
-                        },
-                        phone: {
-                            required: true,
-                        },
-                        province: {
-                            required: true,
-                        },
-                        district: {
-                            required: true,
-                        },
-                        ward: {
-                            required: true,
-                        },
-                        addressDetail: {
-                            required: true,
-                        },
-                        'payment-method': {
-                            required: true,
-                        },
-                        'delivery-method': {
-                            required: true,
-                        }
-                    },
-                    messages: {
-                        nameCustomer: {
-                            required: "Tên khách hàng không được để trống",
-                        },
-                        email: {
-                            required: "Email không được để trống",
-                            email: "Email không đúng định dạng",
-                        },
-                        phone: {
-                            required: "Số điện thoại không được để trống",
-                        },
-                        province: {
-                            required: "Không được để trống",
-                        },
-                        district: {
-                            required: "Không được để trống",
-                        },
-                        ward: {
-                            required: "Không được để trống",
-                        },
-                        addressDetail: {
-                            required: "Không được để trống",
-                        },
-                        'payment-method': {
-                            required: "Vui lòng chọn phương thức thanh toán",
-                        },
-                        'delivery-method': {
-                            required: "Vui lòng chọn phương thức vận chuyển",
-                        }
-                    },
-                    errorElement: 'span',
-                    errorPlacement: function (error, element) {
-                        error.addClass('invalid-feedback');
-                        if (element.is(':radio')) {
-                            if (element.attr('name') === 'payment-method') {
-                                // Thêm lỗi vào dưới thẻ <div id="chose-payment">
-                                $('#chose-payment').append(error);
-                            } else if (element.attr('name') === 'delivery-method') {
-                                // Thêm lỗi vào dưới thẻ <div id="chose-deli">
-                                $('#chose-deli').append(error);
-                            }
-                        } else {
-                            element.closest('.checkout__input').append(error);
-                        }
-                    },
-                    highlight: function (element, errorClass, validClass) {
-                        $(element).addClass('is-invalid');
-                    },
-                    unhighlight: function (element, errorClass, validClass) {
-                        $(element).removeClass('is-invalid');
-                    }
-                });
-
-                //Tạo ra CodeOrder cho đơn COD
-                const updateCodeOrder = async (orderId) => {
-                    try{
-                        let res =  await axios.put(`/api/order/updateCodeOrder/${orderId}`)
-                        console.log(res)
-                        window.location.href = `/cod-Return?codeOrder=${res.data.codeOrder}`
-                    }catch (e){
-                        console.log(e)
-                    }
-
-                }
-
-                //Tạo orderDetail từ orderId
-                const createOrderDetail = async (orderId) => {
-                    for (const cart of cartsByUserId) {
-                        const data={
-                            orderId: orderId,
-                            productId: cart.product.id,
-                            colorId: cart.color.id,
-                            sizeId:  cart.size.id,
-                            quantity: cart.quantity
-                        }
-                        console.log(data)
-                        try {
-                            let res = await axios.put("/api/orderDetail",data)
-                        }catch (e){
-                            console.log("Lỗi khi tạo orderDetail")
-                        }
-                    }
-                }
-                //Tạo ra link thanh toán từ orderId
-                const createPaymentResponse = async (orderId)=>{
-                    try {
-                        let res = await axios.get(`/api/payment/create_payment/${orderId}`)
-                        window.location.href = res.data.url;
-                    }catch (e){
-                        console.log(e)
-                    }
-                }
-
-                $('#form-checkout').on('submit', async function (e) {
-                    e.preventDefault();
-
-                    if (!$('#form-checkout').valid()) {
-                        return;
-                    }
-                    if (parseLong($('#total-price').text())==0){
-                        toastr.error("Bạn chưa mua sản phẩm nào")
-                        return;
-                    }
-
-                    const dataOrder = {
-                        userId: userId,
-                        couponCode: couponCode,
-                        receiverName: $('#input-nameCustomer').val(),
-                        email: $('#input-email').val(),
-                        phone: $('#input-phone').val(),
-                        province: $('#input-province').val(),
-                        district: $('#input-district').val(),
-                        ward: $('#input-ward').val(),
-                        addressDetail: $('#input-addressDetail').val(),
-                        notes: $('#input-orderNotes').val(),
-                        payment: $('input[name="payment-method"]:checked').val(),
-                        delivery: $('input[name="delivery-method"]:checked').val(),
-                        totalPrice: parseLong($('#total-price').text()),
-                        discountAmount: parseLong($('#discount-amount').text()),
-                        finalTotal: parseLong($('#final-total').text())
-                    };
-                    console.log(dataOrder)
-                    function parseLong(value) {
-                        return parseInt(value.replace(/[^0-9]/g, ''), 10) || 0;  // Loại bỏ ký tự không phải số và chuyển đổi thành số nguyên
-                    }
-
-                    try {
-                        let res = await axios.put("/api/order", dataOrder);
-                        console.log(res)
-                        createOrderDetail(res.data.id)
-                        if (res.data.payment=="VNPAY"){
-                            createPaymentResponse(res.data.id)
-                        }else {
-                            updateCodeOrder(res.data.id)
-                        }
-                    } catch (e) {
-                        console.log(e)
-                        toastr.error("Đã xảy ra lỗi khi đặt hàng");
-                    }
-                });
-            });
        </script>
+        <script src="/web-assets/js/checkout-address.js"></script>
+        <script src="/web-assets/js/checkout-order.js"></script>
     </th:block>
 </body>
 

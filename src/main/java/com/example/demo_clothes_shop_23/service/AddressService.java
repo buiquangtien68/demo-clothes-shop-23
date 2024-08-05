@@ -125,4 +125,10 @@ public class AddressService {
         // Trả về danh sách địa chỉ đã được cập nhật
         return addresses;
     }
+
+    public Address getAddressById(Integer id) {
+        return addressRepository.findById(id).orElseThrow(
+            () -> new ResourceNotFoundException("No address found with id: " + id)
+        );
+    }
 }
