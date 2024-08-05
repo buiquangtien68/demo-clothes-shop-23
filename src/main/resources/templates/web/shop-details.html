@@ -35,6 +35,25 @@
             .login-link:hover{
                 color: red!important;
             }
+            /* CSS cho hiệu ứng màu vàng và nhấp nháy */
+            @keyframes highlight {
+                0% {
+                    transform: scale(1);
+                    color: black;
+                }
+                50% {
+                    transform: scale(1.1);
+                    color: gold;
+                }
+                100% {
+                    transform: scale(1);
+                    color: black;
+                }
+            }
+
+            .highlight {
+                animation: highlight 1.1s ease;
+            }
         </style>
     </th:block>
 
@@ -91,10 +110,10 @@
                                     </div>
                                     <span class="m-1" th:text="${reviews.size()} + ' Đánh giá'"></span>
                                 </div>
-                                <h3 th:if="${product.discount!=null}"> <th:block th:text="${product.newPrice +' VNĐ'}"></th:block>
-                                    <span th:text="${product.price+ ' VNĐ'}"></span>
+                                <h3 th:if="${product.discount!=null}"> <div class="formatted-price" th:text="${product.newPrice +' VNĐ'}"></div>
+                                    <span class="formatted-price" th:text="${product.price+ ' VNĐ'}"></span>
                                 </h3>
-                                <h3 th:if="${product.discount==null}"><th:block th:text="${product.price +' VNĐ'}"></th:block> </h3>
+                                <h3 th:if="${product.discount==null}"><div class="formatted-price" th:text="${product.price +' VNĐ'}"></div> </h3>
 
                                 <p th:text="${product.description}">Coat with quilted lining and an adjustable hood. Featuring long sleeves with adjustable
                                     cuff tabs, adjustable asymmetric hem with elastic side tabs and a front zip fastening
@@ -104,7 +123,7 @@
                                     <div class="product__details__option__size">
                                         <span>Kích thước:</span>
                                         <label th:each="size : ${sizes}" th:for="${'size_'+size.id}" th:text="${size.sizeName}" th:data-size-id="${size.id}">xxl
-                                            <input type="radio" th:id="${'size_'+size.id}" th:value="${size.id}" >
+                                            <input type="radio" th:id="${'size_'+size.id}" th:value="${size.id}">
                                         </label>
                                     </div>
                                     <div class="product__details__option__color">
@@ -326,9 +345,8 @@
                                         <i class="fa fa-star-o mr-1 text-warning" th:each="star, iterStat : ${#numbers.sequence(T(java.lang.Math).ceil(product.rating)+1 , 5)}"></i>
                                     </th:block>
                                 </div>
-                                <h5 th:if="${product.discount!=null}"> <th:block th:text="${product.newPrice +' VNĐ'}"></th:block>
-                                </h5>
-                                <h5 th:if="${product.discount==null}"><th:block th:text="${product.price +' VNĐ'}"></th:block> VNĐ </h5>
+                                <h5 th:if="${product.discount!=null}"> <span class="formatted-price" th:text="${product.newPrice}"></span> </h5>
+                                <h5 th:if="${product.discount==null}"><span class="formatted-price" th:text="${product.price}"></span> </h5>
                                 <div class="product__color__select">
                                     <label th:each="color : ${product.colors}" th:style="'background: ' + ${color.colorCode}+';border: 1px solid #e5e5e5; !important'" th:for="${'color_' + color.id}" >
                                         <input type="radio" th:id="${'color_' + color.id}" th:value="${color.id}">
@@ -357,7 +375,13 @@
             let favorites =[[${favorites}]]
             let favorite =[[${favorite}]]
             let reviews = [[${reviews}]]
-
+            document.addEventListener('DOMContentLoaded', function() {
+                // Định dạng tất cả các giá
+                document.querySelectorAll('.formatted-price').forEach(function(element) {
+                    let rawValue = parseLong(element.textContent);
+                    element.textContent = formatCurrency(rawValue);
+                });
+            });
         </script>
         <script src="/web-assets/js/favorite.js"></script>
         <script src="/web-assets/js/shop-detail.js"></script>

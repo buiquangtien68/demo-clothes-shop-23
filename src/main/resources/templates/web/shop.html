@@ -300,12 +300,8 @@
                                                 <i class="fa fa-star-o mr-1 text-warning" th:each="star, iterStat : ${#numbers.sequence(T(java.lang.Math).ceil(product.rating) + 1, 5)}"></i>
                                             </th:block>
                                         </div>
-                                        <h5 th:if="${product.discount != null}">
-                                            <th:block th:text="${product.newPrice +' VNĐ'}"></th:block>
-                                        </h5>
-                                        <h5 th:if="${product.discount == null}">
-                                            <th:block th:text="${product.price +' VNĐ'}"></th:block>
-                                        </h5>
+                                        <h5 th:if="${product.discount!=null}"> <span class="formatted-price" th:text="${product.newPrice}"></span> </h5>
+                                        <h5 th:if="${product.discount==null}"><span class="formatted-price" th:text="${product.price}"></span> </h5>
                                         <div class="product__color__select">
                                             <label th:each="color : ${product.colors}" th:style="'background: ' + ${color.colorCode} + ';border: 1px solid #e5e5e5; !important'" th:for="${'color_' + color.id}">
                                                 <input type="radio" th:id="${'color_' + color.id}" th:value="${color.id}">
@@ -355,6 +351,15 @@
         </div>
         <script src="/web-assets/js/favorite.js"></script>
         <script src="/web-assets/js/shop-sort.js"></script>
+        <script th:inline="javascript">
+            document.addEventListener('DOMContentLoaded', function() {
+                // Định dạng tất cả các giá
+                document.querySelectorAll('.formatted-price').forEach(function(element) {
+                    let rawValue = parseLong(element.textContent);
+                    element.textContent = formatCurrency(rawValue);
+                });
+            });
+        </script>
     </th:block>
 </body>
 

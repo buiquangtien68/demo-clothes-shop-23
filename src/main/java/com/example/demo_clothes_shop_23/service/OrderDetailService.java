@@ -21,6 +21,12 @@ public class OrderDetailService {
     private final SizeRepository sizeRepository;
     private final OrdersDetailRepository ordersDetailRepository;
     private final CartRepository cartRepository;
+    private final QuantityService quantityService;
+    private final QuantityRepository quantityRepository;
+
+    public List<OrdersDetail> getByOrderId(Integer orderId) {
+        return ordersDetailRepository.findByOrdersId(orderId);
+    }
 
     public OrdersDetail createOrderDetail(CreateOrderDetailRequest createOrderDetailRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -36,6 +42,12 @@ public class OrderDetailService {
             .orElseThrow(() -> new RuntimeException("Size not found"));
         List<Cart> carts = cartRepository.findByUser_IdOrderByCreatedAt(user.getId());
         cartRepository.deleteAll(carts);
+
+        Quantity quantity = quantityService.getByProductIdAndColorIdAndSizeId(product.getId(), color.getId(), size.getId());
+        quantity.setValue(quantity.getValue()-createOrderDetailRequest.getQuantity());
+        quantity.setUpdatedAt(LocalDateTime.now());
+        quantityRepository.save(quantity);
+
         OrdersDetail ordersDetail = OrdersDetail.builder()
             .orders(order)
             .product(product)

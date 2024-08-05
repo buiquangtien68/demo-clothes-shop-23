@@ -174,9 +174,8 @@
                                             <i class="fa fa-star-o mr-1 text-warning" th:each="star, iterStat : ${#numbers.sequence(T(java.lang.Math).ceil(newArrivals.get(i).rating)+1 , 5)}"></i>
                                         </th:block>
                                     </div>
-                                    <h5 th:if="${hotSales.get(i).discount!=null}"> <th:block th:text="${newArrivals.get(i).newPrice +' VNĐ'}"></th:block>
-                                    </h5>
-                                    <h5 th:if="${hotSales.get(i).discount==null}"><th:block th:text="${newArrivals.get(i).price +' VNĐ'}"></th:block> </h5>
+                                    <h5 th:if="${newArrivals.get(i).discount!=null}"> <span class="formatted-price" th:text="${newArrivals.get(i).newPrice}"></span> </h5>
+                                    <h5 th:if="${newArrivals.get(i).discount==null}"><span class="formatted-price" th:text="${newArrivals.get(i).price}"></span> </h5>
                                     <div class="product__color__select">
                                         <label th:each="color : ${newArrivals.get(i).colors}" th:style="'background: ' + ${color.colorCode}+';border: 1px solid #e5e5e5; !important'" th:for="${'color_' + color.id}" >
                                             <input type="radio" th:id="${'color_' + color.id}" th:value="${color.id}">
@@ -219,9 +218,8 @@
                                             <i class="fa fa-star-o mr-1 text-warning" th:each="star, iterStat : ${#numbers.sequence(T(java.lang.Math).ceil(hotSales.get(i).rating)+1 , 5)}"></i>
                                         </th:block>
                                     </div>
-                                    <h5 th:if="${hotSales.get(i).discount!=null}"> <th:block th:text="${hotSales.get(i).newPrice +' VNĐ'}"></th:block>
-                                    </h5>
-                                    <h5 th:if="${hotSales.get(i).discount==null}"><th:block th:text="${hotSales.get(i).price +' VNĐ'}"></th:block> </h5>
+                                    <h5 th:if="${hotSales.get(i).discount!=null}"> <span class="formatted-price" th:text="${hotSales.get(i).newPrice}"></span> </h5>
+                                    <h5 th:if="${hotSales.get(i).discount==null}"><span class="formatted-price" th:text="${hotSales.get(i).price}"></span> </h5>
                                     <div class="product__color__select">
                                         <label th:each="color : ${hotSales.get(i).colors}" th:style="'background: ' + ${color.colorCode}+';border: 1px solid #e5e5e5; !important'" th:for="${'color_' + color.id}" >
                                             <input type="radio" th:id="${'color_' + color.id}" th:value="${color.id}">
@@ -283,6 +281,15 @@
             </script>
         </div>
         <script src="/web-assets/js/favorite.js"></script>
+        <script th:inline="javascript">
+            document.addEventListener('DOMContentLoaded', function() {
+                // Định dạng tất cả các giá
+                document.querySelectorAll('.formatted-price').forEach(function(element) {
+                    let rawValue = parseLong(element.textContent);
+                    element.textContent = formatCurrency(rawValue);
+                });
+            });
+        </script>
     </th:block>
 </body>
 

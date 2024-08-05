@@ -11,6 +11,39 @@
 
     <th:block id="css">
         <style>
+            .checkout__order {
+                margin-top: 20px;
+            }
+
+            .checkout__order h4 {
+                margin-bottom: 15px;
+            }
+
+            .checkout__order__products, .checkout__total__products, .checkout__total__all {
+                list-style-type: none;
+                padding: 0;
+            }
+
+            .checkout__order__products {
+                font-weight: bold;
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .checkout__total__products li, .checkout__total__all li {
+                display: flex;
+                justify-content: space-between;
+                padding: 5px 0;
+            }
+
+            .checkout__total__all {
+                margin-top: 15px;
+                font-weight: bold;
+            }
+
+            .order-detail-price {
+                font-weight: normal;
+            }
             /*css coupon input*/
             .cart__discount h6 {
                 font-size: 16px;
@@ -149,7 +182,7 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="breadcrumb__text">
-                            <h4>Check Out</h4>
+                            <h4>Thanh toán</h4>
                             <div class="breadcrumb__links">
                                 <a th:href="@{/}">Trang chủ</a>
                                 <span>Thanh toán</span>
@@ -181,6 +214,7 @@
                                     <p>Email<span>*</span></p>
                                     <input type="text" id="input-email" name="email" placeholder="Email" th:value="${#authentication.principal.user.email}">
                                 </div>
+
                                 <div class="checkout__input">
                                     <p>Tên người nhận<span>*</span></p>
                                     <input type="text" id="input-nameCustomer" name="nameCustomer" placeholder="Tên khách hàng" th:value="${addressChosen.receiverName}">
@@ -225,7 +259,9 @@
                                     <div class="checkout__order__products">Sản phẩm <span>Thành tiền</span></div>
                                     <ul class="checkout__total__products">
                                         <li th:each="cart : ${cartsByUserId}">
-                                            <th:block>[[${cart.quantity}]]</th:block> x <th:block>[[${cart.product.name}]]</th:block>
+                                            <th:block>[[${cart.quantity}]]</th:block> x <th:block>[[${cart.product.name}]]</th:block><br>
+                                            <th:block>&emsp;- Màu: [[${cart.color.colorName}]]</th:block><br>
+                                            <th:block>&emsp;- Kích thước: [[${cart.size.sizeName}]]</th:block>
                                             <span><span class="order-detail-price">[[${cart.quantity*cart.product.newPrice}]] VNĐ</span></span>
                                         </li>
                                     </ul>
@@ -237,9 +273,9 @@
                                     <div id="chose-payment" class="mb-3">
                                         <h5 class="mb-3 font-weight-bolder text-uppercase">Phương thức thanh toán</h5>
                                         <div class="checkout__input__radio mb-2">
-                                            <label for="E_PAYMENT">
+                                            <label for="VNPAY">
                                                 VNPay
-                                                <input type="radio" name="payment-method" id="E_PAYMENT" value="E_PAYMENT">
+                                                <input type="radio" name="payment-method" id="VNPAY" value="VNPAY">
                                                 <span class="checkmark"></span>
                                             </label>
                                         </div>
@@ -418,6 +454,13 @@
             let province = [[${addressChosen.province}]]
             let district = [[${addressChosen.district}]]
             let ward = [[${addressChosen.ward}]]
+            const districtSelect = document.getElementById('input-district');
+            const wardSelect = document.getElementById('input-ward');
+
+            //Xử lý sự kiện thay đổi địa chỉ trong danh sách
+
+
+            //Tự động lấy địa chỉ là mặc định
             $(document).ready(function() {
                 const apiCities = 'https://esgoo.net/api-tinhthanh/1/0.htm';
                 const apiDistricts = idProvince => `https://esgoo.net/api-tinhthanh/2/${idProvince}.htm`;
@@ -458,9 +501,6 @@
                 // Xử lý sự kiện khi chọn tỉnh/thành phố
                 $('#input-province').on('change', function() {
                     const provinceCode = this.value;
-                    const districtSelect = document.getElementById('input-district');
-                    const wardSelect = document.getElementById('input-ward');
-
                     if (provinceCode) {
                         axios.get(apiDistricts(provinceCode))
                             .then(response => {
@@ -469,10 +509,16 @@
                                 wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
                                 wardSelect.disabled = true;
 
+                                let exists = response.data.data.some(d => d.id == district);
+
                                 // Điền giá trị vào trường quận/huyện nếu có dữ liệu
-                                if (district) {
+                                if (exists) {
                                     setSelectedValue(districtSelect, district);
                                     $('#input-district').trigger('change');
+                                }else {
+                                    districtSelect.disabled=false;
+                                    districtSelect.innerHTML='<option value="">Chọn Quận/Huyện</option>';
+                                    populateOptions(districtSelect, response.data.data, 'Chọn Quận/Huyện');
                                 }
                             })
                             .catch(error => {
@@ -489,7 +535,6 @@
                 // Xử lý sự kiện khi chọn quận/huyện
                 $('#input-district').on('change', function() {
                     const districtCode = this.value;
-                    const wardSelect = document.getElementById('input-ward');
 
                     if (districtCode) {
                         axios.get(apiWards(districtCode))
@@ -497,9 +542,15 @@
                                 populateOptions(wardSelect, response.data.data, 'Chọn Phường/Xã');
                                 wardSelect.disabled = false;
 
+                                let exists = response.data.data.some(w => w.id == ward);
+
                                 // Điền giá trị vào trường phường/xã nếu có dữ liệu
-                                if (ward) {
+                                if (exists) {
                                     setSelectedValue(wardSelect, ward);
+                                }else {
+                                    wardSelect.disabled = false;
+                                    wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                                    populateOptions(wardSelect, response.data.data, 'Chọn Phường/Xã');
                                 }
                             })
                             .catch(error => {
@@ -597,6 +648,20 @@
                         $(element).removeClass('is-invalid');
                     }
                 });
+
+                //Tạo ra CodeOrder cho đơn COD
+                const updateCodeOrder = async (orderId) => {
+                    try{
+                        let res =  await axios.put(`/api/order/updateCodeOrder/${orderId}`)
+                        console.log(res)
+                        window.location.href = `/cod-Return?codeOrder=${res.data.codeOrder}`
+                    }catch (e){
+                        console.log(e)
+                    }
+
+                }
+
+                //Tạo orderDetail từ orderId
                 const createOrderDetail = async (orderId) => {
                     for (const cart of cartsByUserId) {
                         const data={
@@ -614,11 +679,24 @@
                         }
                     }
                 }
+                //Tạo ra link thanh toán từ orderId
+                const createPaymentResponse = async (orderId)=>{
+                    try {
+                        let res = await axios.get(`/api/payment/create_payment/${orderId}`)
+                        window.location.href = res.data.url;
+                    }catch (e){
+                        console.log(e)
+                    }
+                }
 
                 $('#form-checkout').on('submit', async function (e) {
                     e.preventDefault();
 
                     if (!$('#form-checkout').valid()) {
+                        return;
+                    }
+                    if (parseLong($('#total-price').text())==0){
+                        toastr.error("Bạn chưa mua sản phẩm nào")
                         return;
                     }
 
@@ -648,7 +726,11 @@
                         let res = await axios.put("/api/order", dataOrder);
                         console.log(res)
                         createOrderDetail(res.data.id)
-                        toastr.success("Đặt hàng thành công");
+                        if (res.data.payment=="VNPAY"){
+                            createPaymentResponse(res.data.id)
+                        }else {
+                            updateCodeOrder(res.data.id)
+                        }
                     } catch (e) {
                         console.log(e)
                         toastr.error("Đã xảy ra lỗi khi đặt hàng");

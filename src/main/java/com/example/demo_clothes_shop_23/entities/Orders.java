@@ -23,7 +23,7 @@ public class Orders {
     Integer id;
 
     @Column(unique = true)
-    String vnPayId;
+    String codeOrder;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

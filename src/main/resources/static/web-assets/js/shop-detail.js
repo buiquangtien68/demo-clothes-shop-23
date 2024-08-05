@@ -61,7 +61,21 @@ const createCart= async ()=>{
     try {
         let res =await axios.put("/api/cart",data)
         console.log(res)
+        // Tạo hiệu ứng cho liên kết giỏ hàng
+        const cartLink = document.getElementById('cart-link');
+        console.log(cartLink)
+        cartLink.classList.remove('text-black')
+        cartLink.classList.add('highlight');
+
+        // Xóa lớp CSS sau khi hiệu ứng kết thúc
+        setTimeout(() => {
+            cartLink.classList.remove('highlight');
+            cartLink.classList.add('text-black')
+        }, 1000);
+
         toastr.success("Thêm vào giỏ thành công")
+
+
     }catch (e){
        console.log(e)
     }

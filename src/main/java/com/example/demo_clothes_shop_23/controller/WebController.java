@@ -3,13 +3,9 @@ package com.example.demo_clothes_shop_23.controller;
 import com.example.demo_clothes_shop_23.entities.*;
 import com.example.demo_clothes_shop_23.model.enums.SizeType;
 import com.example.demo_clothes_shop_23.model.model.ImageProductDetailModel;
-import com.example.demo_clothes_shop_23.repository.FavoriteRepository;
-import com.example.demo_clothes_shop_23.security.CustomUserDetails;
 import com.example.demo_clothes_shop_23.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,6 +31,8 @@ public class WebController {
     private final FavoriteService favoriteService;
     private final CartService cartService;
     private final AddressService addressService;
+    private final OrderService orderService;
+    private final OrderDetailService orderDetailService;
 
     /*Trang chủ*/
     @GetMapping("/")
@@ -64,6 +62,13 @@ public class WebController {
     @GetMapping("/register")
     public String register(Model model) {
         return "web/register";
+    }
+
+    /*Trang thông tin cá nhân*/
+    @GetMapping("/user-info")
+    public String userInfo(Model model) {
+        model.addAttribute("addressesByUserId", addressService.getByUser_Id());
+        return "web/user-info";
     }
 
     /*Trang danh sách sản phẩm được giảm giá theo chương trình*/
@@ -193,9 +198,12 @@ public class WebController {
         return "web/checkout";
     }
 
-    @GetMapping("payment-success")
-    public String paymentSuccess(Model model) {
-        return "web/payment-success";
+    @GetMapping("/cod-Return")
+    public String codReturn(Model model,@RequestParam(required = true) String codeOrder) {
+        Orders order = orderService.getByCodeOrder(codeOrder);
+        model.addAttribute("order",order);
+        model.addAttribute("orderDetails", orderDetailService.getByOrderId(order.getId()));
+        return "web/cod-Return";
     }
 
     /*Trang danh sách blog*/

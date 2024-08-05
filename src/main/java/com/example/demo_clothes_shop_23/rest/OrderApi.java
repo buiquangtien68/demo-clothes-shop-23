@@ -20,4 +20,10 @@ public class OrderApi {
         Orders order = orderService.createOrder(createOrderRequest);
         return new ResponseEntity<>(order, HttpStatus.CREATED);
     }
+
+    @PutMapping("/updateCodeOrder/{orderId}")
+    public ResponseEntity<?> updateCodeOrder(@PathVariable Integer orderId){
+        Orders order = orderService.updateCodeOrder(orderId);
+        return new ResponseEntity<>(order,HttpStatus.OK);
+    }
 }

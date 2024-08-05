@@ -2,7 +2,9 @@ package com.example.demo_clothes_shop_23.service;
 
 import com.example.demo_clothes_shop_23.entities.Coupon;
 import com.example.demo_clothes_shop_23.entities.Orders;
+import com.example.demo_clothes_shop_23.entities.Quantity;
 import com.example.demo_clothes_shop_23.entities.User;
+import com.example.demo_clothes_shop_23.exception.ResourceNotFoundException;
 import com.example.demo_clothes_shop_23.model.enums.DeliveryType;
 import com.example.demo_clothes_shop_23.model.enums.OrdersStatus;
 import com.example.demo_clothes_shop_23.model.enums.PaymentType;
@@ -10,6 +12,7 @@ import com.example.demo_clothes_shop_23.repository.CouponRepository;
 import com.example.demo_clothes_shop_23.repository.OrdersRepository;
 import com.example.demo_clothes_shop_23.request.CreateOrderRequest;
 import com.example.demo_clothes_shop_23.security.CustomUserDetails;
+import com.example.demo_clothes_shop_23.vnPay.config.PaymentConfig;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,6 +28,10 @@ import java.util.Objects;
 public class OrderService {
     private final CouponRepository couponRepository;
     private final OrdersRepository ordersRepository;
+
+    public Orders getByCodeOrder(String codeOrder) {
+        return ordersRepository.findByCodeOrder(codeOrder);
+    }
 
     public Orders createOrder(CreateOrderRequest createOrderRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -73,5 +80,14 @@ public class OrderService {
             .build();
         ordersRepository.save(orders);
         return orders;
+    }
+
+    public Orders updateCodeOrder(Integer orderId) {
+        Orders order = ordersRepository.findById(orderId)
+            .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        order.setCodeOrder(PaymentConfig.getRandomNumber(8));
+        ordersRepository.save(order);
+        return order;
     }
 }

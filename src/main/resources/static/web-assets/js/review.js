@@ -195,7 +195,6 @@ const openEditModal= (id)=>{
     modalReviewTitleEl.innerText="Sửa bình luận"
     btnCreateReviewEl.innerText="Sửa";
     idReviewEdit=id;
-
 }
 const updateRv=async (data) =>{
     try {
