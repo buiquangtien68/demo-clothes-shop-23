@@ -206,6 +206,12 @@ public class WebController {
         return "web/cod-Return";
     }
 
+    @GetMapping("/order-history")
+    public String orderHistory(Model model) {
+        model.addAttribute("ordersByUserId", orderService.getByUser_IdOrderByCreatedAtDesc());
+        return "web/order-history";
+    }
+
     /*Trang danh sách blog*/
     @GetMapping("/blog")
     public String blog(

@@ -124,13 +124,13 @@
                 <div class="product__details__tab">
                     <ul class="nav nav-tabs" role="tablist">
                         <li class="nav-item">
-                            <a class="nav-link active text-black" data-toggle="tab" href="#tabs-account" role="tab">Tài khoản</a>
+                            <a class="nav-link user-info-nav-link active text-black" data-toggle="tab" href="#tabs-account" role="tab">Tài khoản</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#tabs-password" role="tab">Mật khẩu</a>
+                            <a class="nav-link user-info-nav-link" data-toggle="tab" href="#tabs-password" role="tab">Mật khẩu</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#tabs-address" role="tab">Sổ địa chỉ</a>
+                            <a class="nav-link user-info-nav-link" data-toggle="tab" href="#tabs-address" role="tab">Sổ địa chỉ</a>
                         </li>
                     </ul>
                     <div class="tab-content">
@@ -312,9 +312,9 @@
 
         // Làm sáng tab được chọn
         document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('.nav-link').forEach(function (tab) {
+            document.querySelectorAll('.user-info-nav-link').forEach(function (tab) {
                 tab.addEventListener('click', function () {
-                    document.querySelectorAll('.nav-link').forEach(function (link) {
+                    document.querySelectorAll('.user-info-nav-link').forEach(function (link) {
                         link.classList.remove('text-black');
                     });
                     tab.classList.add('text-black');
