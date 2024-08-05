@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/layout :: layout(~{:: title},~{:: #css},~{:: .content-wrapper},~{:: #js})}">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard</title>
+
+    <th:block id="css">
+        <!--Data table-->
+        <link rel="stylesheet" href="/admin-assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+        <link rel="stylesheet" href="/admin-assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+        <link rel="stylesheet" href="/admin-assets/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
+    </th:block>
+</head>
+
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <div class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-12">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="#">Dashboard</a>
+                            </li>
+                            <li class="breadcrumb-item active">
+                                Tổng quan
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-lg-4 col-6">
+                                        <div class="small-box bg-info">
+                                            <div class="inner">
+                                                <h3 th:text="${moviesInCurrentMonth.size()}+'/'+${allMovies.size()}">10/123</h3>
+                                                <p>Phim mới trên tổng số phim</p>
+                                            </div>
+                                            <div class="icon">
+                                                <i class="ion ion-bag"></i>
+                                            </div>
+                                            <a th:href="@{/admin/movies}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-4 col-6">
+
+                                        <div class="small-box bg-success">
+                                            <div class="inner">
+                                                <h3 th:text="${usersInCurrentMonth.size()}+'/'+${allUsers.size()}"><sup style="font-size: 20px"></sup></h3>
+                                                <p>User mới trên tổng số phim</p>
+                                            </div>
+                                            <div class="icon">
+                                                <i class="ion ion-stats-bars"></i>
+                                            </div>
+                                            <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-4 col-6">
+
+                                        <div class="small-box bg-warning">
+                                            <div class="inner">
+                                                <h3 th:text="${blogsInCurrentMonth.size()}+'/'+${allBlogs.size()}">2/50</h3>
+                                                <p>Bài viết mới trên tổng số bài viết</p>
+                                            </div>
+                                            <div class="icon">
+                                                <i class="ion ion-person-add"></i>
+                                            </div>
+                                            <a th:href="@{/admin/blogs}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <canvas  id="movie-chart"></canvas>
+                                    </div>
+                                    <div class="col-6">
+                                        <canvas  id="user-chart"></canvas>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="card">
+                                            <div class="card-header border-transparent">
+                                                <h3 class="card-title">Phim mới cập nhật</h3>
+                                                <div class="card-tools">
+                                                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                                        <i class="fas fa-minus"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div class="card-body p-0">
+                                                <div class="table-responsive">
+                                                    <table class="table m-0">
+                                                        <thead>
+                                                        <tr>
+                                                            <th>Phim</th>
+                                                            <th>Thể loại phim</th>
+                                                            <th>Trạng thái</th>
+                                                            <th>Ngày tạo</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <tr th:each="movie :${moviesInCurrentMonth.stream().limit(10)}">
+                                                            <td><a th:href="@{/admin/movies/{id} (id=${movie.getId()})}" th:text="${movie.getName()}">Call of Duty IV</a></td>
+                                                            <td>Phim lẻ</td>
+                                                            <td><span class="badge badge-success" th:text="${movie.getStatus() ? 'Công khai' : 'Ẩn'}">Công khai</span></td>
+                                                            <td>
+                                                                <div class="sparkbar" data-color="#00a65a" data-height="20" th:text="${#temporals.format(movie.getCreatedAt(),'dd/MM/yyyy')}">22/12/2023</div>
+                                                            </td>
+                                                        </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                            </div>
+                                            <div class="card-footer clearfix">
+                                                <a th:href="@{/admin/movies}" class="btn btn-sm btn-secondary float-right">Xem thêm</a>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="card">
+                                            <div class="card-header border-transparent">
+                                                <h3 class="card-title">User mới tạo</h3>
+                                                <div class="card-tools">
+                                                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                                        <i class="fas fa-minus"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div class="card-body p-0">
+                                                <div class="table-responsive">
+                                                    <table class="table m-0">
+                                                        <thead>
+                                                        <tr>
+                                                            <th>Họ tên</th>
+                                                            <th>Email</th>
+                                                            <th>Ngày tạo</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <tr th:each="user : ${usersInCurrentMonth.stream().limit(10)}">
+                                                            <td th:text="${user.getName()}">Lương Quỳnh Anh</td>
+                                                            <td th:text="${user.getEmail()}">abc@gmail.com</td>
+                                                            <td>
+                                                                <div class="sparkbar" data-color="#00a65a" data-height="20" th:text="${#temporals.format(user.getCreatedAt(),'dd/MM/yyyy')}">30/06/2024</div>
+                                                            </td>
+                                                        </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                            </div>
+
+                                            <div class="card-footer clearfix">
+                                                <a href="" class="btn btn-sm btn-secondary float-right">Xem thêm</a>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<th:block id="js">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script th:inline="javascript">
+        //movie chart
+        const ctxMovie = document.getElementById('movie-chart');
+        let movieData = [[${moviesDataInFiveMonths}]]
+        console.log(movieData)
+        new Chart(ctxMovie, {
+            type: 'bar',
+            data: {
+                labels: movieData.map(mData => `Tháng ${mData.month}/${mData.year}`),
+                datasets: [{
+                    label: 'Phim cập nhật theo tháng',
+                    data: movieData.map(mData => mData.movieCount),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        //user chart
+        const ctxUser = document.getElementById('user-chart');
+        let userData = [[${userDataInFiveMonths}]]
+        new Chart(ctxUser, {
+            type: 'line',
+            data: {
+                labels: userData.map(uData => `Tháng ${uData.month}/${uData.year}`),
+                datasets: [{
+                    label: 'User đăng ký theo tháng',
+                    data: userData.map(uData => uData.userCount),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+    <!--DataTable	-->
+    <script src="/admin-assets/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="/admin-assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="/admin-assets/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="/admin-assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+    <script src="/admin-assets/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="/admin-assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+    <script th:inline="javascript">
+        $('#table-movie').DataTable({
+            "paging": true,
+            "lengthChange": false,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "autoWidth": false,
+            "responsive": true,
+        });
+    </script>
+</th:block>
+</body>
+
+</html>

@@ -30,14 +30,11 @@ $(document).ready(function() {
     // Function to fetch districts
     async function fetchDistricts(provinceId) {
         try {
-            console.log("Fetching districts for province:", provinceId); // Debugging log
             const response = await axios.get(apiDistricts(provinceId));
-            console.log(`Districts response for province ${provinceId}:`, response.data); // Debugging log
             districtsData[provinceId] = response.data.data.reduce((acc, district) => {
                 acc[district.id] = district.name;
                 return acc;
             }, {});
-            console.log(`Districts data for province ${provinceId}:`, districtsData[provinceId]); // Debugging log
         } catch (error) {
             console.error(`Error fetching districts for province ${provinceId}:`, error);
         }
@@ -46,14 +43,11 @@ $(document).ready(function() {
     // Function to fetch wards
     async function fetchWards(districtId) {
         try {
-            console.log(`Fetching wards for district ${districtId}`); // Debugging log
             const response = await axios.get(apiWards(districtId));
-            console.log(`Wards response for district ${districtId}:`, response.data); // Debugging log
             wardsData[districtId] = response.data.data.reduce((acc, ward) => {
                 acc[ward.id] = ward.name;
                 return acc;
             }, {});
-            console.log(`Wards data for district ${districtId}:`, wardsData[districtId]); // Debugging log
         } catch (error) {
             console.error(`Error fetching wards for district ${districtId}:`, error);
         }
@@ -68,17 +62,13 @@ $(document).ready(function() {
                 const text = $(this).text();
                 const [wardId, districtId, provinceId] = text.split(' - ').map(part => part.trim());
 
-                console.log("Replacing address for:", wardId, districtId, provinceId); // Debugging log
-
                 // Ensure districts are fetched
                 if (provincesData[provinceId]) {
-                    console.log(`Fetching districts for province ${provinceId}`); // Debugging log
                     await fetchDistricts(provinceId);
                 }
 
                 // Ensure wards are fetched
                 if (districtsData[provinceId] || districtsData[provinceId][districtId]) {
-                    console.log(`Fetching wards for district ${districtId}`); // Debugging log
                     await fetchWards(districtId);
                 }
 
@@ -86,10 +76,6 @@ $(document).ready(function() {
                 const wardName = wardsData[districtId] ? wardsData[districtId][wardId] || '' : '';
                 const districtName = districtsData[provinceId] ? districtsData[provinceId][districtId] || '' : '';
                 const provinceName = provincesData[provinceId] || '';
-
-                // Log names for debugging
-                console.log(`Updating address: ${wardId} - ${districtId} - ${provinceId}`);
-                console.log(`Names: ${wardName} - ${districtName} - ${provinceName}`);
 
                 $(this).text(`${wardName} - ${districtName} - ${provinceName}`);
             });

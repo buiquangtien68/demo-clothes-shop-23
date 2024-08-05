@@ -24,7 +24,7 @@
                     <ul class="dropdown-menu text-decoration-none">
                         <li sec:authorize="hasRole('ADMIN')"><a class="dropdown-item" th:href="@{/admin/dashboard}">Trang quản trị</a></li>
                         <li><a class="dropdown-item " th:href="@{/thong-tin-ca-nhan}">Thông tin cá nhân</a></li>
-                        <li><a class="dropdown-item" href="#">Lịch sử mua hàng</a></li>
+                        <li><a class="dropdown-item" th:href="@{/order-history}">Lịch sử mua hàng</a></li>
                         <li><a class="dropdown-item"  th:href="@{/logout}">Đăng xuất</a></li>
                     </ul>
                 </div>
@@ -64,7 +64,7 @@
                                     <ul class="dropdown-menu">
                                         <li sec:authorize="hasRole('ADMIN')"><a class="dropdown-item text-black" th:href="@{/admin/dashboard}"  >Trang quản trị</a></li>
                                         <li><a class="dropdown-item text-black" th:href="@{/user-info}">Thông tin cá nhân</a></li>
-                                        <li><a class="dropdown-item text-black " href="#">Lịch sử mua hàng</a></li>
+                                        <li><a class="dropdown-item text-black " th:href="@{/order-history}">Lịch sử mua hàng</a></li>
                                         <li><a class="dropdown-item text-black"  th:href="@{/logout}">Đăng xuất</a></li>
                                     </ul>
                                 </div>
