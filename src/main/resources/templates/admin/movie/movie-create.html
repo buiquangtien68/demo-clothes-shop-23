@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/layout :: layout(~{:: title},~{:: #css},~{:: .content-wrapper},~{:: #js})}">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tạo phim</title>
+
+   <th:block id="css">
+       <!--Easymde-->
+       <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css" />
+       <link rel="stylesheet" href="https://cdn.jsdelivr.net/highlight.js/latest/styles/github.min.css" />
+
+       <!--Summernote-->
+       <link rel="stylesheet" href="/admin-assets/plugins/summernote/summernote-bs4.min.css">
+
+       <!--Select2-->
+       <link rel="stylesheet" href="/admin-assets/plugins/select2/css/select2.min.css" />
+       <link rel="stylesheet" href="/admin-assets/dist/css/style.css">
+   </th:block>
+</head>
+
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <div class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-12">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="#">Dashboard</a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="#">Movie</a>
+                            </li>
+                            <li class="breadcrumb-item active">
+                                Tạo phim
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="container-fluid">
+
+                <div class="row py-2">
+                    <div class="col-6">
+                        <button type="button" class="btn btn-default">
+                            <i class="fas fa-chevron-left"></i> Quay lại
+                        </button>
+                        <button type="button" class="btn btn-info px-4" id="btnCreateMovie">
+                            Lưu
+                        </button>
+                    </div>
+
+
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <form id="form-movie">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <div class="form-group">
+                                                <label>Tên phim</label>
+                                                <input type="text" class="form-control" id="name" name="name"/>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Trailer URL</label>
+                                                <input type="text" class="form-control" id="trailer" name="trailer"/>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Mô tả ngắn</label>
+                                                <textarea id="description" class="form-control" rows="3" name="description"></textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Thể loại</label>
+                                                <div class="select2-purple">
+                                                    <select class="select2 form-control" multiple="multiple"
+                                                            id="genre">
+                                                        <option th:each="genre :${genres}" th:text="${genre.name}" th:value="${genre.id}">
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Đạo diễn</label>
+                                                <div class="select2-purple">
+                                                    <select class="select2 form-control" multiple="multiple"
+                                                            id="director">
+                                                        <option th:each="director :${directors}" th:text="${director.name}" th:value="${director.id}">
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Diễn viên</label>
+                                                <div class="select2-purple">
+                                                    <select class="select2 form-control" multiple="multiple"
+                                                            id="actor">
+                                                        <option th:each="actor :${actors}" th:text="${actor.name}" th:value="${actor.id}">
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                        </div>
+
+
+
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Trạng thái</label>
+                                                <select id="status" class="form-control">
+                                                    <option value="0">
+                                                        Ẩn
+                                                    </option>
+                                                    <option value="1">
+                                                        Công khai
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Release Year</label>
+                                                <input type="text" class="form-control" id="releaseYear" name="releaseYear"/>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Thể loại phim</label>
+                                                <select id="movieType" class="form-control">
+                                                    <option th:each="type : ${movieType}" th:value="${type}" th:text="${type}" >
+                                                    </option>
+
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Quốc gia</label>
+                                                <select id="country" class="form-control">
+                                                    <option th:each="country : ${countries}" th:value="${country.id}" th:text="${country.name}" >
+                                                    </option>
+                                                </select>
+                                            </div>
+                                          <!--  <div class="form-group">
+                                                <div class="thumbnail-preview-container mb-3">
+                                                    <img src="" alt="" id="poster">
+                                                </div>
+                                                <label for="input-poster" class="btn btn-info btn-flat" data-toggle="modal" data-target="#modal-xl">
+                                                    Chọn hình ảnh
+                                                </label>
+                                                <input type="file" id="input-poster" class="d-none">
+                                            </div>-->
+                                        </div>
+
+
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<th:block id="js">
+    //Summernote
+    <script src="/admin-assets/plugins/summernote/summernote-bs4.min.js"></script>
+
+    <script src="/admin-assets/plugins/select2/js/select2.full.min.js"></script>
+
+    <script th:inline="javascript">
+        //Initialize Select2 Elements
+        $(".select2").select2();
+
+        // // Initialize editor
+        // const easyMDE = new EasyMDE({
+        //   element: document.getElementById("content"),
+        //   spellChecker: false,
+        //   maxHeight: "500px",
+        //   renderingConfig: {
+        //     codeSyntaxHighlighting: true,
+        //   },
+        // });
+
+
+        // // Summernote
+        // $('#content').summernote({
+        //     height: 600,                 // set editor height
+        //     minHeight: null,             // set minimum height of editor
+        //     maxHeight: null,             // set maximum height of editor
+        //     focus: true,                 // set focus to editable area after initializing summernote
+        //     disableLinkTarget: true
+        // });
+
+
+
+        //Create movie
+        let nameEl = document.getElementById("name")
+        let trailerEl = document.getElementById("trailer")
+        let descriptionEl = document.getElementById("description")
+        let statusEl = document.getElementById("status")
+        let releaseYearEl = document.getElementById("releaseYear")
+        let movieTypeEl = document.getElementById("movieType")
+        let countryEl = document.getElementById("country")
+        const btnCreateMovie = document.getElementById("btnCreateMovie")
+        btnCreateMovie.addEventListener("click", async (e)=>{
+            e.preventDefault()
+            console.log("Đã ấn nút")
+
+            if (!$('#form-movie').valid()){
+                return;
+            }
+            const data = {
+                name: nameEl.value,
+                description: descriptionEl.value,
+                releaseYear: releaseYearEl.value,
+                movieType: movieTypeEl.value,
+                status : statusEl.value === "1",
+                trailer: trailerEl.value,
+                countryId: countryEl.value,
+                genreIds: $('#genre').val(),
+                actorIds: $('#actor').val(),
+                directorIds: $('#director').val(),
+            }
+            // Gọi API
+            try {
+                let res = await axios.post("/api/admin/movies", data);
+                toastr.success("Tạo movie thành công")
+                setTimeout(()=>{
+                    window.location.href='/admin/movies'
+                },1000)
+            } catch (e) {
+                console.log(e)
+                toastr.error(e.response.data.message);
+            }
+        })
+
+        $('#form-movie').validate({
+            rules: {
+                name: {
+                    required: true,
+                    pattern: /^\s*\S.*$/, // Kiểm tra xem có ký tự nào không là khoảng trắng ở đầu không
+                },
+                releaseYear: {
+                    required: true,
+                    min: 1900,
+                    max: 2100,
+                },
+                description:{
+                    required: true,
+                    pattern: /^\s*\S.*$/, // Kiểm tra xem có ký tự nào không là khoảng trắng ở đầu không
+                }
+            },
+            messages: {
+                name: {
+                    required: "Vui lòng nhập tiêu đề",
+                    pattern: "Tiêu đề không được chỉ chứa khoảng trắng"
+                },
+                releaseYear: {
+                    required: "Vui lòng nhập năm phát hành",
+                    min: "Không được dưới năm 1900",
+                    max: "Không được trên năm 2100"
+                },
+                description:{
+                    required: "Vui lòng nhập mô tả",
+                    pattern: "Mô tả không được chỉ chứa khoảng trắng"
+                }
+            },
+            errorPlacement: function (error, element) {
+                if (element.attr("name") === "content") { // Kiểm tra nếu là trường nội dung
+                    error.appendTo(element.siblings("span")); // Hiển thị thông báo lỗi bên cạnh trường nội dung
+                } else {
+                    error.addClass('invalid-feedback');
+                    element.closest('.form-group').append(error);
+                }
+            },
+            highlight: function (element, errorClass, validClass) {
+                $(element).addClass('is-invalid');
+            },
+            unhighlight: function (element, errorClass, validClass) {
+                $(element).removeClass('is-invalid');
+            }
+        });
+    </script>
+</th:block>
+</body>
+
+</html>

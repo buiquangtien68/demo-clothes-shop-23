@@ -9,10 +9,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/orderDetail")
@@ -24,5 +23,11 @@ public class OrderDetailApi {
     public ResponseEntity<?> createOrderDetail(@Valid @RequestBody CreateOrderDetailRequest createOrderDetailRequest) {
         OrdersDetail ordersDetail = orderDetailService.createOrderDetail(createOrderDetailRequest);
         return new ResponseEntity<>(ordersDetail, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/order/{orderId}")
+    public ResponseEntity<?> getByOrderId(@PathVariable Integer orderId){
+        List<OrdersDetail> ordersDetails = orderDetailService.getByOrderId(orderId);
+        return new ResponseEntity<>(ordersDetails,HttpStatus.OK);
     }
 }

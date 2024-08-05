@@ -26,4 +26,10 @@ public class OrderApi {
         Orders order = orderService.updateCodeOrder(orderId);
         return new ResponseEntity<>(order,HttpStatus.OK);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getOrderById(@PathVariable Integer id){
+        Orders orders = orderService.getById(id);
+        return new ResponseEntity<>(orders,HttpStatus.OK);
+    }
 }

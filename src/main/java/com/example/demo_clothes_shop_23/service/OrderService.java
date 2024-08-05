@@ -33,6 +33,19 @@ public class OrderService {
         return ordersRepository.findByCodeOrder(codeOrder);
     }
 
+    public Orders getById(Integer id) {
+        return ordersRepository.findById(id).orElseThrow(
+            () -> new ResourceNotFoundException("Order not found with id " + id)
+        );
+    }
+
+    public List<Orders> getByUser_IdOrderByCreatedAtDesc() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = (User) userDetails.getUser();
+        return ordersRepository.findByUser_IdOrderByCreatedAtDesc(user.getId());
+    }
+
     public Orders createOrder(CreateOrderRequest createOrderRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
