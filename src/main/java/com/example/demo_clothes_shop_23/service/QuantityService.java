@@ -5,6 +5,8 @@ import com.example.demo_clothes_shop_23.repository.QuantityRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @AllArgsConstructor
 public class QuantityService {
@@ -12,5 +14,9 @@ public class QuantityService {
 
     public Quantity getByProductIdAndColorIdAndSizeId(Integer productId, Integer colorId, Integer sizeId) {
         return quantityRepository.findByProductIdAndColorIdAndSizeId(productId, colorId, sizeId);
+    }
+
+    public List<Quantity> getByProductId(Integer productId) {
+        return quantityRepository.findByProductId(productId);
     }
 }

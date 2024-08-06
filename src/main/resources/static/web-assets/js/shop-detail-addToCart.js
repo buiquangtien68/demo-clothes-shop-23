@@ -51,6 +51,14 @@ const createCart= async ()=>{
         toastr.error("Bạn chưa chọn kích thước")
         return
     }
+    if (!stockMap[`${colorId}_${sizeId}`]){
+        toastr.error("Sản phẩm hiện hết màu và kích thước này")
+        return
+    }
+    if (quantity> stockMap[`${colorId}_${sizeId}`]){
+        toastr.error("Bạn chọn số lượng nhiều hơn số lượng còn lại trong kho")
+        return
+    }
     const data = {
         userId: userId,
         productId: productId,

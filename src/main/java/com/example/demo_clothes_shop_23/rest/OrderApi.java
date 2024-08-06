@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,6 +31,12 @@ public class OrderApi {
     @GetMapping("/{id}")
     public ResponseEntity<?> getOrderById(@PathVariable Integer id){
         Orders orders = orderService.getById(id);
+        return new ResponseEntity<>(orders,HttpStatus.OK);
+    }
+
+    @PutMapping("/cancelOrder/{orderId}")
+    public ResponseEntity<?> cancelOrder(@PathVariable Integer orderId){
+        Orders orders = orderService.cancelOrder(orderId);
         return new ResponseEntity<>(orders,HttpStatus.OK);
     }
 }

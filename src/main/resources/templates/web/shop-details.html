@@ -54,6 +54,29 @@
             .highlight {
                 animation: highlight 1.1s ease;
             }
+
+            .unavailable {
+                opacity: 0.2; /* Độ mờ của phần tử */
+                position: relative; /* Để sử dụng ::before cho hiệu ứng gạch chéo */
+                cursor: not-allowed; /* Con trỏ không cho phép thao tác */
+                pointer-events: none; /* Không cho phép người dùng tương tác */
+            }
+
+            .unavailable::before {
+                content: ''; /* Nội dung rỗng */
+                position: absolute; /* Đặt vị trí tuyệt đối để gạch chéo */
+                top: 0; /* Bắt đầu từ trên cùng */
+                left: 0; /* Bắt đầu từ bên trái */
+                width: 100%; /* Đường chéo rộng bằng phần tử */
+                height: 100%; /* Đường chéo cao bằng phần tử */
+                background: linear-gradient(45deg, transparent 49%, rgba(0, 0, 0, 0.5) 50%, transparent 51%); /* Tạo hiệu ứng gạch chéo */
+                z-index: 1; /* Đặt z-index để đường chéo nằm trên phần tử */
+            }
+
+            .available {
+                opacity: 1;
+                text-decoration: none;
+            }
         </style>
     </th:block>
 
@@ -118,21 +141,27 @@
                                 <p th:text="${product.description}">Coat with quilted lining and an adjustable hood. Featuring long sleeves with adjustable
                                     cuff tabs, adjustable asymmetric hem with elastic side tabs and a front zip fastening
                                     with placket.</p>
-
-                                <div class="product__details__option">
+                                <div class="product__details__option mb-2">
                                     <div class="product__details__option__size">
                                         <span>Kích thước:</span>
-                                        <label th:each="size : ${sizes}" th:for="${'size_'+size.id}" th:text="${size.sizeName}" th:data-size-id="${size.id}">xxl
-                                            <input type="radio" th:id="${'size_'+size.id}" th:value="${size.id}">
+                                        <label th:each="size : ${sizes}" th:for="${'size_'+size.id}" th:text="${size.sizeName}"
+                                               th:data-size-id="${size.id}" class="size-label">
+                                            <input type="radio" name="size" th:id="${'size_'+size.id}" th:value="${size.id}">
                                         </label>
                                     </div>
                                     <div class="product__details__option__color">
                                         <span>Màu sắc:</span>
-                                        <label th:each="color : ${colors}" th:style="'background: ' + ${color.colorCode}" th:for="${'color_' + color.id}" th:data-color-id="${color.id}">
-                                            <input type="radio" th:id="${'color_' + color.id}" th:value="${color.id}">
+                                        <label th:each="color : ${colors}" th:style="'background: ' + ${color.colorCode}"
+                                               th:for="${'color_' + color.id}" th:data-color-id="${color.id}" class="color-label">
+                                            <input type="radio" name="color" th:id="${'color_' + color.id}" th:value="${color.id}">
                                         </label>
                                     </div>
                                 </div>
+                                <div class="stock-status mb-2">
+                                    <span id="stock-status"></span><br>
+                                    <span id="stock-quantity"></span>
+                                </div>
+
                                 <div class="product__details__cart__option">
                                     <div class="quantity">
                                         <div class="pro-qty">
@@ -375,6 +404,7 @@
             let favorites =[[${favorites}]]
             let favorite =[[${favorite}]]
             let reviews = [[${reviews}]]
+            const stockMap = [[${stockMap}]]
             document.addEventListener('DOMContentLoaded', function() {
                 // Định dạng tất cả các giá
                 document.querySelectorAll('.formatted-price').forEach(function(element) {
@@ -387,6 +417,7 @@
         <script src="/web-assets/js/shop-detail-addToCart.js"></script>
         <script src="/web-assets/js/review.js"></script>
         <script src="/web-assets/js/shop-detail-favorite.js"></script>
+        <script src="/web-assets/js/shop-detail-checkQuantity.js"></script>
     </th:block>
 
 </body>

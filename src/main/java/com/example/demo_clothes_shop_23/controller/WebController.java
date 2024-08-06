@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
@@ -33,6 +34,7 @@ public class WebController {
     private final AddressService addressService;
     private final OrderService orderService;
     private final OrderDetailService orderDetailService;
+    private final QuantityService quantityService;
 
     /*Trang chủ*/
     @GetMapping("/")
@@ -130,7 +132,17 @@ public class WebController {
         Set<Color> sortedColor = new TreeSet<>(Comparator.comparingInt(Color::getId));
         sortedColor.addAll(colors);
         model.addAttribute("colors",sortedColor);
-        ;
+
+        //Kiểm tra lượng hàng trong kho
+        List<Quantity> quantities = quantityService.getByProductId(id);
+        Map<String, Integer> stockMap = quantities.stream()
+            .filter(q -> q.getValue() > 0)
+            .collect(Collectors.toMap(
+                q -> q.getColor().getId() + "_" + q.getSize().getId(),
+                Quantity::getValue
+            ));
+
+        model.addAttribute("stockMap", stockMap);
 
         //Lấy thông tin màu để lấy hình ảnh
         List<ImageProductDetailModel> images = imageService.getAllByColor_IdAndProduct_Id(sortedColor.iterator().next().getId(),product.getId());

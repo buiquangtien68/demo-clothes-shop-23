@@ -1,15 +1,14 @@
 package com.example.demo_clothes_shop_23.service;
 
-import com.example.demo_clothes_shop_23.entities.Coupon;
-import com.example.demo_clothes_shop_23.entities.Orders;
-import com.example.demo_clothes_shop_23.entities.Quantity;
-import com.example.demo_clothes_shop_23.entities.User;
+import com.example.demo_clothes_shop_23.entities.*;
 import com.example.demo_clothes_shop_23.exception.ResourceNotFoundException;
 import com.example.demo_clothes_shop_23.model.enums.DeliveryType;
 import com.example.demo_clothes_shop_23.model.enums.OrdersStatus;
 import com.example.demo_clothes_shop_23.model.enums.PaymentType;
 import com.example.demo_clothes_shop_23.repository.CouponRepository;
+import com.example.demo_clothes_shop_23.repository.OrdersDetailRepository;
 import com.example.demo_clothes_shop_23.repository.OrdersRepository;
+import com.example.demo_clothes_shop_23.repository.QuantityRepository;
 import com.example.demo_clothes_shop_23.request.CreateOrderRequest;
 import com.example.demo_clothes_shop_23.security.CustomUserDetails;
 import com.example.demo_clothes_shop_23.vnPay.config.PaymentConfig;
@@ -28,6 +27,8 @@ import java.util.Objects;
 public class OrderService {
     private final CouponRepository couponRepository;
     private final OrdersRepository ordersRepository;
+    private final OrdersDetailRepository ordersDetailRepository;
+    private final QuantityRepository quantityRepository;
 
     public Orders getByCodeOrder(String codeOrder) {
         return ordersRepository.findByCodeOrder(codeOrder);
@@ -100,6 +101,24 @@ public class OrderService {
             .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
         order.setCodeOrder(PaymentConfig.getRandomNumber(8));
+        ordersRepository.save(order);
+        return order;
+    }
+
+    public Orders cancelOrder(Integer orderId) {
+        Orders order = ordersRepository.findById(orderId)
+            .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        List<OrdersDetail> ordersDetails = ordersDetailRepository.findByOrdersId(orderId);
+        ordersDetails.forEach(ordersDetail -> {
+           Quantity quantity = quantityRepository.findByProductIdAndColorIdAndSizeId(
+               ordersDetail.getProduct().getId(),
+               ordersDetail.getColor().getId(),
+               ordersDetail.getSize().getId()
+           );
+           quantity.setValue(quantity.getValue() + ordersDetail.getQuantity());
+           quantityRepository.save(quantity);
+        });
+        order.setStatus(OrdersStatus.DA_HUY);
         ordersRepository.save(order);
         return order;
     }
