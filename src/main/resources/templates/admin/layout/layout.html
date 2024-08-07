@@ -57,6 +57,27 @@
 <script src="/admin-assets/dist/js/adminlte.js"></script>
 <!--Axios-->
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script th:inline="javascript">
+    function formatCurrency(value) {
+        if (typeof value !== 'number' || isNaN(value)) {
+            console.error("Giá trị không phải là số:", value);
+            return '0 VNĐ'; // Giá trị mặc định nếu không phải số
+        }
+        return value.toLocaleString('vi-VN') + ' VNĐ'; // Định dạng số nguyên với định dạng tiền tệ VNĐ
+    }
+
+    // Hàm chuyển đổi chuỗi thành Long
+    function parseLong(value) {
+        return parseInt(value.replace(/[^0-9]/g, ''), 10) || 0;  // Loại bỏ ký tự không phải số và chuyển đổi thành số nguyên
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        // Định dạng tất cả các giá
+        document.querySelectorAll('.formatted-price').forEach(function(element) {
+            let rawValue = parseLong(element.textContent);
+            element.textContent = formatCurrency(rawValue);
+        });
+    });
+</script>
 
 <th:block th:replace="${js}"></th:block>
 

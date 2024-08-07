@@ -100,6 +100,9 @@ public class AuthService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         User user = (User) userDetails.getUser();
+        if (!Objects.equals(user.getId(), updateInfoUserRequest.getUserId())){
+            throw new ResourceNotFoundException("User not found");
+        }
 
         user.setName(updateInfoUserRequest.getName());
         userRepository.save(user);

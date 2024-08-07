@@ -24,12 +24,7 @@
                 <div class="row mb-2">
                     <div class="col-sm-12">
                         <ol class="breadcrumb">
-                            <li class="breadcrumb-item">
-                                <a href="#">Dashboard</a>
-                            </li>
-                            <li class="breadcrumb-item active">
-                                Tổng quan
-                            </li>
+
                         </ol>
                     </div>
                 </div>
@@ -47,13 +42,13 @@
                                     <div class="col-lg-4 col-6">
                                         <div class="small-box bg-info">
                                             <div class="inner">
-                                                <h3 th:text="${moviesInCurrentMonth.size()}+'/'+${allMovies.size()}">10/123</h3>
+                                                <h3>10/123</h3>
                                                 <p>Phim mới trên tổng số phim</p>
                                             </div>
                                             <div class="icon">
                                                 <i class="ion ion-bag"></i>
                                             </div>
-                                            <a th:href="@{/admin/movies}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                                            <a  class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                                         </div>
                                     </div>
 
@@ -61,7 +56,7 @@
 
                                         <div class="small-box bg-success">
                                             <div class="inner">
-                                                <h3 th:text="${usersInCurrentMonth.size()}+'/'+${allUsers.size()}"><sup style="font-size: 20px"></sup></h3>
+                                                <h3 ><sup style="font-size: 20px"></sup></h3>
                                                 <p>User mới trên tổng số phim</p>
                                             </div>
                                             <div class="icon">
@@ -75,7 +70,7 @@
 
                                         <div class="small-box bg-warning">
                                             <div class="inner">
-                                                <h3 th:text="${blogsInCurrentMonth.size()}+'/'+${allBlogs.size()}">2/50</h3>
+                                                <h3>2/50</h3>
                                                 <p>Bài viết mới trên tổng số bài viết</p>
                                             </div>
                                             <div class="icon">
@@ -121,12 +116,12 @@
                                                         </tr>
                                                         </thead>
                                                         <tbody>
-                                                        <tr th:each="movie :${moviesInCurrentMonth.stream().limit(10)}">
-                                                            <td><a th:href="@{/admin/movies/{id} (id=${movie.getId()})}" th:text="${movie.getName()}">Call of Duty IV</a></td>
+                                                        <tr>
+                                                            <td><a href="">Call of Duty IV</a></td>
                                                             <td>Phim lẻ</td>
-                                                            <td><span class="badge badge-success" th:text="${movie.getStatus() ? 'Công khai' : 'Ẩn'}">Công khai</span></td>
+                                                            <td><span class="badge badge-success" >Công khai</span></td>
                                                             <td>
-                                                                <div class="sparkbar" data-color="#00a65a" data-height="20" th:text="${#temporals.format(movie.getCreatedAt(),'dd/MM/yyyy')}">22/12/2023</div>
+                                                                <div class="sparkbar" data-color="#00a65a" data-height="20">22/12/2023</div>
                                                             </td>
                                                         </tr>
                                                         </tbody>
@@ -135,7 +130,7 @@
 
                                             </div>
                                             <div class="card-footer clearfix">
-                                                <a th:href="@{/admin/movies}" class="btn btn-sm btn-secondary float-right">Xem thêm</a>
+                                                <a href="" class="btn btn-sm btn-secondary float-right">Xem thêm</a>
                                             </div>
 
                                         </div>
@@ -165,11 +160,11 @@
                                                         </tr>
                                                         </thead>
                                                         <tbody>
-                                                        <tr th:each="user : ${usersInCurrentMonth.stream().limit(10)}">
-                                                            <td th:text="${user.getName()}">Lương Quỳnh Anh</td>
-                                                            <td th:text="${user.getEmail()}">abc@gmail.com</td>
+                                                        <tr >
+                                                            <td >Lương Quỳnh Anh</td>
+                                                            <td >abc@gmail.com</td>
                                                             <td>
-                                                                <div class="sparkbar" data-color="#00a65a" data-height="20" th:text="${#temporals.format(user.getCreatedAt(),'dd/MM/yyyy')}">30/06/2024</div>
+                                                                <div class="sparkbar" data-color="#00a65a" data-height="20" >30/06/2024</div>
                                                             </td>
                                                         </tr>
                                                         </tbody>
@@ -197,7 +192,7 @@
 <th:block id="js">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script th:inline="javascript">
-        //movie chart
+       /* //movie chart
         const ctxMovie = document.getElementById('movie-chart');
         let movieData = [[${moviesDataInFiveMonths}]]
         console.log(movieData)
@@ -240,7 +235,7 @@
                     }
                 }
             }
-        });
+        });*/
     </script>
     <!--DataTable	-->
     <script src="/admin-assets/plugins/datatables/jquery.dataTables.min.js"></script>
@@ -250,7 +245,7 @@
     <script src="/admin-assets/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
     <script src="/admin-assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
     <script th:inline="javascript">
-        $('#table-movie').DataTable({
+        /*$('#table-movie').DataTable({
             "paging": true,
             "lengthChange": false,
             "searching": true,
@@ -258,7 +253,7 @@
             "info": true,
             "autoWidth": false,
             "responsive": true,
-        });
+        });*/
     </script>
 </th:block>
 </body>

@@ -16,7 +16,7 @@
 
     <!--Select2-->
     <link rel="stylesheet" href="/admin-assets/plugins/select2/css/select2.min.css" />
-    <link rel="stylesheet" href="/admin-assets/dist/css/style.css">
+
   </th:block>
 
 
@@ -102,6 +102,16 @@
                             </select>
                           </div>
                           <div class="form-group">
+                            <label>Thể loại</label>
+                            <div class="select2-purple">
+                              <select class="select2 form-control" multiple="multiple"
+                                      id="tag">
+                                <option th:each="tag :${tags}" th:text="${tag.name}" th:value="${tag.id}">
+                                </option>
+                              </select>
+                            </div>
+                          </div>
+                          <div class="form-group">
                             <div class="thumbnail-preview-container mb-3">
                               <img src="" alt="" id="thumbnail">
                             </div>
@@ -137,8 +147,7 @@
   <script src="/admin-assets/plugins/select2/js/select2.full.min.js"></script>
 
   <script th:inline="javascript">
-    // //Initialize Select2 Elements
-    // $(".select2").select2();
+
     //
     // // Initialize editor
     // const easyMDE = new EasyMDE({
@@ -150,6 +159,9 @@
     //   },
     // });
 
+
+    //Initialize Select2 Elements
+    $(".select2").select2();
 
     // Summernote
     $('#content').summernote({
@@ -180,6 +192,7 @@
         content: content,
         description: descriptionEl.value,
         status : statusEl.value === "1",
+        tagIds: $('#tag').val()
       }
       // Gọi API
       try {
@@ -207,6 +220,9 @@
         description:{
           required: true,
           pattern: /^\s*\S.*$/, // Kiểm tra xem có ký tự nào không là khoảng trắng ở đầu không
+        },
+        tagIds: {
+          required: true
         }
       },
       messages: {
@@ -221,6 +237,9 @@
         description:{
           required: "Vui lòng nhập mô tả",
           pattern: "Mô tả không được chỉ chứa khoảng trắng"
+        },
+        tagIds:{
+          required: "Vui lòng chọn tag",
         }
       },
       errorPlacement: function (error, element) {

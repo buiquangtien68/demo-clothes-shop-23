@@ -1,17 +1,16 @@
 package com.example.demo_clothes_shop_23.request;
 
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-@Getter
-@Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UpdateInfoUserRequest {
-    Integer userId;
-    @NotEmpty(message = "K được để trống name")
+public class UpsertTagRequest {
+    @NotBlank(message = "K đc để trống name")
     String name;
 }

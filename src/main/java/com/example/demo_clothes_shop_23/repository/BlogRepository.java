@@ -19,4 +19,9 @@ public interface BlogRepository extends JpaRepository<Blog, Integer> {
 
     @Query("SELECT b FROM Blog b JOIN b.tags t WHERE t.id = ?1 AND b.status = ?2 ORDER BY b.createdAt DESC")
     List<Blog> findByTagIdAndStatusOrderByCreatedAtDesc(Integer tagId, Boolean status);
+
+    List<Blog> findAllByUserIdOrderByCreatedAtDesc(Integer user_id);
+
+    @Query("SELECT b FROM Blog b JOIN b.tags t WHERE t.id = ?1")
+    List<Blog> findByTagId(Integer tagId);
 }

@@ -41,11 +41,8 @@
 				<div class="container-fluid">
 					<div class="row py-2">
 						<div class="col-12">
-							<button type="button" class="btn btn-primary">
+							<button type="button" class="btn btn-primary" onclick="window.location.href='/admin/blogs/create'">
 								<i class="fas fa-plus"></i> Viết bài
-							</button>
-							<button type="button" class="btn btn-info">
-								<i class="fas fa-redo"></i> Refresh
 							</button>
 						</div>
 					</div>
@@ -58,7 +55,6 @@
 											<tr>
 												<th>Tiêu đề</th>
 												<th>Tác giả</th>
-												<th>Mô tả ngắn</th>
 												<th>Trạng thái</th>
 												<th>Ngày tạo</th>
 											</tr>
@@ -76,11 +72,8 @@
 												<td>
 													<a href="#" th:text="${blog.getUser().getName()}">John Doe</a>
 												</td>
-												<td th:text="${blog.getDescription()}">
-													Java, Golang, Springboot
-												</td>
 												<td th:text="${blog.getStatus() ? 'Công khai' : 'Nháp'}" >Công khai</td>
-												<td th:text="${blog.getCreatedAt()}">06-07-2022</td>
+												<td th:text="${#temporals.format(blog.createdAt, 'dd/MM/yyyy HH:mm:ss')}">06-07-2022</td>
 											</tr>
 										</tbody>
 									</table>
@@ -108,7 +101,7 @@
 				"searching": true,
 				"ordering": true,
 				"info": true,
-				"autoWidth": false,
+				"autoWidth": true,
 				"responsive": true,
 			});
 		</script>

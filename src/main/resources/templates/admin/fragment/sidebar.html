@@ -18,19 +18,26 @@
         <!-- Sidebar Menu -->
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                <li class="nav-item"><a th:href="@{/admin/dashboard}" class="nav-link">
+                    <i class="nav-icon fas fa-chart-pie"></i>
+                    <p>
+                        Dashboard
+                    </p>
+                </a>
+                </li>
                 <li class="nav-item">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-chart-pie"></i>
                         <p>
-                            Quản lý phim
+                            Quản lý sản phẩm
                             <i class="right fas fa-angle-left"></i>
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a th:href="@{/admin/movies}" class="nav-link">
+                            <a th:href="@{/admin/products}" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>
-                                <p>Tất cả phim</p>
+                                <p>Tất cả sản phẩm</p>
                             </a>
                         </li>
                     <!--    <li class="nav-item">
@@ -40,9 +47,9 @@
                             </a>
                         </li>-->
                         <li class="nav-item">
-                            <a th:href="@{/admin/movies/create}" class="nav-link">
+                            <a th:href="@{/admin/products/create}" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>
-                                <p>Tạo phim</p>
+                                <p>Tạo sản phẩm</p>
                             </a>
                         </li>
                     </ul>
@@ -72,6 +79,12 @@
                             <a th:href="@{/admin/blogs/create}" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Tạo bài viết</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a th:href="@{/admin/blogs/tags}" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Quản lý thể loại</p>
                             </a>
                         </li>
                     </ul>

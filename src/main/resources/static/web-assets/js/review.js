@@ -166,7 +166,7 @@ const postRv =async (data) => {
 
 //Nút sửa, xóa
 const deleteRv =async (id)=>{
-    const confirm = window.confirm("Bạn có chắc chắn muốn xóa ko")
+    const confirm = window.confirm("Bạn có chắc chắn muốn xóa không")
     if(confirm){
         try {
             const deleteRv = await axios.delete(`/api/reviews/${productId}/${id}`)

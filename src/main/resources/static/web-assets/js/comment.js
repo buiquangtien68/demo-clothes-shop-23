@@ -102,7 +102,7 @@ const postCmt =async (data) => {
 
 //Nút sửa, xóa
 const deleteCmt =async (id)=>{
-    const confirm = window.confirm("Bạn có chắc chắn muốn xóa ko")
+    const confirm = window.confirm("Bạn có chắc chắn muốn xóa không")
     if(confirm){
         try {
             const deleteCmt = await axios.delete(`/api/comments/${id}`)

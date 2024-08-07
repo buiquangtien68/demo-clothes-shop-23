@@ -4,6 +4,7 @@ import com.example.demo_clothes_shop_23.entities.*;
 import com.example.demo_clothes_shop_23.model.enums.SizeType;
 import com.example.demo_clothes_shop_23.model.model.ImageProductDetailModel;
 import com.example.demo_clothes_shop_23.service.*;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -16,7 +17,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class WebController {
     private final ProductService productService;
     private final ReviewService reviewService;
@@ -177,7 +178,7 @@ public class WebController {
         @RequestParam(required = false) Double startPrice,
         @RequestParam(required = false) Double endPrice
     ) {
-        List<Category> categories = categoryService.findAllCategories();
+        List<Category> categories = categoryService.getAllCategories();
         model.addAttribute("categories",categories);
         model.addAttribute("colors",colorService.findAllColors());
         model.addAttribute("shoesSizes",sizeService.findSizeByTypeOrderByOrdersAsc(SizeType.SHOES_SIZE));

@@ -16,8 +16,8 @@ public class RegisterRequest {
     @NotEmpty(message = "K được để trống name")
     String name;
 
-    @NotEmpty(message = "K được để trống email")
-    @Email(message = "Email ko đúng định dạng")
+    @NotEmpty(message = "Không được để trống email")
+    @Email(message = "Email không đúng định dạng")
     String email;
 
     @Column(nullable = false)

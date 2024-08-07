@@ -48,32 +48,32 @@ public class SecurityConfig {
         //TODO: cấu hình path dựa trn role
         http.authorizeHttpRequests(auth->{
             auth.requestMatchers(
+                "/api/admin/**",
+                "/admin/**")
+                .hasRole("ADMIN");
+            auth.requestMatchers(
                 "/cart/**",
                 "/favorite/**",
                 "/checkout/**",
-                "payment-success/**")
+                "/payment-success/**",
+                "/user-info",
+                "/checkout",
+                "/cod-Return",
+                "/order-history")
                 .authenticated();
             auth.requestMatchers(
                 "/api/cart/**",
                 "/api/reviews/**",
                 "/api/comments/**",
-                "/api/favorites/**")
+                "/api/favorites/**",
+                "/api/addresses",
+                "/api/auth/updateInfo",
+                "/api/auth/update-password/**",
+                "/api/coupon/**",
+                "/api/order/**",
+                "/api/orderDetail/**")
                 .authenticated();
             auth.anyRequest().permitAll();
-
-
-//            auth.requestMatchers("/").permitAll();
-//            auth.requestMatchers("/user").hasRole("USER");
-//            auth.requestMatchers("/admin").hasRole("ADMIN");
-//
-//            //ví dụ:
-//            auth.requestMatchers(path).permitAll();
-//            auth.requestMatchers("/author").hasAnyRole("ADMIN","USER");
-//            auth.requestMatchers("/css/**", "/js/**", "/image/**").permitAll();
-//            auth.requestMatchers(HttpMethod.GET, "/aa/**","/bb/**").hasRole("ADMIN");
-//            auth.requestMatchers("/abc","bcd").hasAuthority("ROLE_USER");
-//            auth.requestMatchers("/xxx","yyy").hasAnyAuthority("ROLE_ADMIN","ROLE_USER");
-//            auth.anyRequest().authenticated();
         });
 
         //cấu hình login

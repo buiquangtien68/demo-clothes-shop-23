@@ -30,6 +30,7 @@ $('#form-updateInfo').on('submit', async (e) => {
     }
 
     const data = {
+        userId: user.id,
         name: $('#input-name').val(),
     };
 

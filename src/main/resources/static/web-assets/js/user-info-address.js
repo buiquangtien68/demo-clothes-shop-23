@@ -659,7 +659,7 @@ const updateAddress=async (data) =>{
 
 // Xóa địa chỉ
 const deleteAddress =async (id)=>{
-    const confirm = window.confirm("Bạn có chắc chắn muốn xóa ko")
+    const confirm = window.confirm("Bạn có chắc chắn muốn xóa không")
     if(confirm){
         try {
             const res = await axios.delete(`/api/addresses/${id}`)

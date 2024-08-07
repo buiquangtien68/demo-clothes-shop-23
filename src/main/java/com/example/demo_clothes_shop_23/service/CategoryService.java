@@ -12,7 +12,15 @@ import java.util.List;
 public class CategoryService {
     private final CategoryRepository categoryRepository;
 
-    public List<Category> findAllCategories() {
+    public List<Category> getAllCategories() {
         return categoryRepository.findAll();
     }
+
+    public List<Category> getCategoriesWithNullParentId() {
+        return categoryRepository.findCategoriesWithNullParentId();
+    }
+
+
+
+
 }

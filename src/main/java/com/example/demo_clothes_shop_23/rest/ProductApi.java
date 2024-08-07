@@ -19,7 +19,7 @@ public class ProductApi {
     private ProductService productService;
 
     @GetMapping("/{productId}")
-    public ResponseEntity<?> getAllByColorIdAndProductId(@PathVariable int productId) {
+    public ResponseEntity<?> getById(@PathVariable int productId) {
         Product product = productService.getById(productId);
         return ResponseEntity.ok(product);
     }

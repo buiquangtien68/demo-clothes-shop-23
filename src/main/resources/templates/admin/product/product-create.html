@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/layout :: layout(~{:: title},~{:: #css},~{:: .content-wrapper},~{:: #js})}">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Tạo phim</title>
+    <title>Tạo sản phẩm</title>
 
    <th:block id="css">
        <!--Easymde-->
@@ -17,6 +17,65 @@
        <!--Select2-->
        <link rel="stylesheet" href="/admin-assets/plugins/select2/css/select2.min.css" />
        <link rel="stylesheet" href="/admin-assets/dist/css/style.css">
+       <style>
+           /* Tùy chỉnh kích thước và kiểu dáng của các label màu */
+           .color-label {
+               height: 15px;
+               width: 15px;
+               border-radius: 50%;
+               position: relative;
+               margin-right: 10px;
+               display: inline-block;
+               vertical-align: middle; /* Căn giữa label với văn bản */
+           }
+
+           /* Tùy chỉnh tên màu sắc */
+           .color-name {
+               vertical-align: middle;
+           }
+
+           /* Tùy chỉnh padding và khoảng cách của các tùy chọn trong danh sách */
+           .select2-results__option {
+               padding: 5px 10px;
+               display: flex; /* Để label màu và văn bản nằm trên cùng một hàng */
+               align-items: center;
+           }
+
+           /* Tùy chỉnh hiệu ứng khi chọn một tùy chọn */
+           .select2-results__option--highlighted {
+               background-color: #f0f0f0;
+           }
+
+           /* Tùy chỉnh kiểu dáng của các tùy chọn đã chọn */
+           .select2-selection__rendered {
+               display: flex;
+               align-items: center;
+               flex-wrap: wrap; /* Cho phép văn bản và các label màu nằm trên nhiều dòng */
+           }
+
+           .select2-selection__choice {
+               margin: 2px;
+               padding: 2px 8px;
+               border-radius: 16px;
+               background-color: #e9ecef;
+               border: 1px solid #ccc;
+               display: flex;
+               align-items: center;
+               position: relative; /* Để có thể căn chỉnh dấu x */
+           }
+
+           /* Tùy chỉnh dấu x bỏ chọn */
+           .select2-selection__choice__remove {
+               margin-left: 8px;
+               cursor: pointer;
+               position: absolute; /* Đặt dấu x ở vị trí tương đối với phần tử chứa */
+               right: 1px; /* Khoảng cách từ bên phải */
+               top: 50%; /* Căn giữa dọc */
+               transform: translateY(-50%); /* Căn giữa dọc hoàn hảo */
+           }
+       </style>
+
+
    </th:block>
 </head>
 
@@ -24,7 +83,7 @@
 <div class="wrapper">
     <!-- Content Wrapper. Contains page content -->
     <div class="content-wrapper">
-        <!-- Content Header (Page header) -->
+   <!-- Content Header (Page header) -->
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
@@ -34,10 +93,10 @@
                                 <a href="#">Dashboard</a>
                             </li>
                             <li class="breadcrumb-item">
-                                <a href="#">Movie</a>
+                                <a th:href="@{/admin/products}">Danh sách sản phẩm</a>
                             </li>
                             <li class="breadcrumb-item active">
-                                Tạo phim
+                                Tạo sản phẩm
                             </li>
                         </ol>
                     </div>
@@ -70,55 +129,19 @@
                                     <div class="row">
                                         <div class="col-md-8">
                                             <div class="form-group">
-                                                <label>Tên phim</label>
+                                                <label>Tên sản phẩm</label>
                                                 <input type="text" class="form-control" id="name" name="name"/>
                                             </div>
 
                                             <div class="form-group">
-                                                <label>Trailer URL</label>
-                                                <input type="text" class="form-control" id="trailer" name="trailer"/>
+                                                <label>Giá tiền</label>
+                                                <input type="text" class="form-control" id="price" name="price"/>
                                             </div>
 
                                             <div class="form-group">
                                                 <label>Mô tả ngắn</label>
                                                 <textarea id="description" class="form-control" rows="3" name="description"></textarea>
                                             </div>
-                                            <div class="form-group">
-                                                <label>Thể loại</label>
-                                                <div class="select2-purple">
-                                                    <select class="select2 form-control" multiple="multiple"
-                                                            id="genre">
-                                                        <option th:each="genre :${genres}" th:text="${genre.name}" th:value="${genre.id}">
-                                                        </option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Đạo diễn</label>
-                                                <div class="select2-purple">
-                                                    <select class="select2 form-control" multiple="multiple"
-                                                            id="director">
-                                                        <option th:each="director :${directors}" th:text="${director.name}" th:value="${director.id}">
-                                                        </option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Diễn viên</label>
-                                                <div class="select2-purple">
-                                                    <select class="select2 form-control" multiple="multiple"
-                                                            id="actor">
-                                                        <option th:each="actor :${actors}" th:text="${actor.name}" th:value="${actor.id}">
-                                                        </option>
-                                                    </select>
-                                                </div>
-                                        </div>
-
-
-
-                                        </div>
-
-                                        <div class="col-md-4">
                                             <div class="form-group">
                                                 <label>Trạng thái</label>
                                                 <select id="status" class="form-control">
@@ -130,25 +153,48 @@
                                                     </option>
                                                 </select>
                                             </div>
-                                            <div class="form-group">
-                                                <label>Release Year</label>
-                                                <input type="text" class="form-control" id="releaseYear" name="releaseYear"/>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Thể loại phim</label>
-                                                <select id="movieType" class="form-control">
-                                                    <option th:each="type : ${movieType}" th:value="${type}" th:text="${type}" >
-                                                    </option>
+                                        </div>
 
-                                                </select>
-                                            </div>
+                                        <div class="col-md-4">
                                             <div class="form-group">
-                                                <label>Quốc gia</label>
-                                                <select id="country" class="form-control">
-                                                    <option th:each="country : ${countries}" th:value="${country.id}" th:text="${country.name}" >
+                                                <label>Danh mục cha</label>
+                                                <select id="categoryParent" class="form-control">
+                                                    <option th:each="categoryParent : ${categoryParents}" th:value="${categoryParent.id}" th:text="${categoryParent.name}" >
                                                     </option>
                                                 </select>
                                             </div>
+                                            <div class="form-group">
+                                                <label>Danh mục con</label>
+                                                <select id="categoryChild" class="form-control" disabled>
+                                                    <option th:each="categoryParent : ${categoryParents}" th:value="${categoryParent.id}" th:text="${categoryParent.name}">
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Màu sắc</label>
+                                                <div class="select2-purple">
+                                                    <select class="select2 form-control" multiple="multiple" id="color">
+                                                        <!-- Ví dụ sử dụng Thymeleaf để lặp qua danh sách màu -->
+                                                        <option th:each="color : ${colors}"
+                                                                th:text="${color.colorName}"
+                                                                th:value="${color.id}"
+                                                                th:data-color="${color.colorCode}">
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <!-- <div class="form-group">
+                                                 <label>Kích thước</label>
+                                                 <div class="select2-purple">
+                                                     <select class="select2 form-control" multiple="multiple"
+                                                             id="size">
+                                                         <option th:each="size :${sizes}" th:text="${size.sizeName}" th:value="${size.id}">
+                                                         </option>
+                                                     </select>
+                                                 </div>
+                                             </div>-->
+
                                           <!--  <div class="form-group">
                                                 <div class="thumbnail-preview-container mb-3">
                                                     <img src="" alt="" id="poster">
@@ -180,7 +226,28 @@
 
     <script th:inline="javascript">
         //Initialize Select2 Elements
-        $(".select2").select2();
+        $(document).ready(function() {
+            // Khởi tạo Select2
+            $('#color').select2({
+                templateResult: formatState,
+                templateSelection: formatState
+            });
+
+            function formatState(state) {
+                if (!state.id) {
+                    return state.text;
+                }
+                var color = $(state.element).data('color');
+                var $state = $(
+                    '<span class="color-name">' + state.text + '</span>'+
+                    '&ensp;<span class="color-label" style="background-color:' + color + '"></span>;'
+                );
+                return $state;
+            }
+        });
+
+
+
 
         // // Initialize editor
         // const easyMDE = new EasyMDE({
@@ -205,7 +272,7 @@
 
 
         //Create movie
-        let nameEl = document.getElementById("name")
+       /* let nameEl = document.getElementById("name")
         let trailerEl = document.getElementById("trailer")
         let descriptionEl = document.getElementById("description")
         let statusEl = document.getElementById("status")
@@ -290,7 +357,7 @@
             unhighlight: function (element, errorClass, validClass) {
                 $(element).removeClass('is-invalid');
             }
-        });
+        });*/
     </script>
 </th:block>
 </body>

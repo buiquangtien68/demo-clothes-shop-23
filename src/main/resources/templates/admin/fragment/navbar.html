@@ -21,16 +21,16 @@
             <a class="nav-link py-0 d-flex align-items-center" data-toggle="dropdown" href="#">
                 <div class="user-panel">
                     <div class="image">
-                        <img src="/admin-assets/dist/img/user2-160x160.jpg" class="img-circle border" alt="User Image">
+                        <img th:src="${#authentication.principal.user.avatar}" class="img-circle border" alt="User Image">
                     </div>
                 </div>
             </a>
 
             <div class="dropdown-menu dropdown-menu-sm dropdown-menu-right">
-                <a th:href="@{/static}" class="dropdown-item">
+                <a th:href="@{/}" class="dropdown-item">
                     <span class="text-muted">Trang chủ</span>
                 </a>
-                <a class="dropdown-item" onclick="logout()">
+                <a class="dropdown-item" th:href="@{/logout}">
                     <span class="text-muted">Đăng xuất</span>
                 </a>
             </div>

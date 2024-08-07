@@ -69,7 +69,7 @@
 													<a th:href="@{/admin/blogs/{id} (id=${blog.getId()})}" th:text="${blog.getTitle()}"></a>
 												</td>
 												<td th:text="${blog.getStatus() ? 'Công khai' : 'Nháp'}"></td>
-												<td th:text="${blog.getCreatedAt()}">06-07-2022</td>
+												<td th:text="${#temporals.format(blog.createdAt, 'dd/MM/yyyy HH:mm:ss')}">06-07-2022</td>
 											</tr>
 										</tbody>
 									</table>
@@ -97,7 +97,7 @@
 				"searching": true,
 				"ordering": true,
 				"info": true,
-				"autoWidth": false,
+				"autoWidth": true,
 				"responsive": true,
 			});
 		</script>
