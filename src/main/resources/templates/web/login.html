@@ -223,7 +223,7 @@
                         window.location.href = '/';
                     }, 1000);
                 } catch (e) {
-                    toastr.error("Email hoặc mật khẩu không đúng");
+                    toastr.error(e.response.data.message);
                 }
             });
         });

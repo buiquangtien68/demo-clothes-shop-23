@@ -7,6 +7,7 @@ import com.example.demo_clothes_shop_23.request.UseCouponRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,12 +22,20 @@ public class CouponService {
 
         // Kiểm tra xem coupon có tồn tại không
         if (coupon == null) {
-            throw new ResourceNotFoundException("Coupon not found");
+            throw new ResourceNotFoundException("Không tìm thấy coupon này");
         }
 
         // Kiểm tra xem coupon có còn số lượng không
         if (coupon.getQuantity() == 0) {
-            throw new RuntimeException("Coupon has no quantity");
+            throw new RuntimeException("Coupon đã dùng hết");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        if (coupon.getStartDate() != null && now.isBefore(coupon.getStartDate())) {
+            throw new RuntimeException("Coupon chưa đến thời gian sử dụng");
+        }
+        if (coupon.getEndDate() != null && now.isAfter(coupon.getEndDate())) {
+            throw new RuntimeException("Coupon đã hết hạn sử dụng");
         }
 
         // Nếu danh sách chưa được khởi tạo, khởi tạo nó
@@ -36,7 +45,7 @@ public class CouponService {
 
         // Kiểm tra xem người dùng đã sử dụng coupon chưa
         if (coupon.getListUserIdUsed() != null && coupon.getListUserIdUsed().contains(userId)) {
-            throw new RuntimeException("User already used coupon");
+            throw new RuntimeException("Người dùng đã sử dụng coupon này");
         }
 
         return coupon;

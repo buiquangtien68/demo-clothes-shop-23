@@ -38,7 +38,7 @@ public class CartService {
     //Sử dụng SecurityContextHolder để lấy user
     public Cart updateQuantityCart(UpdateQuantityCartRequest updateQuantityCartRequest) {
         //Kiểm tra xem product có tồn tại hay không
-        Cart cart = cartRepository.findById(updateQuantityCartRequest.getCartId()).orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
+        Cart cart = cartRepository.findById(updateQuantityCartRequest.getCartId()).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy giỏ hàng"));
 
         cart.setQuantity(updateQuantityCartRequest.getQuantity());
         cartRepository.save(cart);
@@ -46,7 +46,7 @@ public class CartService {
     }
 
     public void deleteCart(Integer id) {
-        Cart cart = cartRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
+        Cart cart = cartRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy giỏ hàng"));
         cartRepository.delete(cart);
     }
 
@@ -56,7 +56,7 @@ public class CartService {
         User user = (User) userDetails.getUser();
 
         //Kiểm tra xem product có tồn tại hay không
-        Product product = productRepository.findById(createCartRequest.getProductId()).orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+        Product product = productRepository.findById(createCartRequest.getProductId()).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
 
         List<Cart> cartList = cartRepository.findByUser_IdOrderByCreatedAt(user.getId());
         Optional<Cart> existingCartItem = cartList.stream()

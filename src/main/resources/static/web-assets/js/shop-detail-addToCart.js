@@ -67,7 +67,7 @@ const createCart= async ()=>{
         quantity: quantity
     }
     try {
-        let res =await axios.put("/api/cart",data)
+        let res =await axios.put("/api/carts",data)
         console.log(res)
         // Tạo hiệu ứng cho liên kết giỏ hàng
         const cartLink = document.getElementById('cart-link');
@@ -86,6 +86,7 @@ const createCart= async ()=>{
 
     }catch (e){
        console.log(e)
+        toastr.error(e.response.data.message);
     }
 }
 
@@ -96,8 +97,9 @@ const changeImage = async (colorId, productId) =>{
         console.log("Sự kiện đổi ảnh")
         console.log(changeImg.data)
         renderImages(changeImg.data)
-    } catch (error) {
-        console.log(error)
+    } catch (e) {
+        console.log(e)
+        toastr.error(e.response.data.message);
     }
 };
 

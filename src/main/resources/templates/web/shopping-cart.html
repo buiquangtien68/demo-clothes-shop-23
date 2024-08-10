@@ -185,7 +185,7 @@
                     };
 
                     try {
-                        await axios.post("/api/cart/update-quantity-cart", data);
+                        await axios.post("/api/carts/update-quantity-cart", data);
                     } catch (e) {
                         console.error('Update failed:', e);
                     }
@@ -232,7 +232,7 @@
                     console.log(cartId);
 
                     try {
-                        await axios.delete(`/api/cart/${cartId}`);
+                        await axios.delete(`/api/carts/${cartId}`);
                         $cartCloseBtn.closest('tr').remove();
                         updateTotalPrice(); // Cập nhật tổng giá và tổng tiền sau khi xóa sản phẩm
                         checkCartEmpty();

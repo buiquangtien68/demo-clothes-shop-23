@@ -12,6 +12,65 @@
         <!--Select2-->
         <link rel="stylesheet" href="/admin-assets/plugins/select2/css/select2.min.css" />
         <link rel="stylesheet" href="/admin-assets/dist/css/style.css">
+        <style>
+            /* Tùy chỉnh kích thước và kiểu dáng của các label màu */
+            .color-label {
+                height: 15px;
+                width: 15px;
+                border-radius: 50%;
+                position: relative;
+                margin-right: 10px;
+                display: inline-block;
+                vertical-align: middle; /* Căn giữa label với văn bản */
+            }
+
+            /* Tùy chỉnh tên màu sắc */
+            .color-name,.size-name {
+                vertical-align: middle;
+            }
+
+            /* Tùy chỉnh padding và khoảng cách của các tùy chọn trong danh sách */
+            .select2-results__option {
+                padding: 5px 10px;
+                display: flex; /* Để label màu và văn bản nằm trên cùng một hàng */
+                align-items: center;
+            }
+
+            /* Tùy chỉnh hiệu ứng khi chọn một tùy chọn */
+            .select2-results__option--highlighted {
+                background-color: #f0f0f0;
+            }
+
+            /* Tùy chỉnh kiểu dáng của các tùy chọn đã chọn */
+            .select2-selection__rendered {
+                display: flex;
+                align-items: center;
+                flex-wrap: wrap; /* Cho phép văn bản và các label màu nằm trên nhiều dòng */
+            }
+
+            /* Tùy chỉnh các tùy chọn đã chọn */
+            .select2-selection__choice {
+                margin: 2px;
+                padding: 4px 8px;
+                border-radius: 16px;
+                background-color: #e9ecef;
+                border: 1px solid #ccc;
+                display: flex;
+                align-items: center;
+                position: relative; /* Để có thể căn chỉnh dấu x */
+                overflow: hidden; /* Đảm bảo không có phần tử nào vượt ra ngoài */
+            }
+
+            /* Tùy chỉnh dấu x bỏ chọn */
+            .select2-selection__choice__remove {
+                cursor: pointer;
+                position: absolute; /* Đặt dấu x ở vị trí tương đối với phần tử chứa */
+                right: 2px; /* Khoảng cách từ bên phải */
+                top: 50%;
+                transform: translateY(-50%);
+                font-size: 14px;
+            }
+        </style>
     </th:block>
 </head>
 
@@ -29,9 +88,10 @@
                                 <a href="#">Dashboard</a>
                             </li>
                             <li class="breadcrumb-item">
-                                <a href="#">Sản phẩm</a>
+                                <a th:href="@{/admin/products}">Danh sách sản phẩm</a>
                             </li>
-                            <li class="breadcrumb-item active" th:text="${product.getName()}">
+                            <li class="breadcrumb-item active">
+                                Tạo sản phẩm
                             </li>
                         </ol>
                     </div>
@@ -42,20 +102,15 @@
         <!-- Main content -->
         <section class="content">
             <div class="container-fluid">
+
                 <div class="row py-2">
                     <div class="col-6">
-                        <button type="button" class="btn btn-default">
-                            <i class="fas fa-chevron-left"></i> Quay lại
-                        </button>
-                        <button type="button" class="btn btn-info px-4" id="btnUpdateproduct">
-                            Lưu
+                        <button type="button" class="btn btn-info px-4" id="btnCreateProduct">
+                            Cập nhật
                         </button>
                     </div>
-                    <div class="col-6 d-flex justify-content-end">
-                        <button type="button" class="btn btn-danger px-4" id="btnDeleteproduct">
-                            Xóa
-                        </button>
-                    </div>
+
+
                 </div>
 
                 <div class="row">
@@ -67,57 +122,16 @@
                                         <div class="col-md-8">
                                             <div class="form-group">
                                                 <label>Tên sản phẩm</label>
-                                                <input type="text" class="form-control" id="name" name="name" th:value="${product.getName()}"/>
+                                                <input type="text" class="form-control" id="name" name="name"/>
                                             </div>
-
-                                            <div class="form-group">
-                                                <label>Giá tiền</label>
-                                                <input type="text" class="form-control" id="price" name="price" th:value="${product.newPrice}"/>
-                                            </div>
-
                                             <div class="form-group">
                                                 <label>Mô tả ngắn</label>
-                                                <textarea id="description" class="form-control" rows="3" name="description" th:text="${product.getDescription()}"></textarea>
+                                                <textarea id="description" class="form-control" rows="3" name="description"></textarea>
                                             </div>
-                                            <div class="form-group">
-                                                <label>Thể loại</label>
-                                                <div class="select2-purple">
-                                                    <select class="select2 form-control" multiple="multiple"
-                                                            id="genre">
-                                                        <option th:each="genre :${genres}" th:text="${genre.name}" th:value="${genre.id}">
-                                                        </option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Đạo diễn</label>
-                                                <div class="select2-purple">
-                                                    <select class="select2 form-control" multiple="multiple"
-                                                            id="director">
-                                                        <option th:each="director :${directors}" th:text="${director.name}" th:value="${director.id}">
-                                                        </option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Diễn viên</label>
-                                                <div class="select2-purple">
-                                                    <select class="select2 form-control" multiple="multiple"
-                                                            id="actor">
-                                                        <option th:each="actor :${actors}" th:text="${actor.name}" th:value="${actor.id}">
-                                                        </option>
-                                                    </select>
-                                                </div>
-                                            </div>
-
-
-
-                                        </div>
-
-                                        <div class="col-md-4">
                                             <div class="form-group">
                                                 <label>Trạng thái</label>
                                                 <select id="status" class="form-control" th:value="${product.getStatus()? '1':'0'}">
+                                                    <option value="" >Chọn trạng thái</option>
                                                     <option value="0" th:selected="${!product.getStatus()}">
                                                         Ẩn
                                                     </option>
@@ -127,33 +141,72 @@
                                                 </select>
                                             </div>
                                             <div class="form-group">
-                                                <label>Release Year</label>
-                                                <input type="text" class="form-control" id="releaseYear" name="releaseYear" th:value="${product.getReleaseYear()}"/>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Thể loại phim</label>
-                                                <select id="productType" class="form-control" th:value="${product.getType()}">
-                                                    <option th:each="type : ${productType}" th:value="${type}" th:text="${type}" th:selected="${type==product.getType()}" >
-                                                    </option>
-                                                </select>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Quốc gia</label>
-                                                <select id="country" class="form-control" th:value="${product.getCountry().getId()}">
-                                                    <option th:each="country : ${countries}" th:value="${country.id}" th:text="${country.name}" th:selected="${country.id == product.country.id}">
-                                                    </option>
-                                                </select>
-                                            </div>
-                                            <div class="form-group">
-                                                <div class="thumbnail-preview-container mb-3">
-                                                    <img src="" alt="" id="poster">
-                                                </div>
-                                                <label for="input-poster" class="btn btn-info btn-flat" data-toggle="modal" data-target="#modal-xl">
-                                                    Chọn hình ảnh
-                                                </label>
-                                                <input type="file" id="input-poster" class="d-none">
+                                                <label>Giá tiền</label>
+                                                <input type="number" class="form-control" id="price" name="price"/>
                                             </div>
                                         </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Danh mục cha</label>
+                                                <select id="categoryParent" class="form-control">
+                                                    <option value="">Chọn danh mục cha</option>
+                                                    <option th:each="categoryParent : ${categoryParents}"
+                                                            th:value="${categoryParent.id}"
+                                                            th:text="${categoryParent.name}">
+                                                    </option>
+                                                </select>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Danh mục con</label>
+                                                <select id="categoryChild" class="form-control" disabled>
+                                                    <option value="">Chọn danh mục con</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Màu sắc</label>
+                                                <div class="select2-purple">
+                                                    <select class="select2 form-control" multiple="multiple" id="color">
+                                                        <!-- Ví dụ sử dụng Thymeleaf để lặp qua danh sách màu -->
+                                                        <option th:each="color : ${colors}"
+                                                                th:text="${color.colorName}"
+                                                                th:value="${color.id}"
+                                                                th:data-color="${color.colorCode}">
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Kiểu kích thước</label>
+                                                <select id="sizeType" class="form-control">
+                                                    <option value="" >Chọn kiểu kích thước</option>
+                                                    <option th:each="sizetype : ${sizeTypes}" th:value="${sizetype}" th:text="${sizetype.getName()}" >
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Kích thước</label>
+                                                <div class="select2-purple">
+                                                    <select class="select2 form-control" multiple="multiple" id="size" disabled>
+                                                        <option></option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+
+                                            <!--  <div class="form-group">
+                                                  <div class="thumbnail-preview-container mb-3">
+                                                      <img src="" alt="" id="poster">
+                                                  </div>
+                                                  <label for="input-poster" class="btn btn-info btn-flat" data-toggle="modal" data-target="#modal-xl">
+                                                      Chọn hình ảnh
+                                                  </label>
+                                                  <input type="file" id="input-poster" class="d-none">
+                                              </div>-->
+                                        </div>
+
+
                                     </div>
                                 </div>
                             </div>
@@ -162,95 +215,17 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-12">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h4>Danh sách tập phim</h4>
-                                    <button type="button" class="btn btn-info px-4 m-2" id="btnCreateEpisodeModal" data-bs-toggle="modal" data-bs-target="#modal-create-ep">
-                                        Tạo tập phim
-                                    </button>
-                                    <table class="table table-bordered table-hover" id="table-episode">
-                                        <thead >
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Tên tập phim</th>
-                                            <th>Video URL</th>
-                                            <th>Thời lượng</th>
-                                            <th>Ngày tạo</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody id="episodeList">
-                                            <tr th:each="episode : ${episodes}">
-                                                <td th:text="${episode.orders}"></td>
-                                                <td th:text="${episode.name}"></td>
-                                                <td th:text="${episode.videoURL}"></td>
-                                                <td th:text="${episode.duration}"></td>
-                                                <td th:text="${#temporals.format(episode.createdAt,'dd/MM/yyyy')}"></td>
-                                                <td>
-                                                    <button th:onclick="'uploadVideo('+${episode.id}+')'" class="btn btn-sm btn-warning text-white">
-                                                        <i class="fas fa-upload"></i>
-                                                    </button>
-                                                    <input type="file" th:id="'input-video-'+${episode.id}" class="d-none">
-                                                    <button class="btn btn-sm btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#modal-trailer" th:onclick="'previewVideo('+${episode.id}+')'">
-                                                        <i class="fas fa-play"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-success" th:onclick="'openUpdateModal('+${episode.id}+')'">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-danger" th:onclick="'deleteEp('+${episode.id}+')'">
-                                                        <i class="fas fa-trash-alt"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    <div class="modal fade " id="modal-trailer">
-                                        <div class="modal-dialog modal-xl">
-                                            <div class="modal-content">
-                                                <div class="modal-body">
-                                                    <video width="100%" controls id="video">
-                                                        <source id="source" src="" type="video/mp4">
-                                                    </video>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="modal fade" id="modal-create-ep">
-                                        <div class="modal-dialog modal-lg">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h4 class="modal-title" id="modal-title-create">Tạo tập phim</h4>
-                                                    <button type="button" class="close btn-close" data-bs-dismiss="modal" aria-label="Close">
-                                                        <span aria-hidden="true">×</span>
-                                                    </button>
-                                                </div>
-                                                <form id="episodeForm">
-                                                    <div class="modal-body">
-                                                        <div class="form-group">
-                                                            <label>Tên tập phim</label>
-                                                            <input type="text" class="form-control" id="nameEpisode" name="nameEpisode"/>
-                                                        </div>
-
-                                                        <div class="form-group">
-                                                            <label>Thứ tự tập phim</label>
-                                                            <input type="text" class="form-control" id="ordersEpisode" name="ordersEpisode"/>
-                                                        </div>
-                                                    </div>
-                                                    <div class="modal-footer justify-content-between">
-                                                        <button type="submit" class="btn btn-primary" id="btnCreateEpisode">Tạo</button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row quantity-table"></div>
                             </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
     </div>
-
 </div>
 
 
@@ -266,36 +241,184 @@
     <script src="/admin-assets/plugins/select2/js/select2.full.min.js"></script>
 
     <script th:inline="javascript">
-        //Initialize Select2 Elements
-        $(".select2").select2();
+        //Sản phẩm hiện taại
+        let currentProduct = [[${product}]]
+        let stockMap = [[${stockMap}]]
 
-        let currentproduct = [[${product}]]
-        console.log(currentproduct)
+        // Chọn màu
+        $('#color').select2({
+            templateResult: formatStateColor,
+            templateSelection: formatStateColor,
+            placeholder: "Chọn màu sắc"
+        });
 
-        let genreList = currentproduct.genres;
-        genreList=genreList.map(genre => genre.id.toString())
-        $('#genre').val(genreList);
-        $('#genre').trigger('change');
+        function formatStateColor(state) {
+            if (!state.id) {
+                return state.text;
+            }
+            var color = $(state.element).data('color');
+            var $state = $(
+                '<span class="color-name">' + state.text + '</span>'+
+                '&ensp;<span class="color-label" style="background-color:' + color + '"></span>;'
+            );
+            return $state;
+        }
+        //Chọn Size
+        let sizeEl = document.getElementById("size");
 
-        let directorList = currentproduct.directors;
-        directorList=directorList.map(director => director.id.toString())
-        $('#director').val(directorList);
-        $('#director').trigger('change');
+        function formatStateSize(state) {
+            if (!state.id) {
+                return state.text;
+            }
+            var $state = $(
+                '<span class="size-name">' + state.text + '&ensp;' + '</span>'
+            );
+            return $state;
+        }
 
-        let actorList = currentproduct.actors;
-        actorList=actorList.map(actor => actor.id.toString())
-        $('#actor').val(actorList);
-        $('#actor').trigger('change');
+        $(sizeEl).select2({
+            placeholder: "Chọn kích thước",
+            templateResult: formatStateSize,
+            templateSelection: formatStateSize,
+        });
 
-        // // Initialize editor
-        // const easyMDE = new EasyMDE({
-        //     element: document.getElementById("content"),
-        //     spellChecker: false,
-        //     maxHeight: "500px",
-        //     renderingConfig: {
-        //         codeSyntaxHighlighting: true,
-        //     },
-        // });
+        $('#sizeType').change(async function() {
+            let selectedValue = $(this).val();
+            $(sizeEl).val(null).trigger('change');
+            if (selectedValue) {
+                try {
+                    updateQuantityTable()
+                    let res = await axios.get(`/api/admin/sizes/sizeType/${selectedValue}`);
+                    let sizes = res.data;
+                    $(sizeEl).val()
+                    $(sizeEl).empty().append(new Option('Chọn kích thước', ''));
+
+
+                    $(sizeEl).append(new Option('Chọn kích thước', ''));
+                    sizes.forEach(size => {
+                        $(sizeEl).append(new Option(size.sizeName, size.id)); // Adjust `size.name` and `size.id` based on your data structure
+                    });
+                    sizeEl.disabled = false;
+                    let sizeList = currentProduct.sizes;
+                    sizeList=sizeList.map(size => size.id.toString())
+                    $(sizeEl).val(sizeList);
+                    $(sizeEl).trigger('change');
+                    $(sizeEl).select2({
+                        placeholder: "Chọn kích thước",
+                        autoWidth: true,
+                        templateResult: formatStateSize,
+                        templateSelection: formatStateSize,
+                    });
+                    $(this).prop('disabled', true); // Vô hiệu hóa sizeType
+                } catch (error) {
+                    console.error('Error fetching sizes:', error);
+                }
+            } else {
+                updateQuantityTable()
+                $(sizeEl).empty().append(new Option('Chọn kích thước', '')).prop('disabled', true);
+            }
+        });
+
+
+        //Chọn category
+        let categoryChildEl = document.getElementById("categoryChild");
+        $('#categoryParent').on('change', async function() {
+            let categoryParentId = $(this).val();
+            if (categoryParentId) {
+                if (categoryParentId==3){
+                    $('#sizeType').val('SHOES_SIZE').trigger('change');
+                }else {
+                    $('#sizeType').val('CLOTHES_SIZE').trigger('change');
+                }
+                try {
+                    let res = await axios.get(`/api/admin/categories/categoryParent/${categoryParentId}`);
+                    let categoryChild = res.data;
+                    $(categoryChildEl).empty();
+                    $(categoryChildEl).append(new Option('Chọn danh mục con', ''));
+
+
+                    categoryChild.forEach(c => {
+                        $(categoryChildEl).append(new Option(c.name, c.id));
+                    });
+                    if (categoryParentId==currentProduct.category.parentId){
+                        $(categoryChildEl).prop('disabled', false);
+                        $(categoryChildEl).val(currentProduct.category.id)
+                        $(categoryChildEl).trigger('change');
+                    }
+
+                } catch (e) {
+                    console.error('Error fetching category children:', e);
+                }
+            } else {
+                $(categoryChildEl).empty().append(new Option('Chọn danh mục con', '')).prop('disabled', true);
+            }
+        });
+
+
+        let quantityData = {};
+
+        // Cập nhật bảng số lượng
+        function updateQuantityTable() {
+            let selectedColors = $('#color').val() || [];
+            let selectedSizes = $('#size').val() || [];
+            console.log(selectedSizes);
+
+            // Xóa nội dung cũ
+            let tableHtml = '<table class="table table-bordered"><thead><tr><th>Màu sắc</th><th>Kích thước</th><th>Số lượng</th></tr></thead><tbody>';
+
+            selectedColors.forEach(color => {
+                let colorText = $('#color option:selected').filter(`[value="${color}"]`).text();
+
+                selectedSizes.forEach(size => {
+                    if (size !== "") {
+                        let sizeText = $('#size option:selected').filter(`[value="${size}"]`).text();
+                        let key = `${color}-${size}`;
+                        let quantityValue = stockMap[key] || '0'; // Lấy giá trị đã lưu hoặc để trống nếu không có
+
+                        tableHtml += `<tr><td>${colorText}</td><td>${sizeText}</td><td><input type="number" class="form-control" name="quantity" value="${quantityValue}" data-key="${key}" /></td></tr>`;
+                    }
+                });
+            });
+
+            tableHtml += '</tbody></table>';
+            $('.quantity-table').html(tableHtml);
+        }
+
+        // Lưu giá trị khi người dùng thay đổi số lượng
+        function saveQuantityValue() {
+            $('.quantity-table').on('input', 'input[name="quantity"]', function() {
+                let key = $(this).data('key');
+                quantityData[key] = $(this).val();
+            });
+        }
+
+        $('#color').on('change', function() {
+            updateQuantityTable();
+            saveQuantityValue();
+        });
+        $('#size').on('change', function() {
+            updateQuantityTable();
+            saveQuantityValue();
+        });
+
+        saveQuantityValue();
+
+        //Đền thông tin sẵn có của sản phẩm
+        let colorList = currentProduct.colors;
+        colorList=colorList.map(color => color.id.toString())
+        $('#color').val(colorList);
+        $('#color').trigger('change');
+
+        $('#categoryParent').val(currentProduct.category.parentId);
+        $('#categoryParent').trigger('change');
+
+        $('#name').val(currentProduct.name)
+        $('#description').val(currentProduct.description)
+        $('#price').val(currentProduct.price)
+
+
+
+
 
 
         // // Summernote
@@ -308,7 +431,7 @@
         // });
 
         //Update product
-        let nameEl = document.getElementById("name")
+       /* let nameEl = document.getElementById("name")
         let trailerEl = document.getElementById("trailer")
         let descriptionEl = document.getElementById("description")
         let statusEl = document.getElementById("status")
@@ -671,7 +794,7 @@
                 console.log("sự kiện phát preview")
             }
         }
-
+*/
     </script>
 </th:block>
 

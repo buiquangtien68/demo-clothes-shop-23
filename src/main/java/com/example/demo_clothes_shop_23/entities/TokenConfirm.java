@@ -1,10 +1,11 @@
 package com.example.demo_clothes_shop_23.entities;
-import com.example.demo_clothes_shop_23.model.enums.SizeType;
+
+import com.example.demo_clothes_shop_23.model.enums.TokenType;
 import jakarta.persistence.*;
 import lombok.*;
 
-
 import java.time.LocalDateTime;
+
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -12,15 +13,19 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 @Entity
-@Table(name = "sizes")
-public class Size {
+@Table(name = "token_confirm")
+public class TokenConfirm {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
-    String sizeName;
-    Integer orders;
+    String token;
     @Enumerated(EnumType.ORDINAL)
-    SizeType type;
+    TokenType type;
+    LocalDateTime expiresAt;
+    LocalDateTime confirmedAt;
     LocalDateTime createdAt;
-    LocalDateTime updatedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    User user;
 }

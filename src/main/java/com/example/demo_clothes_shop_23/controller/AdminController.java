@@ -1,6 +1,7 @@
 package com.example.demo_clothes_shop_23.controller;
 
 import com.example.demo_clothes_shop_23.entities.*;
+import com.example.demo_clothes_shop_23.model.enums.SizeType;
 import com.example.demo_clothes_shop_23.service.*;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class AdminController {
     private final SizeService sizeService;
     private final ColorService colorService;
     private final CategoryService categoryService;
+    private final QuantityService quantityService;
 
     //dashboard
     @GetMapping("/dashboard")
@@ -80,22 +82,36 @@ public class AdminController {
     @GetMapping("/products/{id}")
     public String getDetailPage(@PathVariable int id, Model model) {
         model.addAttribute("product",productService.getById(id));
-        return "admin/product/product-detail";
-    }
-
-    @GetMapping("/products/create")
-    public String getCreatePage(Model model) {
-        //Sắp xếp size
-        Set<Size> sizes = sizeService.getAll();
-        Set<Size> sortedSizes = new TreeSet<>(Comparator.comparingInt(Size::getOrders));
-        sortedSizes.addAll(sizes);
 
         //Sắp xếp màu
         Set<Color> colors = colorService.getAll();
         Set<Color> sortedColor = new TreeSet<>(Comparator.comparingInt(Color::getId));
         sortedColor.addAll(colors);
 
-        model.addAttribute("sizes",sortedSizes);
+        List<Quantity> quantities = quantityService.getByProductId(id);
+        Map<String, Integer> stockMap = quantities.stream()
+            .filter(q -> q.getValue() > 0)
+            .collect(Collectors.toMap(
+                q -> q.getColor().getId() + "-" + q.getSize().getId(),
+                Quantity::getValue
+            ));
+
+        model.addAttribute("stockMap", stockMap);
+        model.addAttribute("sizeTypes", SizeType.values());
+        model.addAttribute("colors",sortedColor);
+        model.addAttribute("categoryParents",categoryService.getCategoriesWithNullParentId());
+
+        return "admin/product/product-detail";
+    }
+
+    @GetMapping("/products/create")
+    public String getCreatePage(Model model) {
+        //Sắp xếp màu
+        Set<Color> colors = colorService.getAll();
+        Set<Color> sortedColor = new TreeSet<>(Comparator.comparingInt(Color::getId));
+        sortedColor.addAll(colors);
+
+        model.addAttribute("sizeTypes", SizeType.values());
         model.addAttribute("colors",sortedColor);
         model.addAttribute("categoryParents",categoryService.getCategoriesWithNullParentId());
 

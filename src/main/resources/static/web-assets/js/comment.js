@@ -11,34 +11,32 @@ const commentSizeEl = document.getElementById("comments-size")
 const renderComment = (comments) => {
     let html = "";
     comments.forEach((comment) => {
-        // Kiểm tra xem đánh giá này có phải của người dùng hiện tại không
         const isCurrentUser = userId !== null && userId === comment.user.id;
         html += `
-                    <div class="comment-info bg-light-subtle rounded-5 p-3 mt-3" style="background-color: #f3f2ee">
-                        <div class="d-flex align-items-center">
-                            <img src="${comment.user.avatar}" alt="Avatar" class="rounded-circle" style="width: 50px; height: 50px;">
-                            <div class="mt-2 ml-2">
-                                <h5 class="ml-1 mt-1">${comment.user.name}</h5>
-                            </div>
-                            <div class="ml-auto">
-                                <p class="pt-2 ms-2 text-body-tertiary">${formatDate(comment.createdAt)}</></p>
-                            </div>
-                        </div>
-                        <div class="comment-content ps-1 pt-2">
-                            <p>${comment.content}</p>
-                        </div>
-                        ${isCurrentUser ? `
-                            <div class="mt-2">
-                                <button onclick="openEditModal(${comment.id})" style="border: none">Sửa</button>
-                                <button onclick="deleteCmt(${comment.id})" style="border: none">Xóa</button>
-                            </div>
-                        ` : ''}
-                        <hr>
+            <div class="comment-info bg-light-subtle rounded-5 p-3 mt-3" style="background-color: #f3f2ee">
+                <div class="d-flex align-items-center">
+                    <img src="${comment.user.avatar}" alt="Avatar" class="rounded-circle" style="width: 50px; height: 50px;">
+                    <div class="mt-2 ml-2">
+                        <h5 class="ml-1 mt-1">${comment.user.name}</h5>
                     </div>
-                `;
+                    <div class="ml-auto">
+                        <p class="pt-2 ms-2 text-body-tertiary">${formatDate(comment.createdAt)}</p>
+                    </div>
+                </div>
+                <div class="comment-content ps-1 pt-2">
+                    <p>${comment.content}</p>
+                </div>
+                ${isCurrentUser ? `
+                    <div class="mt-2">
+                        <button onclick="openEditModal(${comment.id})" style="border: none">Sửa</button>
+                        <button onclick="deleteCmt(${comment.id})" style="border: none">Xóa</button>
+                    </div>
+                ` : ''}
+                <hr>
+            </div>
+        `;
     });
-    commentSizeEl.innerText = `${comments.size} Comments`;
-    // Đặt nội dung HTML vào phần tử hiển thị
+    commentSizeEl.innerText = `${comments.length} Comments`;
     commentListEl.innerHTML = html;
 }
 
@@ -96,7 +94,7 @@ const postCmt =async (data) => {
 
 
     } catch (e) {
-        toastr.error("Lỗi: "+error)
+        toastr.error("Lỗi: "+e)
     }
 }
 
@@ -113,21 +111,25 @@ const deleteCmt =async (id)=>{
             // Dong modal
             myModalCommentEl.hide();
             toastr.success("Xóa thành công bình luận")
-        } catch (error) {
-            toastr.error("Lỗi: "+error)
+        } catch (e) {
+            toastr.error(e.response.data.message)
         }
     }
 }
 const modalCommentTitleEl = document.querySelector(".modal-title")
 const btnCreateCommentEl = document.getElementById("btn-create-comment")
 
-const openEditModal= (id)=>{
-    myModalCommentEl.show();
-    commentContentEl.value = comments.find(comment => comment.id === id).content;
-    modalCommentTitleEl.innerText="Sửa bình luận"
-    btnCreateCommentEl.innerText="Sửa";
-    idCommentEdit=id;
-
+const openEditModal = (id) => {
+    const commentToEdit = comments.find(comment => comment.id === id);
+    if (commentToEdit) {
+        myModalCommentEl.show();
+        commentContentEl.value = commentToEdit.content;
+        modalCommentTitleEl.innerText = "Sửa bình luận";
+        btnCreateCommentEl.innerText = "Sửa";
+        idCommentEdit = id;
+    } else {
+        console.error("Comment with id " + id + " not found.");
+    }
 }
 const updateCmt=async (data) =>{
     try {
@@ -144,7 +146,7 @@ const updateCmt=async (data) =>{
         myModalCommentEl.hide();
         toastr.success("Cập nhật thành công")
     } catch (e) {
-        toastr.error("Lỗi: "+error)
+        toastr.error(e.response.data.message)
     }
 }
 $('#form-comment').validate({

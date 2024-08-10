@@ -1,11 +1,15 @@
 package com.example.demo_clothes_shop_23.service;
 
 import com.example.demo_clothes_shop_23.entities.Address;
+import com.example.demo_clothes_shop_23.entities.TokenConfirm;
 import com.example.demo_clothes_shop_23.entities.User;
 import com.example.demo_clothes_shop_23.exception.BadRequestException;
 import com.example.demo_clothes_shop_23.exception.ResourceNotFoundException;
+import com.example.demo_clothes_shop_23.model.enums.TokenType;
 import com.example.demo_clothes_shop_23.model.enums.UserRole;
+import com.example.demo_clothes_shop_23.model.response.VerifyResponse;
 import com.example.demo_clothes_shop_23.repository.AddressRepository;
+import com.example.demo_clothes_shop_23.repository.TokenConfirmRepository;
 import com.example.demo_clothes_shop_23.repository.UserRepository;
 import com.example.demo_clothes_shop_23.request.LoginRequest;
 import com.example.demo_clothes_shop_23.request.RegisterRequest;
@@ -26,6 +30,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +41,8 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final HttpSession httpSession;
     private final AuthenticationManager authenticationManager;
+    private final TokenConfirmRepository tokenConfirmRepository;
+    private final MailService mailService;
 
     public void login(LoginRequest loginRequest) {
         UsernamePasswordAuthenticationToken token =
@@ -46,7 +54,7 @@ public class AuthService {
         }catch (DisabledException e) {
             throw new BadRequestException("Tài khoản chưa được kích hoạt");
         }catch (AuthenticationException e) {
-            throw new BadRequestException("Email or password is incorrect");
+            throw new BadRequestException("Email hoặc mật khẩu không đúng");
         }
     }
 
@@ -54,18 +62,16 @@ public class AuthService {
         httpSession.setAttribute("user", null);
     }
 
-    public User createUser(RegisterRequest registerRequest) {
+    public void register(RegisterRequest registerRequest) {
         //Cần kiểm tra user đã tồn tại hay chưa
         if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()){
-            throw new BadRequestException("Email is already in use");
-        }
-        //kiểm tra đã điền mật khẩu chưa
-        if (registerRequest.getPassword() == null){
-            throw new BadRequestException("Password is required");
+            throw new BadRequestException("Email đã sử dụng rồi");
         }
         if (!registerRequest.getConfirmPassword().equals(registerRequest.getPassword())){
-            throw new BadRequestException("Passwords do not match");
+            throw new BadRequestException("Mật khẩu xác nhận không trùng khớp");
         }
+
+
 
         //Lưu password vào database cần mã hóa password
         User user = User.builder()
@@ -76,6 +82,7 @@ public class AuthService {
             .createdAt(LocalDateTime.now())
             .updatedAt(LocalDateTime.now())
             .role(UserRole.USER)
+            .enabled(false)
             .build();
         userRepository.save(user);
 
@@ -93,7 +100,21 @@ public class AuthService {
             .build();
         addressRepository.save(address);
 
-        return user;
+        //Tạo token xác thực đăng kí
+        TokenConfirm token = TokenConfirm.builder()
+            .token(UUID.randomUUID().toString())
+            .user(user)
+            .type(TokenType.REGISTRATION)
+            .createdAt(LocalDateTime.now())
+            .expiresAt(LocalDateTime.now().plusMinutes(30))
+            .build();
+        tokenConfirmRepository.save(token);
+
+        //Tạo link xác thực đăng kí
+        String link = "http://localhost:8080/verifyAccount?token=" + token.getToken();
+
+        //Gửi mail xác thực
+        mailService.sendMail2(user, "Xác thực tài khoản", link);
     }
 
     public User updateInfo(UpdateInfoUserRequest updateInfoUserRequest) {
@@ -101,7 +122,7 @@ public class AuthService {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         User user = (User) userDetails.getUser();
         if (!Objects.equals(user.getId(), updateInfoUserRequest.getUserId())){
-            throw new ResourceNotFoundException("User not found");
+            throw new ResourceNotFoundException("Không tìm thấy người dùng này");
         }
 
         user.setName(updateInfoUserRequest.getName());
@@ -116,14 +137,14 @@ public class AuthService {
         User user = (User) userDetails.getUser();
 
         if (!Objects.equals(user.getId(), id)){
-            throw new ResourceNotFoundException("User not found");
+            throw new ResourceNotFoundException("Không tìm thấy người dùng này");
         }
 
         if (!passwordEncoder.matches(updatePasswordRequest.getOldPassword(), user.getPassword())) {
             throw new BadRequestException("Mật khẩu cũ sai");
         }
         if (!updatePasswordRequest.getNewPassword().equals(updatePasswordRequest.getConfirmPassword())){
-            throw new BadRequestException("Mật khẩu mới và mật khẩu confirm khác nhau");
+            throw new BadRequestException("Mật khẩu mới và mật khẩu khác khác nhau");
         }
 
         if (updatePasswordRequest.getNewPassword().equals(updatePasswordRequest.getOldPassword())){
@@ -132,5 +153,46 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(updatePasswordRequest.getNewPassword()));
         userRepository.save(user);
         return user;
+    }
+
+    public VerifyResponse confirmRegistration(String token) {
+        Optional<TokenConfirm> tokenConfirmOptional = tokenConfirmRepository
+            .findByTokenAndType(token,TokenType.REGISTRATION);
+
+        if (tokenConfirmOptional.isEmpty()){
+            return VerifyResponse.builder()
+                .success(false)
+                .message("Mã không hợp lệ")
+                .build();
+        }
+
+        TokenConfirm tokenConfirm = tokenConfirmOptional.get();
+        //Token đã được xác thực trc dây
+        if (tokenConfirm.getConfirmedAt()!=null){
+            return VerifyResponse.builder()
+                .success(false)
+                .message("Mã đã được xác thực")
+                .build();
+        }
+
+        if (tokenConfirm.getExpiresAt().isBefore(LocalDateTime.now())){
+            return VerifyResponse.builder()
+                .success(false)
+                .message("Mã đã hết hạn ")
+                .build();
+        }
+
+        User user = tokenConfirm.getUser();
+        user.setEnabled(true);
+        userRepository.save(user);
+
+        tokenConfirm.setConfirmedAt(LocalDateTime.now());
+        tokenConfirmRepository.save(tokenConfirm);
+
+        return VerifyResponse.builder()
+            .success(true)
+            .message("Xác thực tài khoản thành công")
+            .build();
+
     }
 }

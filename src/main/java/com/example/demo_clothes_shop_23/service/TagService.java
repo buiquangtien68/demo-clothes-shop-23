@@ -39,7 +39,7 @@ public class TagService {
 
     public Tag updateTag(UpsertTagRequest upsertTagRequest, Integer tagId) {
         Tag tag = tagRepository.findById(tagId).orElseThrow(
-            () -> new ResourceNotFoundException("Tag not found")
+            () -> new ResourceNotFoundException("Không tìm thấy tag này")
         );
         tag.setName(upsertTagRequest.getName());
         tag.setUpdatedAt(LocalDateTime.now());
@@ -48,7 +48,7 @@ public class TagService {
 
     public Tag deleteTag(Integer tagId) {
         Tag tag = tagRepository.findById(tagId).orElseThrow(
-            () -> new ResourceNotFoundException("Tag not found")
+            () -> new ResourceNotFoundException("Không tìm thấy tag này")
         );
         tagRepository.delete(tag);
         return tag;

@@ -23,7 +23,12 @@ public class CommentService {
     private final BlogRepository blogRepository;
 
     public List<Comment> getByBlog_IdOrderByCreatedAtDesc(Integer blogId) {
-        return commentRepository.findByBlog_IdOrderByCreatedAtDesc(blogId);
+        try {
+            return commentRepository.findByBlog_IdOrderByCreatedAtDesc(blogId);
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new ResourceNotFoundException(e.getMessage());
+        }
     }
 
     //Sử dụng SecurityContextHolder để lấy user
@@ -33,7 +38,7 @@ public class CommentService {
         User user = (User) userDetails.getUser();
 
         //Kiểm tra xem blog có tồn tại hay không
-        Blog blog = blogRepository.findById(commentRequest.getBlogId()).orElseThrow(() -> new ResourceNotFoundException("Blog not found"));
+        Blog blog = blogRepository.findById(commentRequest.getBlogId()).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài viết"));
 
         //Tạo review
         Comment comment = Comment.builder()
@@ -50,7 +55,7 @@ public class CommentService {
     //Sử dụng SecurityContextHolder để lấy user
     public Comment updateComment(UpsertCommentRequest commentRequest, Integer id) {
         //Kiểm tra comment xem tồn tại ko
-        Comment comment = commentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Comment not found"));
+        Comment comment = commentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bình luận"));
 
         //Kiểm tra user này có tồn tại hay ko
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -58,16 +63,15 @@ public class CommentService {
         User user = (User) userDetails.getUser();
 
         //Kiểm tra xem blog có tồn tại hay không
-        Blog blog = blogRepository.findById(commentRequest.getBlogId()).orElseThrow(() -> new ResourceNotFoundException("Blog not found"));
+        Blog blog = blogRepository.findById(commentRequest.getBlogId()).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài viết"));
 
         //Kiểm tra xem comment này có của user này ko
         if (!comment.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("User not authorized to update comment");
+            throw new RuntimeException("Người dùng không sở hữu bình luận này");
         }
 
-        //Kểm tra xem review này có thuộc movie hay k
         if (!comment.getBlog().getId().equals(blog.getId())) {
-            throw new RuntimeException("Not comment's blog");
+            throw new RuntimeException("Không phải bình luận của bài viết này");
         }
 
         comment.setContent(commentRequest.getContent());
@@ -91,7 +95,7 @@ public class CommentService {
 
         //Kiểm tra xem review này có của user này ko
         if (!comment.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("User not authorized to update comment");
+            throw new RuntimeException("Người dùng không sở hữu bình luận này");
         }
 
         commentRepository.delete(comment);

@@ -54,7 +54,7 @@ public class FavoriteService {
         User user = (User) userDetails.getUser();
 
         //Kiểm tra xem product có tồn tại hay không
-        Product product = productRepository.findById(favoriteRequest.getProductId()).orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+        Product product = productRepository.findById(favoriteRequest.getProductId()).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm này"));
 
         //Tạo review
         Favorite favorite = Favorite.builder()
@@ -73,11 +73,11 @@ public class FavoriteService {
         User user = (User) userDetails.getUser();
 
         //Kiểm tra review xem tồn tại ko
-        Favorite favorite = favoriteRepository.findByProduct_IdAndUser_Id(productId,user.getId()).orElseThrow(() -> new ResourceNotFoundException("Favorite not found"));
+        Favorite favorite = favoriteRepository.findByProduct_IdAndUser_Id(productId,user.getId()).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm yêu thích này"));
 
         //Kiểm tra xem review này có của user này ko
         if (!favorite.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("User not authorized to update favorite");
+            throw new RuntimeException("Người dùng không sở hữu sản phẩm yêu thích này");
         }
 
         favoriteRepository.delete(favorite);

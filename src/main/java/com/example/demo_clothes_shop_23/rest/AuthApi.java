@@ -19,21 +19,21 @@ public class AuthApi {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> createUser(@Valid @RequestBody RegisterRequest registerRequest) {
-        User user = authService.createUser(registerRequest);
-        return new ResponseEntity<>(user, HttpStatus.CREATED); //201
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
+        authService.register(registerRequest);
+        return ResponseEntity.ok("Đăng ký thành công!");//201
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
         authService.login(loginRequest);
-        return ResponseEntity.ok("Logged in successfully");
+        return ResponseEntity.ok("Đăng nhập thành công!");
     }
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
         authService.logout();
-        return ResponseEntity.ok("Logged out successfully");
+        return ResponseEntity.ok("Đăng xuất thành công!");
     }
 
     @PutMapping("/updateInfo")

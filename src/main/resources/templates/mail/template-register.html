@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xác thực Email</title>
+  <style type="text/css">
+    body, td, input, textarea, select, div {
+      font-family: Roboto, Arial, sans-serif;
+    }
+    ul, li {
+      padding: 0;
+      margin: 0;
+      margin-left: 10px;
+    }
+    a {
+      text-decoration: none;
+    }
+    .button {
+      display: inline-block;
+      padding: 15px 25px;
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+      background-color: black;
+      border-radius: 5px;
+      text-align: center;
+    }
+
+  </style>
+</head>
+<body>
+<table style="background:url('https://bis.dp.ua/images/background-12.jpg');width:100%;padding-top:20px;">
+  <tbody>
+  <tr>
+    <td>
+      <table style="background-color: #ffffff; padding: 25px; border-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); max-width: 600px; margin: 0 auto;" class="content">
+        <!-- Header -->
+        <tbody>
+        <tr>
+          <td class="content">
+            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+              <tbody>
+              <tr>
+                <td style="color:#212121;font-size:24px;font-weight:bold;text-align: center;">Xin chào [[${user.name}]]!</td>
+              </tr>
+              <tr>
+                <td style="color: #212121;font-size:15px;line-height:23px;text-align: center;">
+                  Để xác thực tài khoản, mời bạn ấn nút dưới đây:
+                  <br /><br />
+                  <a th:href="${link}" class="button" style="color: white; background-color: black">Xác Thực Tài Khoản</a>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+        <tr style="height:80px">
+        </tr>
+        </tbody>
+      </table>
+    </td>
+  </tr>
+  </tbody>
+</table>
+</body>
+</html>

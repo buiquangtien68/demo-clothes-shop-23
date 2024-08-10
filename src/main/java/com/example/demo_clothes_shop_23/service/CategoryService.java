@@ -20,7 +20,8 @@ public class CategoryService {
         return categoryRepository.findCategoriesWithNullParentId();
     }
 
-
-
+    public List<Category> getByParentId(Integer parentId) {
+        return categoryRepository.findByParentId(parentId);
+    }
 
 }

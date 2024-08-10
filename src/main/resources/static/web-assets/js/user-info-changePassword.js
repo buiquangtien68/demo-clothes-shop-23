@@ -60,6 +60,6 @@ document.getElementById("form-changePassword").addEventListener("submit", async 
         toastr.success("Cập nhật thành công")
     } catch (e) {
         console.log(e)
-        toastr.error("Mật khẩu cũ sai hoặc Mật khẩu mới và mật khẩu cũ giống nhau")
+        toastr.error(e.response.data.message);
     }
 })

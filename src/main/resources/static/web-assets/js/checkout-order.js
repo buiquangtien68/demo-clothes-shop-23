@@ -87,11 +87,12 @@ $(document).ready(function() {
     //Tạo ra CodeOrder cho đơn COD
     const updateCodeOrder = async (orderId) => {
         try{
-            let res =  await axios.put(`/api/order/updateCodeOrder/${orderId}`)
+            let res =  await axios.put(`/api/orders/updateCodeOrder/${orderId}`)
             console.log(res)
             window.location.href = `/cod-Return?codeOrder=${res.data.codeOrder}`
         }catch (e){
             console.log(e)
+            toastr.error(e.response.data.message);
         }
 
     }
@@ -108,7 +109,7 @@ $(document).ready(function() {
             }
             console.log(data)
             try {
-                let res = await axios.put("/api/orderDetail",data)
+                let res = await axios.put("/api/orderDetails",data)
             }catch (e){
                 console.log("Lỗi khi tạo orderDetail")
             }
@@ -117,10 +118,11 @@ $(document).ready(function() {
     //Tạo ra link thanh toán từ orderId
     const createPaymentResponse = async (orderId)=>{
         try {
-            let res = await axios.get(`/api/payment/create_payment/${orderId}`)
+            let res = await axios.get(`/api/payments/create_payment/${orderId}`)
             window.location.href = res.data.url;
         }catch (e){
             console.log(e)
+            toastr.error(e.response.data.message);
         }
     }
 
@@ -158,7 +160,7 @@ $(document).ready(function() {
         }
 
         try {
-            let res = await axios.put("/api/order", dataOrder);
+            let res = await axios.put("/api/orders", dataOrder);
             console.log(res)
             createOrderDetail(res.data.id)
             if (res.data.payment=="VNPAY"){
@@ -168,7 +170,7 @@ $(document).ready(function() {
             }
         } catch (e) {
             console.log(e)
-            toastr.error("Đã xảy ra lỗi khi đặt hàng");
+            toastr.error(e.response.data.message);
         }
     });
 });

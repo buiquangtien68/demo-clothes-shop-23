@@ -37,6 +37,7 @@ const createFavorite = async () =>{
 
     } catch (e) {
        console.log(e)
+        toastr.error(e.response.data.message);
     }
 
 }
@@ -51,8 +52,9 @@ const deleteFavorite = async (id) =>{
             console.log(favorites)
             renderFavorites(favorites)
             toastr.success("Xóa khỏi danh sách yêu thích thành công")
-        } catch (error) {
-            console.log(error)
+        } catch (e) {
+            console.log(e)
+            toastr.error(e.response.data.message);
         }
     }
 }

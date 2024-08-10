@@ -23,6 +23,7 @@ public class Discount {
     @Column(columnDefinition = "TEXT")
     String description;
 
+    @Enumerated(EnumType.ORDINAL)
     DiscountType type;
     Long amount;
 

@@ -11,7 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 
 @RestController
-@RequestMapping("/api/payment")
+@RequestMapping("/api/payments")
 @AllArgsConstructor
 public class PaymentApi {
     private final PaymentService paymentService;

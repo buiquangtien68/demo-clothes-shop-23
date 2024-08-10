@@ -54,8 +54,11 @@ public class Orders {
     @Column(nullable = false)
     Long finalTotal;
 
+    @Enumerated(EnumType.ORDINAL)
     OrdersStatus status;
+    @Enumerated(EnumType.ORDINAL)
     PaymentType payment;
+    @Enumerated(EnumType.ORDINAL)
     DeliveryType delivery;
 
     @Column(columnDefinition = "TEXT")

@@ -17,19 +17,19 @@ public class CommentApi {
     private final CommentService commentService;
 
     @PostMapping
-    public ResponseEntity<?> createReview(@Valid @RequestBody UpsertCommentRequest commentRequest) {
+    public ResponseEntity<?> createComment(@Valid @RequestBody UpsertCommentRequest commentRequest) {
         Comment comment = commentService.createComment(commentRequest);
         return new ResponseEntity<>(comment, HttpStatus.CREATED); //201
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateReview(@Valid @PathVariable Integer id, @Valid @RequestBody UpsertCommentRequest commentRequest) {
+    public ResponseEntity<?> updateComment(@Valid @PathVariable Integer id, @Valid @RequestBody UpsertCommentRequest commentRequest) {
         Comment comment = commentService.updateComment(commentRequest, id);
         return ResponseEntity.ok(comment); //200
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteReview(@PathVariable Integer id) {
+    public ResponseEntity<?> deleteComment(@PathVariable Integer id) {
         commentService.deleteComment(id);
         return ResponseEntity.noContent().build(); //204
     }

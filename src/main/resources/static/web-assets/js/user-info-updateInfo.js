@@ -66,5 +66,6 @@ $('#form-updateInfo').on('submit', async (e) => {
         })
     } catch (e) {
         console.log(e);
+        toastr.error(e.response.data.message);
     }
 });

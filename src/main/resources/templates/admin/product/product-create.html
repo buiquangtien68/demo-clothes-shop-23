@@ -30,7 +30,7 @@
            }
 
            /* Tùy chỉnh tên màu sắc */
-           .color-name {
+           .color-name,.size-name {
                vertical-align: middle;
            }
 
@@ -53,25 +53,27 @@
                flex-wrap: wrap; /* Cho phép văn bản và các label màu nằm trên nhiều dòng */
            }
 
+           /* Tùy chỉnh các tùy chọn đã chọn */
            .select2-selection__choice {
                margin: 2px;
-               padding: 2px 8px;
+               padding: 4px 8px;
                border-radius: 16px;
                background-color: #e9ecef;
                border: 1px solid #ccc;
                display: flex;
                align-items: center;
                position: relative; /* Để có thể căn chỉnh dấu x */
+               overflow: hidden; /* Đảm bảo không có phần tử nào vượt ra ngoài */
            }
 
            /* Tùy chỉnh dấu x bỏ chọn */
            .select2-selection__choice__remove {
-               margin-left: 8px;
                cursor: pointer;
                position: absolute; /* Đặt dấu x ở vị trí tương đối với phần tử chứa */
-               right: 1px; /* Khoảng cách từ bên phải */
-               top: 50%; /* Căn giữa dọc */
-               transform: translateY(-50%); /* Căn giữa dọc hoàn hảo */
+               right: 2px; /* Khoảng cách từ bên phải */
+               top: 50%;
+               transform: translateY(-50%);
+               font-size: 14px;
            }
        </style>
 
@@ -110,9 +112,6 @@
 
                 <div class="row py-2">
                     <div class="col-6">
-                        <button type="button" class="btn btn-default">
-                            <i class="fas fa-chevron-left"></i> Quay lại
-                        </button>
                         <button type="button" class="btn btn-info px-4" id="btnCreateMovie">
                             Lưu
                         </button>
@@ -132,12 +131,6 @@
                                                 <label>Tên sản phẩm</label>
                                                 <input type="text" class="form-control" id="name" name="name"/>
                                             </div>
-
-                                            <div class="form-group">
-                                                <label>Giá tiền</label>
-                                                <input type="text" class="form-control" id="price" name="price"/>
-                                            </div>
-
                                             <div class="form-group">
                                                 <label>Mô tả ngắn</label>
                                                 <textarea id="description" class="form-control" rows="3" name="description"></textarea>
@@ -145,6 +138,7 @@
                                             <div class="form-group">
                                                 <label>Trạng thái</label>
                                                 <select id="status" class="form-control">
+                                                    <option value="" >Chọn trạng thái</option>
                                                     <option value="0">
                                                         Ẩn
                                                     </option>
@@ -153,21 +147,28 @@
                                                     </option>
                                                 </select>
                                             </div>
+                                            <div class="form-group">
+                                                <label>Giá tiền</label>
+                                                <input type="number" class="form-control" id="price" name="price"/>
+                                            </div>
                                         </div>
 
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label>Danh mục cha</label>
                                                 <select id="categoryParent" class="form-control">
-                                                    <option th:each="categoryParent : ${categoryParents}" th:value="${categoryParent.id}" th:text="${categoryParent.name}" >
+                                                    <option value="">Chọn danh mục cha</option>
+                                                    <option th:each="categoryParent : ${categoryParents}"
+                                                            th:value="${categoryParent.id}"
+                                                            th:text="${categoryParent.name}">
                                                     </option>
                                                 </select>
                                             </div>
+
                                             <div class="form-group">
                                                 <label>Danh mục con</label>
                                                 <select id="categoryChild" class="form-control" disabled>
-                                                    <option th:each="categoryParent : ${categoryParents}" th:value="${categoryParent.id}" th:text="${categoryParent.name}">
-                                                    </option>
+                                                    <option value="">Chọn danh mục con</option>
                                                 </select>
                                             </div>
                                             <div class="form-group">
@@ -183,17 +184,23 @@
                                                     </select>
                                                 </div>
                                             </div>
+                                            <div class="form-group">
+                                                <label>Kiểu kích thước</label>
+                                                <select id="sizeType" class="form-control">
+                                                    <option value="" >Chọn kiểu kích thước</option>
+                                                    <option th:each="sizetype : ${sizeTypes}" th:value="${sizetype}" th:text="${sizetype.getName()}" >
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Kích thước</label>
+                                                <div class="select2-purple">
+                                                    <select class="select2 form-control" multiple="multiple" id="size" disabled>
+                                                        <option></option>
+                                                    </select>
+                                                </div>
+                                            </div>
 
-                                            <!-- <div class="form-group">
-                                                 <label>Kích thước</label>
-                                                 <div class="select2-purple">
-                                                     <select class="select2 form-control" multiple="multiple"
-                                                             id="size">
-                                                         <option th:each="size :${sizes}" th:text="${size.sizeName}" th:value="${size.id}">
-                                                         </option>
-                                                     </select>
-                                                 </div>
-                                             </div>-->
 
                                           <!--  <div class="form-group">
                                                 <div class="thumbnail-preview-container mb-3">
@@ -213,6 +220,16 @@
                         </form>
                     </div>
                 </div>
+
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row quantity-table"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
     </div>
@@ -226,25 +243,161 @@
 
     <script th:inline="javascript">
         //Initialize Select2 Elements
-        $(document).ready(function() {
-            // Khởi tạo Select2
-            $('#color').select2({
-                templateResult: formatState,
-                templateSelection: formatState
-            });
+        // Chọn màu
+        $('#color').select2({
+            templateResult: formatStateColor,
+            templateSelection: formatStateColor,
+            placeholder: "Chọn màu sắc"
+        });
 
-            function formatState(state) {
-                if (!state.id) {
-                    return state.text;
+        function formatStateColor(state) {
+            if (!state.id) {
+                return state.text;
+            }
+            var color = $(state.element).data('color');
+            var $state = $(
+                '<span class="color-name">' + state.text + '</span>'+
+                '&ensp;<span class="color-label" style="background-color:' + color + '"></span>;'
+            );
+            return $state;
+        }
+        //Chọn Size
+        let sizeEl = document.getElementById("size");
+
+        function formatStateSize(state) {
+            if (!state.id) {
+                return state.text;
+            }
+            var $state = $(
+                '<span class="size-name">' + state.text + '&ensp;' + '</span>'
+            );
+            return $state;
+        }
+
+        $(sizeEl).select2({
+            placeholder: "Chọn kích thước",
+            autoWidth: true,
+            templateResult: formatStateSize,
+            templateSelection: formatStateSize,
+        });
+
+        $('#sizeType').change(async function() {
+            let selectedValue = $(this).val();
+            $(sizeEl).val(null).trigger('change');
+            if (selectedValue) {
+                try {
+                    updateQuantityTable()
+                    let res = await axios.get(`/api/admin/sizes/sizeType/${selectedValue}`);
+                    let sizes = res.data;
+                    $(sizeEl).val()
+                    $(sizeEl).empty().append(new Option('Chọn kích thước', ''));
+
+
+                    $(sizeEl).append(new Option('Chọn kích thước', ''));
+                    sizes.forEach(size => {
+                        $(sizeEl).append(new Option(size.sizeName, size.id)); // Adjust `size.name` and `size.id` based on your data structure
+                    });
+                    sizeEl.disabled = false;
+                    $(sizeEl).select2({
+                        placeholder: "Chọn kích thước",
+                        autoWidth: true,
+                        templateResult: formatStateSize,
+                        templateSelection: formatStateSize,
+                    });
+                    console.log(!$('#categoryParent').val()=="")
+                    if (!$('#categoryParent').val()==""){
+                        $(this).prop('disabled', true); // Vô hiệu hóa sizeType
+                    }
+
+                } catch (error) {
+                    console.error('Error fetching sizes:', error);
                 }
-                var color = $(state.element).data('color');
-                var $state = $(
-                    '<span class="color-name">' + state.text + '</span>'+
-                    '&ensp;<span class="color-label" style="background-color:' + color + '"></span>;'
-                );
-                return $state;
+            } else {
+                updateQuantityTable()
+                $(sizeEl).empty().append(new Option('Chọn kích thước', '')).prop('disabled', true);
             }
         });
+
+
+        //Chọn category
+        let categoryChildEl = document.getElementById("categoryChild");
+        $('#categoryParent').on('change', async function() {
+            let categoryParentId = $(this).val();
+            if (categoryParentId) {
+                if (categoryParentId==3){
+                    $('#sizeType').val('SHOES_SIZE').trigger('change');
+                }else {
+                    $('#sizeType').val('CLOTHES_SIZE').trigger('change');
+                }
+                try {
+                    let res = await axios.get(`/api/admin/categories/categoryParent/${categoryParentId}`);
+                    let categoryChild = res.data;
+                    $(categoryChildEl).empty();
+                    $(categoryChildEl).append(new Option('Chọn danh mục con', ''));
+
+                    categoryChild.forEach(c => {
+                        $(categoryChildEl).append(new Option(c.name, c.id));
+                    });
+
+                    $(categoryChildEl).prop('disabled', false);
+                } catch (e) {
+                    console.error('Error fetching category children:', e);
+                }
+            } else {
+                $(categoryChildEl).empty().append(new Option('Chọn danh mục con', '')).prop('disabled', true);
+            }
+        });
+
+
+        let quantityData = {};
+
+        // Cập nhật bảng số lượng
+        function updateQuantityTable() {
+            let selectedColors = $('#color').val() || [];
+            let selectedSizes = $('#size').val() || [];
+            console.log(selectedSizes);
+
+            // Xóa nội dung cũ
+            let tableHtml = '<table class="table table-bordered"><thead><tr><th>Màu sắc</th><th>Kích thước</th><th>Số lượng</th></tr></thead><tbody>';
+
+            selectedColors.forEach(color => {
+                let colorText = $('#color option:selected').filter(`[value="${color}"]`).text();
+
+                selectedSizes.forEach(size => {
+                    if (size !== "") {
+                        let sizeText = $('#size option:selected').filter(`[value="${size}"]`).text();
+                        let key = `${color}-${size}`;
+                        let quantityValue = quantityData[key] || ''; // Lấy giá trị đã lưu hoặc để trống nếu không có
+
+                        tableHtml += `<tr><td>${colorText}</td><td>${sizeText}</td><td><input type="number" class="form-control" name="quantity" value="${quantityValue}" data-key="${key}" /></td></tr>`;
+                    }
+                });
+            });
+
+            tableHtml += '</tbody></table>';
+            $('.quantity-table').html(tableHtml);
+        }
+
+        // Lưu giá trị khi người dùng thay đổi số lượng
+        function saveQuantityValue() {
+            $('.quantity-table').on('input', 'input[name="quantity"]', function() {
+                let key = $(this).data('key');
+                quantityData[key] = $(this).val();
+            });
+        }
+
+        $('#color').on('change', function() {
+            updateQuantityTable();
+            saveQuantityValue();
+        });
+        $('#size').on('change', function() {
+            updateQuantityTable();
+            saveQuantityValue();
+        });
+
+        saveQuantityValue();
+
+
 
 
 

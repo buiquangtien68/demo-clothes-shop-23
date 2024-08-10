@@ -90,6 +90,44 @@
                 text-decoration: underline;
             }
 
+            /* HTML: <div class="loader"></div> */
+            .btn {
+                position: relative; /* Để đặt loader vào vị trí tuyệt đối bên trong nút */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 10px 20px; /* Kích thước của nút */
+                font-size: 16px; /* Kích thước chữ của nút */
+            }
+
+            /* Đặt loader vào vị trí tuyệt đối và không làm thay đổi kích thước của nút */
+            .loader {
+                width: 20px;
+                height: 20px;
+                border: 3px solid transparent;
+                border-top: 3px solid white;
+                border-radius: 50%;
+                position: absolute;
+                display: none; /* Ẩn loader khi không cần thiết */
+                animation: spin 1s linear infinite;
+            }
+
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+
+            /* Đặt loader vào bên phải của nút và không làm thay đổi kích thước của nút */
+            .btn .btn-text {
+                display: inline-block;
+            }
+
+            .btn .loader {
+                right: 10px; /* Đặt loader ở bên phải của nút */
+                top: 50%;
+                transform: translateY(-50%); /* Đặt loader ở giữa nút theo chiều dọc */
+            }
+
         </style>
     </th:block>
 </head>
@@ -157,9 +195,9 @@
                                         <div class="register-toggle-btn">
                                             <div class="form-action-button">
                                                 <button id="btn-register" type="submit" class="btn bg-dark d-flex align-items-center justify-content-center text-white">
-                                                    Đăng ký
+                                                    <span class="btn-text">Đăng ký</span>
+                                                    <div class="loader" id="btn-loader"></div>
                                                 </button>
-
                                             </div>
                                             <div class="d-flex justify-content-center account-optional-action">
                                                 <a id="recover-password" class="me-3" href="/quen-mat-khau">Quên mật khẩu?</a>
@@ -353,10 +391,22 @@
             }
         });
 
+        function loadBtn() {
+            const button = document.getElementById('btn-register');
+            const loader = document.getElementById('btn-loader');
+
+            if (button && loader) {
+                button.disabled = true; // Vô hiệu hóa nút khi đang tải
+                loader.style.display = 'block'; // Hiển thị loader
+                document.querySelector('.btn-text').style.opacity = '0'; // Ẩn văn bản nút một cách mềm mại
+            }
+        }
+
         $('#form-register').on('submit', async (e) => {
             e.preventDefault();
             console.log("Form submission attempted");
-            if (!$('#form-register').valid()){
+
+            if (!$('#form-register').valid()) {
                 return;
             }
 
@@ -372,20 +422,44 @@
                 password: $('#input-password').val(),
                 confirmPassword: $('#input-confirm-password').val()
             };
-            console.log(data.province)
+            console.log(data.province);
 
             try {
+                loadBtn();
                 let res = await axios.post("/api/auth/register", data);
-                toastr.success("Đăng ký thành công");
-                setTimeout(() => {
-                    window.location.href = '/';
-                }, 1000);
+                toastr.success("Vui lòng để ý email để xác thực tài khoản, mã xác thực sẽ hết sau 30 phút!");
+
+
+                // Xóa loader và khôi phục văn bản nút
+                const button = document.getElementById('btn-register');
+                const loader = document.getElementById('btn-loader');
+
+                if (button && loader) {
+                    button.disabled = false;
+                    loader.style.display = 'none'; // Ẩn loader
+                    document.querySelector('.btn-text').style.opacity = '1'; // Khôi phục văn bản nút
+                }
+
+                // Reset form sau khi thành công
+                document.getElementById('form-register').reset();
+                document.getElementById('input-district').disabled=true;
+                    document.getElementById('input-ward').disabled=true;
+
             } catch (e) {
                 console.log(e);
-                toastr.error("Email đã tồn tại");
+                toastr.error(e.response.data.message);
+
+                // Xóa loader và khôi phục văn bản nút trong trường hợp có lỗi
+                const button = document.getElementById('btn-register');
+                const loader = document.getElementById('btn-loader');
+
+                if (button && loader) {
+                    button.disabled = false;
+                    loader.style.display = 'none'; // Ẩn loader
+                    document.querySelector('.btn-text').style.opacity = '1'; // Khôi phục văn bản nút
+                }
             }
         });
-
 
         // Hàm kiểm tra và ẩn hiện biểu tượng mắt
         function togglePasswordVisibility() {

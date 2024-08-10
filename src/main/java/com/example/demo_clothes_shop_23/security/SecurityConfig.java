@@ -59,19 +59,21 @@ public class SecurityConfig {
                 "/user-info",
                 "/checkout",
                 "/cod-Return",
-                "/order-history")
+                "/order-history",
+                "/payment_return")
                 .authenticated();
             auth.requestMatchers(
-                "/api/cart/**",
+                "/api/carts/**",
                 "/api/reviews/**",
                 "/api/comments/**",
                 "/api/favorites/**",
                 "/api/addresses",
                 "/api/auth/updateInfo",
                 "/api/auth/update-password/**",
-                "/api/coupon/**",
-                "/api/order/**",
-                "/api/orderDetail/**")
+                "/api/coupons/**",
+                "/api/orders/**",
+                "/api/orderDetails/**",
+                "api/payments/")
                 .authenticated();
             auth.anyRequest().permitAll();
         });

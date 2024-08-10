@@ -305,11 +305,12 @@
 
         const getOrderDetailsByOrderId = async (orderId)=>{
             try {
-                let res = await axios.get(`/api/orderDetail/order/${orderId}`)
+                let res = await axios.get(`/api/orderDetails/order/${orderId}`)
                 console.log(res.data)
                 renderOrderDetailInfo(res.data)
             }catch (e){
                 console.log(e)
+                toastr.error(e.response.data.message);
             }
         }
         const formatDate = dateStr => {
@@ -324,7 +325,7 @@
             const confirm = window.confirm("Bạn có chắc chắn muốn hủy không")
             if(confirm){
                 try {
-                    let res = await axios.put(`/api/order/cancelOrder/${orderId}`)
+                    let res = await axios.put(`/api/orders/cancelOrder/${orderId}`)
                     document.getElementById(`order-status-table-${orderId}`).innerText="Đã hủy"
                     myModalOrderEl.hide()
                     toastr.success("Bạn đã hủy đơn hàng thành công")
@@ -336,7 +337,7 @@
 
         const openModal = async (orderId)=>{
             try {
-                let res = await axios.get(`/api/order/${orderId}`)
+                let res = await axios.get(`/api/orders/${orderId}`)
                 document.getElementById("orderModalLabel").innerText=`Chi tiết đơn hàng #${res.data.codeOrder}`
                 document.getElementById("receiverName").innerText=res.data.receiverName;
                 document.getElementById("phone").innerText=res.data.phone;

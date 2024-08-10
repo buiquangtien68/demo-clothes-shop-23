@@ -32,8 +32,10 @@ public class User {
     @Column(nullable = false)
     String password;
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     UserRole role;
+
+    Boolean enabled;
 
     LocalDateTime createdAt;
 

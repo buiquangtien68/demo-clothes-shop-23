@@ -75,7 +75,7 @@ public class ReviewService {
     //Sử dụng SecurityContextHolder để lấy user
     public Review updateReview(UpsertReviewRequest reviewRequest, Integer id) {
         //Kiểm tra review xem tồn tại ko
-        Review review = reviewRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Review not found"));
+        Review review = reviewRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đánh giá này"));
 
         //Kiểm tra user này có tồn tại hay ko
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -83,16 +83,16 @@ public class ReviewService {
         User user = (User) userDetails.getUser();
 
         //Kiểm tra xem product có tồn tại hay không
-        Product product = productRepository.findById(reviewRequest.getProductId()).orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+        Product product = productRepository.findById(reviewRequest.getProductId()).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm này"));
 
         //Kiểm tra xem review này có của user này ko
         if (!review.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("User not authorized to update review");
+            throw new RuntimeException("Người dùng không sở hữu đánh giá này");
         }
 
         //Kểm tra xem review này có thuộc movie hay k
         if (!review.getProduct().getId().equals(product.getId())) {
-            throw new RuntimeException("Not review's movie");
+            throw new RuntimeException("Đánh giá không thuộc sản phẩm này");
         }
 
         review.setContent(reviewRequest.getContent());
@@ -125,7 +125,7 @@ public class ReviewService {
     //Sử dụng SecurityContextHolder để lấy user
     public void deleteReview(Integer productId, Integer id) {
         //Kiểm tra review xem tồn tại ko
-        Review review = reviewRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Review not found"));
+        Review review = reviewRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đánh giá này"));
 
         //Kiểm tra user này có tồn tại hay ko
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -134,11 +134,11 @@ public class ReviewService {
 
         //Kiểm tra xem review này có của user này ko
         if (!review.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("User not authorized to update review");
+            throw new RuntimeException("Người dùng không sở hữu đánh giá này");
         }
 
         List<Review> reviewsOfThisProduct = reviewRepository.findByProduct_IdOrderByCreatedAtDesc(productId);
-        Product product = productRepository.findById(productId).orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+        Product product = productRepository.findById(productId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm này"));
         // Kiểm tra xem có đánh giá nào không
         if (!reviewsOfThisProduct.isEmpty()) {
             // Tính tổng số điểm đánh giá

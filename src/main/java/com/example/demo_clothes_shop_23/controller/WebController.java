@@ -3,6 +3,7 @@ package com.example.demo_clothes_shop_23.controller;
 import com.example.demo_clothes_shop_23.entities.*;
 import com.example.demo_clothes_shop_23.model.enums.SizeType;
 import com.example.demo_clothes_shop_23.model.model.ImageProductDetailModel;
+import com.example.demo_clothes_shop_23.model.response.VerifyResponse;
 import com.example.demo_clothes_shop_23.service.*;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ public class WebController {
     private final OrderService orderService;
     private final OrderDetailService orderDetailService;
     private final QuantityService quantityService;
+    private final AuthService authService;
 
     /*Trang chủ*/
     @GetMapping("/")
@@ -65,6 +67,13 @@ public class WebController {
     @GetMapping("/register")
     public String register(Model model) {
         return "web/register";
+    }
+
+    @GetMapping("/verifyAccount")
+    public String verifyAccount(@RequestParam String token, Model model) {
+        VerifyResponse verifyResponse = authService.confirmRegistration(token);
+        model.addAttribute("verifyResponse", verifyResponse);
+        return "web/verifyAccount";
     }
 
     /*Trang thông tin cá nhân*/

@@ -450,7 +450,7 @@
                         return;
                     }
                     try {
-                        let res = await axios.get(`/api/coupon/${userId}/${couponCode}`);
+                        let res = await axios.get(`/api/coupons/${userId}/${couponCode}`);
                         let couponAmount = parseInt(res.data.amount, 10); // Chuyển đổi thành số nguyên
 
                         if (isNaN(couponAmount)) {
@@ -470,7 +470,7 @@
                         document.getElementById('cancel-coupon-btn').style.display = 'block';
                     } catch (e) {
                         console.log(e);
-                        toastr.error("Mã không tồn tại, đã hết hoặc bạn đã sử dụng rồi");
+                        toastr.error(e.response.data.message);
                         let couponAmount = 0;// Chuyển đổi thành số nguyên
                         // Cập nhật phần trăm giảm giá và các giá trị liên quan
                         document.getElementById('discount-amount').dataset.discountPercentage = couponAmount;

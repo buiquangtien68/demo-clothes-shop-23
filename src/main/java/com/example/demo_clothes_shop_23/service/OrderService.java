@@ -36,7 +36,7 @@ public class OrderService {
 
     public Orders getById(Integer id) {
         return ordersRepository.findById(id).orElseThrow(
-            () -> new ResourceNotFoundException("Order not found with id " + id)
+            () -> new ResourceNotFoundException("Không tìm thấy đơn hàng này")
         );
     }
 
@@ -51,26 +51,41 @@ public class OrderService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         User user = (User) userDetails.getUser();
-        if (!Objects.equals(createOrderRequest.getCouponCode(), "")){
+        if (createOrderRequest.getCouponCode() != null && !createOrderRequest.getCouponCode().isEmpty()) {
             Coupon coupon = couponRepository.findByCodeAndActive(createOrderRequest.getCouponCode(), true);
-            if (coupon != null) {
-                if (coupon.getQuantity() > 0) {  // Kiểm tra số lượng mã giảm giá
-                    coupon.setQuantity(coupon.getQuantity() - 1);
-                    List<Integer> usedUserIds = coupon.getListUserIdUsed();
-                    if (usedUserIds == null) {
-                        usedUserIds = new ArrayList<>();
-                    }
-                    usedUserIds.add(createOrderRequest.getUserId());
-                    coupon.setListUserIdUsed(usedUserIds);
-                    couponRepository.save(coupon);
-                } else {
-                    // Xử lý khi mã giảm giá hết số lượng
-                    throw new RuntimeException("Mã giảm giá đã hết số lượng");
-                }
-            } else {
-                // Xử lý khi mã giảm giá không tồn tại hoặc không hợp lệ
+
+            if (coupon == null) {
                 throw new RuntimeException("Mã giảm giá không hợp lệ");
             }
+
+            // Kiểm tra số lượng mã giảm giá
+            if (coupon.getQuantity() <= 0) {
+                throw new RuntimeException("Mã giảm giá đã hết số lượng");
+            }
+
+            // Kiểm tra thời gian sử dụng
+            LocalDateTime now = LocalDateTime.now();
+            if (coupon.getStartDate() != null && now.isBefore(coupon.getStartDate())) {
+                throw new RuntimeException("Mã giảm giá chưa đến thời gian sử dụng");
+            }
+            if (coupon.getEndDate() != null && now.isAfter(coupon.getEndDate())) {
+                throw new RuntimeException("Mã giảm giá đã hết hạn sử dụng");
+            }
+
+            // Kiểm tra người dùng đã sử dụng mã giảm giá chưa
+            List<Integer> usedUserIds = coupon.getListUserIdUsed();
+            if (usedUserIds == null) {
+                usedUserIds = new ArrayList<>();
+            }
+            if (usedUserIds.contains(createOrderRequest.getUserId())) {
+                throw new RuntimeException("Người dùng đã sử dụng mã giảm giá này");
+            }
+
+            // Cập nhật mã giảm giá
+            coupon.setQuantity(coupon.getQuantity() - 1);
+            usedUserIds.add(createOrderRequest.getUserId());
+            coupon.setListUserIdUsed(usedUserIds);
+            couponRepository.save(coupon);
         }
 
         Orders orders = Orders.builder()
@@ -98,7 +113,7 @@ public class OrderService {
 
     public Orders updateCodeOrder(Integer orderId) {
         Orders order = ordersRepository.findById(orderId)
-            .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng này"));
 
         order.setCodeOrder(PaymentConfig.getRandomNumber(8));
         ordersRepository.save(order);
@@ -107,7 +122,7 @@ public class OrderService {
 
     public Orders cancelOrder(Integer orderId) {
         Orders order = ordersRepository.findById(orderId)
-            .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng này"));
         List<OrdersDetail> ordersDetails = ordersDetailRepository.findByOrdersId(orderId);
         ordersDetails.forEach(ordersDetail -> {
            Quantity quantity = quantityRepository.findByProductIdAndColorIdAndSizeId(

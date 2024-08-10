@@ -33,13 +33,13 @@ public class OrderDetailService {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         User user = (User) userDetails.getUser();
         Orders order = ordersRepository.findById(createOrderDetailRequest.getOrderId())
-            .orElseThrow(() -> new RuntimeException("Order not found"));
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng này"));
         Product product = productRepository.findById(createOrderDetailRequest.getProductId())
-            .orElseThrow(() -> new RuntimeException("Product not found"));
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm này"));
         Color color = colorRepository.findById(createOrderDetailRequest.getColorId())
-            .orElseThrow(() -> new RuntimeException("Color not found"));
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy màu này"));
         Size size = sizeRepository.findById(createOrderDetailRequest.getSizeId())
-            .orElseThrow(() -> new RuntimeException("Size not found"));
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy size này"));
         List<Cart> carts = cartRepository.findByUser_IdOrderByCreatedAt(user.getId());
         cartRepository.deleteAll(carts);
 

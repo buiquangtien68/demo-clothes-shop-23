@@ -683,5 +683,6 @@ const setAddressChosen=async (id)=>{
         toastr.success("Đã đổi địa chỉ mặc định thành công!")
     }catch (e){
         console.log(e)
+        toastr.error(e.response.data.message);
     }
 }

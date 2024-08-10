@@ -18,6 +18,7 @@ public class Image {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
     String imgUrl;
+    @Enumerated(EnumType.ORDINAL)
     ImageType type;
 
     @ManyToOne
