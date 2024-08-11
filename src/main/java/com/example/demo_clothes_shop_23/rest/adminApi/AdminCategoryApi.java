@@ -14,7 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin/categories")
 @AllArgsConstructor
-public class CategoryApi {
+public class AdminCategoryApi {
     private final CategoryService categoryService;
 
     @GetMapping("/categoryParent/{categoryParentId}")

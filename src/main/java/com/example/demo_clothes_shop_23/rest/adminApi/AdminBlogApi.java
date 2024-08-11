@@ -5,7 +5,6 @@ import com.example.demo_clothes_shop_23.request.UpsertBlogRequest;
 import com.example.demo_clothes_shop_23.service.BlogService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin/blogs")
 @AllArgsConstructor
-public class BlogApi {
+public class AdminBlogApi {
     private final BlogService blogService;
 
     @PostMapping

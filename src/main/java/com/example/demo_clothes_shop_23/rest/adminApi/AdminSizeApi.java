@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin/sizes")
 @AllArgsConstructor
-public class SizeApi {
+public class AdminSizeApi {
     private final SizeService sizeService;
 
     @GetMapping("/sizeType/{sizeType}")

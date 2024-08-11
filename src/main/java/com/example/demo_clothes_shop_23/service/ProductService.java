@@ -1,9 +1,12 @@
 package com.example.demo_clothes_shop_23.service;
 
-import com.example.demo_clothes_shop_23.entities.Product;
-import com.example.demo_clothes_shop_23.repository.CategoryRepository;
-import com.example.demo_clothes_shop_23.repository.ProductRepository;
+import com.example.demo_clothes_shop_23.entities.*;
+import com.example.demo_clothes_shop_23.exception.ResourceNotFoundException;
+import com.example.demo_clothes_shop_23.model.enums.ImageType;
+import com.example.demo_clothes_shop_23.repository.*;
+import com.example.demo_clothes_shop_23.request.UpsertProductRequest;
 import com.example.demo_clothes_shop_23.specifications.ProductSpecifications;
+import com.github.slugify.Slugify;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -12,7 +15,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -22,6 +30,10 @@ public class ProductService {
     private final JdbcTemplate jdbcTemplate;
     private final ProductSpecifications productSpecifications;
     public final CategoryRepository categoryRepository;
+    private final ColorRepository colorRepository;
+    private final SizeRepository sizeRepository;
+    private final QuantityRepository quantityRepository;
+    private final ImageRepository imageRepository;
 
 
     public Product findProductByIdAndSlugAndStatus(Integer id, String slug, Boolean status) {
@@ -31,14 +43,6 @@ public class ProductService {
     //Tìm các sản phẩm liên quan nhưng không phải sản phẩm đang hiển thị
     public List<Product> findByCategoryIdOrderByCreatedAtDescExcludingProductId(Integer categoryId, Integer excludedMovieId) {
         return productRepository.findByCategoryIdOrderByCreatedAtDescExcludingProductId(categoryId,excludedMovieId).stream().limit(4).toList();
-    }
-
-    public List<Product> findByStatusOrderByNewPrice(){
-        return productRepository.findByStatusOrderByNewPrice(true);
-    }
-    public Page<Product> findAllByStatusOrderByNewPrice(Boolean status, int page, int pageSize) {
-        PageRequest pageRequest = PageRequest.of(page-1, pageSize, Sort.by("createdAt").descending());
-        return productRepository.findAllByStatusOrderByNewPrice(status,pageRequest);
     }
 
     public void updatePosters() {
@@ -119,5 +123,150 @@ public class ProductService {
 
     public List<Product> getAll() {
         return productRepository.findAll();
+    }
+
+    public void createProduct(UpsertProductRequest upsertProductRequest) {
+        Slugify slugify = Slugify.builder().build();
+        Category category = categoryRepository.findById(upsertProductRequest.getCategoryId()).orElseThrow(
+            () -> new ResourceNotFoundException("Không thấy thể loại")
+        );
+        Set<Color> colors = upsertProductRequest.getColorIds().stream()
+            .map(i->colorRepository.findById(i).orElseThrow(() -> new ResourceNotFoundException("Không thấy color")))
+            .collect(Collectors.toSet());
+
+        Set<Size> sizes = upsertProductRequest.getSizeIds().stream()
+            .map(i->sizeRepository.findById(i).orElseThrow(() -> new ResourceNotFoundException("Không thấy size")))
+            .collect(Collectors.toSet());
+        Product product = Product.builder()
+            .name(upsertProductRequest.getName())
+            .slug(slugify.slugify(upsertProductRequest.getName()))
+            .description(upsertProductRequest.getDescription())
+            .price(upsertProductRequest.getPrice())
+            .newPrice(upsertProductRequest.getNewPrice())
+            .rating(0.0)
+            .status(upsertProductRequest.getStatus())
+            .category(category)
+            .colors(colors)
+            .sizes(sizes)
+            .createdAt(LocalDateTime.now())
+            .updatedAt(LocalDateTime.now())
+            .build();
+        productRepository.save(product);
+
+       colors.forEach(color->{
+           for (int i = 0; i < 3; i++) {
+               Image image =Image.builder()
+                   .imgUrl("https://placehold.co/400x700?text=" +String.valueOf(product.getName().charAt(0)).toUpperCase()+color.getId()+i)
+                   .product(product)
+                   .color(color)
+                   .type(i==0 ? ImageType.MAIN : ImageType.SUP)
+                   .createdAt(LocalDateTime.now())
+                   .updatedAt(LocalDateTime.now())
+                   .build();
+               imageRepository.save(image);
+            }
+       });
+
+
+        Map<String, Integer> sortedQuantityData = new HashMap<>();
+        colors.forEach(color -> {
+            sizes.forEach(size -> {
+                // Tạo key cho kết hợp màu sắc và kích thước
+                String key = color.getId() + "-" + size.getId();
+                if (upsertProductRequest.getQuantityData().containsKey(key)) {
+                    // Lấy số lượng và thêm vào Map
+                    Integer quantity = upsertProductRequest.getQuantityData().get(key);
+                    sortedQuantityData.put(key, quantity);
+                }
+            });
+        });
+
+        sortedQuantityData.forEach((key, value) -> {
+            String[] parts = key.split("-");
+            Integer colorId = Integer.parseInt(parts[0]);
+            Integer sizeId = Integer.parseInt(parts[1]);
+
+            // Tìm thực thể Color, Size, và Product (giả định có Product ID)
+            Color colorEntity = colorRepository.findById(colorId).orElseThrow(() -> new RuntimeException("Không thấy color"));
+            Size sizeEntity = sizeRepository.findById(sizeId).orElseThrow(() -> new RuntimeException("Không thấy size"));
+
+            // Tạo và lưu thực thể Quantity
+            Quantity quantityEntity = Quantity.builder()
+                .color(colorEntity)
+                .size(sizeEntity)
+                .product(product)
+                .value(value)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+            quantityRepository.save(quantityEntity);
+        });
+    }
+
+
+    public void updateProduct(Integer productId, UpsertProductRequest upsertProductRequest) {
+        Product product = productRepository.findById(productId).orElseThrow(
+            () -> new ResourceNotFoundException("Không tìm thấy sản phẩm")
+        );
+        Slugify slugify = Slugify.builder().build();
+        Category category = categoryRepository.findById(upsertProductRequest.getCategoryId()).orElseThrow(
+            () -> new ResourceNotFoundException("Không thấy thể loại")
+        );
+        Set<Color> colors = upsertProductRequest.getColorIds().stream()
+            .map(i->colorRepository.findById(i).orElseThrow(() -> new ResourceNotFoundException("Không thấy color")))
+            .collect(Collectors.toSet());
+
+        Set<Size> sizes = upsertProductRequest.getSizeIds().stream()
+            .map(i->sizeRepository.findById(i).orElseThrow(() -> new ResourceNotFoundException("Không thấy size")))
+            .collect(Collectors.toSet());
+
+        List<Quantity> quantities = quantityRepository.findByProductId(productId);
+        quantityRepository.deleteAll(quantities);
+
+        Map<String, Integer> sortedQuantityData = new HashMap<>();
+        colors.forEach(color -> {
+            sizes.forEach(size -> {
+                // Tạo key cho kết hợp màu sắc và kích thước
+                String key = color.getId() + "-" + size.getId();
+                if (upsertProductRequest.getQuantityData().containsKey(key)) {
+                    // Lấy số lượng và thêm vào Map
+                    Integer quantity = upsertProductRequest.getQuantityData().get(key);
+                    sortedQuantityData.put(key, quantity);
+                }
+            });
+        });
+
+        sortedQuantityData.forEach((key, value) -> {
+            String[] parts = key.split("-");
+            Integer colorId = Integer.parseInt(parts[0]);
+            Integer sizeId = Integer.parseInt(parts[1]);
+
+            // Tìm thực thể Color, Size, và Product (giả định có Product ID)
+            Color colorEntity = colorRepository.findById(colorId).orElseThrow(() -> new RuntimeException("Không thấy color"));
+            Size sizeEntity = sizeRepository.findById(sizeId).orElseThrow(() -> new RuntimeException("Không thấy size"));
+
+            // Tạo và lưu thực thể Quantity
+            Quantity quantityEntity = Quantity.builder()
+                .color(colorEntity)
+                .size(sizeEntity)
+                .product(product)
+                .value(value)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+            quantityRepository.save(quantityEntity);
+
+            product.setName(upsertProductRequest.getName());
+            product.setSlug(slugify.slugify(upsertProductRequest.getName()));
+            product.setDescription(upsertProductRequest.getDescription());
+            product.setPrice(upsertProductRequest.getPrice());
+            product.setStatus(upsertProductRequest.getStatus());
+            product.setCategory(category);
+            product.setColors(colors);
+            product.setSizes(sizes);
+            product.setUpdatedAt(LocalDateTime.now());
+            productRepository.save(product);
+        });
+
     }
 }

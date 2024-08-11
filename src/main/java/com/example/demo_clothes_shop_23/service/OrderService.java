@@ -40,12 +40,17 @@ public class OrderService {
         );
     }
 
-    public List<Orders> getByUser_IdOrderByCreatedAtDesc() {
+    public List<Orders> getByCurrentUser_IdOrderByCreatedAtDesc() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         User user = (User) userDetails.getUser();
         return ordersRepository.findByUser_IdOrderByCreatedAtDesc(user.getId());
     }
+
+    public List<Orders> getByUser_IdOrderByCreatedAtDesc(Integer userId) {
+        return ordersRepository.findByUser_IdOrderByCreatedAtDesc(userId);
+    }
+
 
     public Orders createOrder(CreateOrderRequest createOrderRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

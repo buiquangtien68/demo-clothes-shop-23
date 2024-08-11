@@ -245,7 +245,7 @@ public class WebController {
 
     @GetMapping("/order-history")
     public String orderHistory(Model model) {
-        model.addAttribute("ordersByUserId", orderService.getByUser_IdOrderByCreatedAtDesc());
+        model.addAttribute("ordersByUserId", orderService.getByCurrentUser_IdOrderByCreatedAtDesc());
         return "web/order-history";
     }
 

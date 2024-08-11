@@ -25,6 +25,9 @@ public class AdminController {
     private final ColorService colorService;
     private final CategoryService categoryService;
     private final QuantityService quantityService;
+    private final UserService userService;
+    private final OrderService orderService;
+    private final ReviewService reviewService;
 
     //dashboard
     @GetMapping("/dashboard")
@@ -32,7 +35,7 @@ public class AdminController {
         return "admin/dashboard/dashboard";
     }
 
-    //blog
+    //BLOG
     @GetMapping("/blogs")
     public String getBlogIndexPage(Model model) {
         model.addAttribute("blogs", blogService.getAll());
@@ -72,15 +75,15 @@ public class AdminController {
         return "admin/blog/blog-tag";
     }
 
-    //product
+    //PRODUCT
     @GetMapping("/products")
-    public String getIndexPage(Model model) {
+    public String getProductIndexPage(Model model) {
         model.addAttribute("products",productService.getAll());
         return "admin/product/product-index";
     }
 
     @GetMapping("/products/{id}")
-    public String getDetailPage(@PathVariable int id, Model model) {
+    public String getProductDetailPage(@PathVariable int id, Model model) {
         model.addAttribute("product",productService.getById(id));
 
         //Sắp xếp màu
@@ -100,12 +103,12 @@ public class AdminController {
         model.addAttribute("sizeTypes", SizeType.values());
         model.addAttribute("colors",sortedColor);
         model.addAttribute("categoryParents",categoryService.getCategoriesWithNullParentId());
-
+        model.addAttribute("reviews",reviewService.findByProduct_IdOrderByCreatedAtDesc(id));
         return "admin/product/product-detail";
     }
 
     @GetMapping("/products/create")
-    public String getCreatePage(Model model) {
+    public String getProductCreatePage(Model model) {
         //Sắp xếp màu
         Set<Color> colors = colorService.getAll();
         Set<Color> sortedColor = new TreeSet<>(Comparator.comparingInt(Color::getId));
@@ -117,5 +120,27 @@ public class AdminController {
 
         return "admin/product/product-create";
     }
+
+    //USER
+    @GetMapping("/users")
+    public String getUserIndexPage(Model model) {
+        model.addAttribute("users",userService.getAll());
+        return "admin/user/user-index";
+    }
+
+    @GetMapping("/users/{id}")
+    public String getDetailPage(@PathVariable int id, Model model) {
+        model.addAttribute("user",userService.getById(id));
+        model.addAttribute("ordersByUserId", orderService.getByUser_IdOrderByCreatedAtDesc(id));
+        return "admin/user/user-detail";
+    }
+
+    @GetMapping("/users/create")
+    public String getCreatePage(Model model) {
+
+
+        return "admin/user/user-create";
+    }
+
 
 }

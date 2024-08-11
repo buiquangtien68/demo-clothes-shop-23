@@ -323,7 +323,7 @@ class DemoClothesShop23ApplicationTests {
 		Faker faker = new Faker();
 		for (int i=0;i<5;i++){
 			DiscountType type = (i < 2) ? DiscountType.AMOUNT : (i == 2) ? DiscountType.PERCENT : DiscountType.SAME_PRICE;
-			Integer amount = (i < 2) ? 100000 : (i == 2) ? 50 : 200000;
+			long amount = (i < 2) ? 100000 : (i == 2) ? 50 : 200000;
 			String name = faker.funnyName().name();
 			Discount discount = Discount.builder()
 					.name(name)
@@ -461,7 +461,7 @@ class DemoClothesShop23ApplicationTests {
 					.name(name)
 					.slug(slugify.slugify(name))
 					.description(faker.lorem().paragraph())
-					.price(roundedPrice)
+					.price((long) roundedPrice)
 					.status(i < 40)
 					.discount(rdDiscount)
 					.category(rdCategory)
@@ -768,19 +768,19 @@ class DemoClothesShop23ApplicationTests {
 					double discountAmount = product.getDiscount().getAmount();
 					double newPrice = price * (1 - discountAmount / 100);
 
-					product.setNewPrice(newPrice);
+					product.setNewPrice((long) newPrice);
 					productRepository.save(product);
 				}else if (Objects.equals(product.getDiscount().getType().toString(), "SAME_PRICE")){
 					// Lấy giá sản phẩm và tính toán giá mới sau khi giảm giá
 					double discountAmount = product.getDiscount().getAmount();
 
-					product.setNewPrice(discountAmount);
+					product.setNewPrice((long) discountAmount);
 					productRepository.save(product);
 				}else {
 					// Lấy giá sản phẩm và tính toán giá mới sau khi giảm giá
 					double price = product.getPrice();
 					double discountAmount = product.getDiscount().getAmount();
-					double newPrice = price - discountAmount;
+					long newPrice = (long) (price - discountAmount);
 
 					product.setNewPrice(newPrice);
 					productRepository.save(product);

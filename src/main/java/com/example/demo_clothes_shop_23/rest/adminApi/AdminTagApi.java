@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/admin/tags")
 @AllArgsConstructor
-public class TagApi {
+public class AdminTagApi {
     private final TagService tagService;
 
     @PostMapping("/create")
