@@ -68,7 +68,22 @@ public class WebController {
     public String register(Model model) {
         return "web/register";
     }
+    /*Trang quên mât khẩu*/
+    @GetMapping("/forgetPassword")
+    public String forgetPassword(Model model) {
+        return "web/forgetPassword";
+    }
 
+    /*Trang thay đổi mật khẩu*/
+    @GetMapping("/changePassword")
+    public String changePassword(@RequestParam String token, Model model) {
+        VerifyResponse verifyResponse = authService.confirmChangePassword(token);
+        model.addAttribute("verifyResponse", verifyResponse);
+        model.addAttribute("tokenString", token);
+        return "web/changePassword";
+    }
+
+    /*Trang thông báo xác thưc tài khoản*/
     @GetMapping("/verifyAccount")
     public String verifyAccount(@RequestParam String token, Model model) {
         VerifyResponse verifyResponse = authService.confirmRegistration(token);

@@ -1,10 +1,7 @@
 package com.example.demo_clothes_shop_23.rest;
 
 import com.example.demo_clothes_shop_23.entities.User;
-import com.example.demo_clothes_shop_23.request.LoginRequest;
-import com.example.demo_clothes_shop_23.request.RegisterRequest;
-import com.example.demo_clothes_shop_23.request.UpdateInfoUserRequest;
-import com.example.demo_clothes_shop_23.request.UpdatePasswordRequest;
+import com.example.demo_clothes_shop_23.request.*;
 import com.example.demo_clothes_shop_23.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -46,5 +43,17 @@ public class AuthApi {
     public ResponseEntity<?> updatePassword(@Valid @RequestBody UpdatePasswordRequest updatePasswordRequest, @Valid @PathVariable Integer id) {
         User user = authService.updatePassword(updatePasswordRequest,id);
         return new ResponseEntity<>(user, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/forgetPassword")
+    public ResponseEntity<?> forgetPassword(@Valid @RequestBody ForgetPasswordRequest forgetPasswordRequest) {
+        authService.forgetPassword(forgetPasswordRequest);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PutMapping("/changePassword")
+    public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest) {
+        authService.changePassword(changePasswordRequest);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

@@ -11,13 +11,11 @@ import com.example.demo_clothes_shop_23.model.response.VerifyResponse;
 import com.example.demo_clothes_shop_23.repository.AddressRepository;
 import com.example.demo_clothes_shop_23.repository.TokenConfirmRepository;
 import com.example.demo_clothes_shop_23.repository.UserRepository;
-import com.example.demo_clothes_shop_23.request.LoginRequest;
-import com.example.demo_clothes_shop_23.request.RegisterRequest;
-import com.example.demo_clothes_shop_23.request.UpdateInfoUserRequest;
-import com.example.demo_clothes_shop_23.request.UpdatePasswordRequest;
+import com.example.demo_clothes_shop_23.request.*;
 import com.example.demo_clothes_shop_23.security.CustomUserDetails;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -70,8 +68,6 @@ public class AuthService {
         if (!registerRequest.getConfirmPassword().equals(registerRequest.getPassword())){
             throw new BadRequestException("Mật khẩu xác nhận không trùng khớp");
         }
-
-
 
         //Lưu password vào database cần mã hóa password
         User user = User.builder()
@@ -162,7 +158,7 @@ public class AuthService {
         if (tokenConfirmOptional.isEmpty()){
             return VerifyResponse.builder()
                 .success(false)
-                .message("Mã không hợp lệ")
+                .message("Mã xác thực không hợp lệ")
                 .build();
         }
 
@@ -171,14 +167,14 @@ public class AuthService {
         if (tokenConfirm.getConfirmedAt()!=null){
             return VerifyResponse.builder()
                 .success(false)
-                .message("Mã đã được xác thực")
+                .message("Mã xác thực đã được xác thực rồi")
                 .build();
         }
 
         if (tokenConfirm.getExpiresAt().isBefore(LocalDateTime.now())){
             return VerifyResponse.builder()
                 .success(false)
-                .message("Mã đã hết hạn ")
+                .message("Mã xác thực đã hết hạn ")
                 .build();
         }
 
@@ -191,8 +187,79 @@ public class AuthService {
 
         return VerifyResponse.builder()
             .success(true)
-            .message("Xác thực tài khoản thành công")
+            .message("Xác thực tài khoản thành công!")
             .build();
 
+    }
+
+    public void forgetPassword(ForgetPasswordRequest forgetPasswordRequest) {
+        Optional<User> user = userRepository.findByEmail(forgetPasswordRequest.getEmail());
+        if (user.isEmpty()){
+            throw new BadRequestException("Email chưa được đăng ký");
+        }
+
+        //Tạo token xác thực đăng kí
+        TokenConfirm token = TokenConfirm.builder()
+            .token(UUID.randomUUID().toString())
+            .user(user.get())
+            .type(TokenType.PASSWORD_RESET)
+            .createdAt(LocalDateTime.now())
+            .expiresAt(LocalDateTime.now().plusMinutes(30))
+            .build();
+        tokenConfirmRepository.save(token);
+
+        //Tạo link
+        String link = "http://localhost:8080/changePassword?token=" + token.getToken();
+
+        //Gửi mail
+        mailService.sendMail3(user.get(), "Thay đổi mật khẩu", link);
+    }
+
+    public VerifyResponse confirmChangePassword(String token) {
+        Optional<TokenConfirm> tokenConfirmOptional = tokenConfirmRepository
+            .findByTokenAndType(token,TokenType.PASSWORD_RESET);
+
+        if (tokenConfirmOptional.isEmpty()){
+            return VerifyResponse.builder()
+                .success(false)
+                .message("Mã xác thực không hợp lệ")
+                .build();
+        }
+
+        TokenConfirm tokenConfirm = tokenConfirmOptional.get();
+        //Token đã được xác thực trc dây
+        if (tokenConfirm.getConfirmedAt()!=null){
+            return VerifyResponse.builder()
+                .success(false)
+                .message("Mã xác thực đã được xác thực rồi")
+                .build();
+        }
+
+        if (tokenConfirm.getExpiresAt().isBefore(LocalDateTime.now())){
+            return VerifyResponse.builder()
+                .success(false)
+                .message("Mã xác thực đã hết hạn")
+                .build();
+        }
+
+        return VerifyResponse.builder()
+            .success(true)
+            .message("Xác thực tài khoản thành công!")
+            .build();
+    }
+
+    public void changePassword(ChangePasswordRequest changePasswordRequest) {
+        Optional<TokenConfirm> tokenConfirmOptional = tokenConfirmRepository
+            .findByTokenAndType(changePasswordRequest.getTokenString(),TokenType.PASSWORD_RESET);
+        if (tokenConfirmOptional.isEmpty()){
+            throw new ResourceNotFoundException("Không tìm thấy token");
+        }
+        TokenConfirm tokenConfirm = tokenConfirmOptional.get();
+        User user = tokenConfirm.getUser();
+        user.setPassword(passwordEncoder.encode(changePasswordRequest.getPassword()));
+        userRepository.save(user);
+
+        tokenConfirm.setConfirmedAt(LocalDateTime.now());
+        tokenConfirmRepository.save(tokenConfirm);
     }
 }
