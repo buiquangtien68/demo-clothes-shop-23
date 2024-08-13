@@ -4,6 +4,7 @@ import com.example.demo_clothes_shop_23.entities.Address;
 import com.example.demo_clothes_shop_23.entities.User;
 import com.example.demo_clothes_shop_23.exception.ResourceNotFoundException;
 import com.example.demo_clothes_shop_23.repository.AddressRepository;
+import com.example.demo_clothes_shop_23.repository.UserRepository;
 import com.example.demo_clothes_shop_23.request.UpsertAddressRequest;
 import com.example.demo_clothes_shop_23.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -14,13 +15,16 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class AddressService {
     private final AddressRepository addressRepository;
+    private final UserService userService;
+    private final UserRepository userRepository;
 
-    public List<Address> getByUser_Id() {
+    public List<Address> getByCurrentUser_Id() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails customUserDetails) {
             User user = (User) customUserDetails.getUser();
@@ -28,7 +32,11 @@ public class AddressService {
         }else return new ArrayList<>();
     }
 
-    public Address getByUser_IdAndChosen() {
+    public List<Address> getByUser_Id(Integer userId) {
+        return addressRepository.findByUser_Id(userId);
+    }
+
+    public Address getByCurrentUser_IdAndChosen() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails customUserDetails) {
             User user = (User) customUserDetails.getUser();
@@ -37,9 +45,9 @@ public class AddressService {
     }
 
     public List<Address> createAddress(UpsertAddressRequest addressRequest) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        User user = (User) userDetails.getUser();
+        User user = userRepository.findById(addressRequest.getUserId()).orElseThrow(
+            () -> new  ResourceNotFoundException("Not found user")
+        );
 
         Address address = Address.builder()
             .receiverName(addressRequest.getReceiverName())
@@ -58,15 +66,16 @@ public class AddressService {
     }
 
     public List<Address> updateAddress(UpsertAddressRequest addressRequest, Integer id) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        User user = (User) userDetails.getUser();
+
+        User user = userRepository.findById(addressRequest.getUserId()).orElseThrow(
+            () -> new  ResourceNotFoundException("Not found user")
+        );
 
         Address address = addressRepository.findById(id).orElseThrow(
             () -> new ResourceNotFoundException("No address found with id: " + id)
         );
 
-        if (!addressRepository.findByUser_Id(user.getId()).contains(address)) {
+        if (!addressRepository.findByUser_Id(user.getId()).contains(address) && !Objects.equals(user.getRole().toString(), "ADMIN")) {
             throw new ResourceNotFoundException("Address is not ur own");
         }
         address.setReceiverName(addressRequest.getReceiverName());
@@ -79,25 +88,25 @@ public class AddressService {
         return addressRepository.findByUser_Id(user.getId());
     }
 
-    public List<Address> deleteAddress( Integer id) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        User user = (User) userDetails.getUser();
+    public List<Address> deleteAddress( Integer id, Integer userId) {
+        User user = userRepository.findById(userId).orElseThrow(
+            () -> new  ResourceNotFoundException("Not found user")
+        );
         Address address = addressRepository.findById(id).orElseThrow(
             () -> new ResourceNotFoundException("No address found with id: " + id)
         );
 
-        if (!addressRepository.findByUser_Id(user.getId()).contains(address)) {
+        if (!addressRepository.findByUser_Id(user.getId()).contains(address) && !Objects.equals(user.getRole().toString(), "ADMIN")) {
             throw new ResourceNotFoundException("Address is not ur own");
         }
         addressRepository.delete(address);
         return addressRepository.findByUser_Id(user.getId());
     }
 
-    public List<Address> updateChosen(Integer id) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        User user = (User) userDetails.getUser();
+    public List<Address> updateChosen(Integer id,Integer userId) {
+        User user = userRepository.findById(userId).orElseThrow(
+            () -> new  ResourceNotFoundException("Not found user")
+        );
 
         // Tìm địa chỉ cần cập nhật
         Address address = addressRepository.findById(id).orElseThrow(
@@ -105,7 +114,7 @@ public class AddressService {
         );
 
         // Kiểm tra xem địa chỉ có thuộc về người dùng hiện tại không
-        if (!addressRepository.findByUser_Id(user.getId()).contains(address)) {
+        if (!addressRepository.findByUser_Id(user.getId()).contains(address)&& !Objects.equals(user.getRole().toString(), "ADMIN")) {
             throw new ResourceNotFoundException("Address is not your own");
         }
 

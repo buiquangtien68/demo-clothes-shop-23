@@ -1,3 +1,21 @@
+
+let addresses;
+//Lấy địa chỉ theo user
+document.addEventListener('DOMContentLoaded', (event) => {
+    getAddressByUserId();
+});
+
+async function getAddressByUserId() {
+    try {
+        let res = await axios.get(`/api/admin/addresses/user/${user.id}`)
+        addresses=res.data
+        renderAddress(res.data)
+    }catch (e){
+        toastr.error(e.response.data.message)
+    }
+}
+
+
 // Lấy thông tin địa chỉ để lắp vào bảng
 $(document).ready(function() {
     const apiCities = 'https://esgoo.net/api-tinhthanh/1/0.htm';
@@ -680,6 +698,7 @@ const deleteAddress =async (id)=>{
 const setAddressChosen=async (id)=>{
     try {
         let res = await axios.put(`/api/addresses/updateChosen/${id}/user/${user.id}`)
+        addresses=res.data
         renderAddress(res.data)
         toastr.success("Đã đổi địa chỉ mặc định thành công!")
     }catch (e){

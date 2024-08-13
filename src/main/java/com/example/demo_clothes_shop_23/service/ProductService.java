@@ -16,10 +16,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,6 +32,9 @@ public class ProductService {
     private final QuantityRepository quantityRepository;
     private final ImageRepository imageRepository;
 
+    public List<Product> getAllByStatus(Boolean status) {
+        return productRepository.findAllByStatus(status);
+    }
 
     public Product findProductByIdAndSlugAndStatus(Integer id, String slug, Boolean status) {
         return productRepository.findProductByIdAndSlugAndStatus(id,slug,status);
@@ -220,6 +220,22 @@ public class ProductService {
             .map(i->sizeRepository.findById(i).orElseThrow(() -> new ResourceNotFoundException("Không thấy size")))
             .collect(Collectors.toSet());
 
+        colors.forEach(color->{
+            if (imageRepository.findAllByColor_IdAndProduct_Id(color.getId(), productId).isEmpty()) {
+                for (int i = 0; i < 3; i++) {
+                    Image image =Image.builder()
+                        .imgUrl("https://placehold.co/400x700?text=" +String.valueOf(product.getName().charAt(0)).toUpperCase()+color.getId()+i)
+                        .product(product)
+                        .color(color)
+                        .type(i==0 ? ImageType.MAIN : ImageType.SUP)
+                        .createdAt(LocalDateTime.now())
+                        .updatedAt(LocalDateTime.now())
+                        .build();
+                    imageRepository.save(image);
+                }
+            }
+        });
+
         List<Quantity> quantities = quantityRepository.findByProductId(productId);
         quantityRepository.deleteAll(quantities);
 
@@ -256,6 +272,31 @@ public class ProductService {
                 .build();
             quantityRepository.save(quantityEntity);
 
+            if (product.getDiscount()!=null){
+                if (Objects.equals(product.getDiscount().getType().toString(), "PERCENT")){
+                    // Lấy giá sản phẩm và tính toán giá mới sau khi giảm giá
+                    Long price = product.getPrice();
+                    Long discountAmount = product.getDiscount().getAmount();
+                    Long newPrice = price * (1 - discountAmount / 100);
+                    product.setNewPrice(newPrice);
+
+                }else if (Objects.equals(product.getDiscount().getType().toString(), "SAME_PRICE")){
+                    // Lấy giá sản phẩm và tính toán giá mới sau khi giảm giá
+                    Long discountAmount = product.getDiscount().getAmount();
+
+                    product.setNewPrice(discountAmount);
+                }else {
+                    // Lấy giá sản phẩm và tính toán giá mới sau khi giảm giá
+                    Long price = product.getPrice();
+                    Long discountAmount = product.getDiscount().getAmount();
+                    Long newPrice =  price - discountAmount;
+
+                    product.setNewPrice(newPrice);
+                }
+            } else{
+                product.setNewPrice(product.getPrice());
+            }
+
             product.setName(upsertProductRequest.getName());
             product.setSlug(slugify.slugify(upsertProductRequest.getName()));
             product.setDescription(upsertProductRequest.getDescription());
@@ -267,6 +308,5 @@ public class ProductService {
             product.setUpdatedAt(LocalDateTime.now());
             productRepository.save(product);
         });
-
     }
 }

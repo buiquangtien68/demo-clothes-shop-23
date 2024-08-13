@@ -29,15 +29,15 @@ public class AddressApi {
         return ResponseEntity.ok(addresses); //200
     }
 
-    @PutMapping("/updateChosen/{id}")
-    public ResponseEntity<?> updateChosenAddress(@Valid @PathVariable Integer id) {
-        List<Address> addresses = addressService.updateChosen(id);
+    @PutMapping("/updateChosen/{id}/user/{userId}")
+    public ResponseEntity<?> updateChosenAddress(@Valid @PathVariable Integer id, @PathVariable Integer userId) {
+        List<Address> addresses = addressService.updateChosen(id,userId);
         return ResponseEntity.ok(addresses); //200
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteAddress(@PathVariable Integer id) {
-        List<Address> addresses = addressService.deleteAddress(id);
+    @DeleteMapping("/{id}/user/{userId}")
+    public ResponseEntity<?> deleteAddress(@PathVariable Integer id, @PathVariable Integer userId) {
+        List<Address> addresses = addressService.deleteAddress(id,userId);
         return ResponseEntity.ok(addresses); //200
     }
 

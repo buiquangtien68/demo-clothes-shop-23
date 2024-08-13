@@ -239,7 +239,7 @@
                 const confirm = window.confirm("Bạn có chắc chắn muốn xóa không")
                 if(confirm){
                     try {
-                        const deleteRv = await axios.delete(`/api/admin/blogs/${blog.id}`)
+                        const deleteRv = await axios.delete(`/api/admin/blogs/${currentBlog.id}`)
                         console.log("Sự kiện xóa blog")
                         toastr.success("Xóa thành công đánh giá")
                         setTimeout(()=>{

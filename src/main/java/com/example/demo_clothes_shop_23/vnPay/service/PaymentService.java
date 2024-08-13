@@ -99,6 +99,7 @@ public class PaymentService {
         PaymentResponse paymentResponse = PaymentResponse.builder()
             .status("OK")
             .message("Successfully created payment link: " + vnp_TxnRef)
+            .codeOrder(vnp_TxnRef)
             .URL(paymentUrl)
             .build();
 

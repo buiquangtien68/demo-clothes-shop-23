@@ -22,4 +22,7 @@ public class ImageService {
         return imageProductDetailDecorator.decorate(images);
     }
 
+    public List<Image> getByProductId(int id) {
+        return imageRepository.findByProduct_Id(id);
+    }
 }

@@ -44,4 +44,6 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
 
     Page<Product> findByDiscount_IdAndStatus(Integer discount_id, Boolean status, Pageable pageable);
 
+    List<Product> findAllByStatus(Boolean status);
+
 }

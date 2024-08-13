@@ -12,6 +12,7 @@ import lombok.experimental.FieldDefaults;
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpsertAddressRequest {
+    Integer userId;
     @NotEmpty(message = "Không được để trống")
     String receiverName;
     @NotEmpty(message = "Không được để trống")

@@ -94,7 +94,7 @@ public class WebController {
     /*Trang thông tin cá nhân*/
     @GetMapping("/user-info")
     public String userInfo(Model model) {
-        model.addAttribute("addressesByUserId", addressService.getByUser_Id());
+        model.addAttribute("addressesByUserId", addressService.getByCurrentUser_Id());
         return "web/user-info";
     }
 
@@ -229,8 +229,8 @@ public class WebController {
     @GetMapping("/checkout")
     public String checkOut(Model model) {
         model.addAttribute("cartsByUserId", cartService.getByUser_IdOrderByCreatedAt());
-        model.addAttribute("addressesByUserId", addressService.getByUser_Id());
-        model.addAttribute("addressChosen", addressService.getByUser_IdAndChosen());
+        model.addAttribute("addressesByUserId", addressService.getByCurrentUser_Id());
+        model.addAttribute("addressChosen", addressService.getByCurrentUser_IdAndChosen());
         model.addAttribute("cartsByUserId", cartService.getByUser_IdOrderByCreatedAt());
         return "web/checkout";
     }

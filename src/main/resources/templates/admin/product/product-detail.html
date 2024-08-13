@@ -239,8 +239,21 @@
 
                             <!-- Tab Cập nhật hình ảnh -->
                             <div class="tab-pane" id="tabs-product-img" role="tabpanel">
-                                <div class="product__details__tab__content ">
-
+                                <div class="product__details__tab__content">
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="col-6 mb-2 mt-2">
+                                                <button type="button" class="btn btn-info px-4" id="btnUpdateImage">
+                                                    Cập nhật
+                                                </button>
+                                            </div>
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div class="row image-table"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -262,7 +275,7 @@
                                                         </tr>
                                                         </thead>
                                                         <tbody>
-                                                        <tr th:each="review : ${reviews}">
+                                                        <tr th:each="review : ${reviews}" th:data-id="${review.id}">
                                                             <td th:text="${review.user.name}"></td>
                                                             <td>[[${review.rating}]]/5</td>
                                                             <td th:text="${review.content}"></td>
@@ -475,8 +488,163 @@
         $('#description').val(currentProduct.description)
         $('#price').val(currentProduct.price)
 
-        $('#form-product').validate({
 
+
+        let imageMap = new Map(); // Khởi tạo map để lưu trữ ảnh
+
+        // Chuyển đổi dữ liệu từ server thành Map
+        let imageMapFromServer = [[${imageMap}]]; // Giả sử imageMapFromServer là dạng này
+        let newImageMap = new Map();
+
+        Object.keys(imageMapFromServer).forEach(colorId => {
+            let images = imageMapFromServer[colorId];
+            newImageMap.set(parseInt(colorId), images);
+        });
+
+        imageMap = newImageMap;
+
+        function updateImageTable() {
+            let selectedColors = $('#color').val() || [];
+
+            // Xóa nội dung cũ
+            let tableHtml = `
+    <table class="table table-bordered" style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr>
+                <th>Màu sắc</th>
+                <th>Hình ảnh chính</th>
+                <th>Hình ảnh phụ</th>
+            </tr>
+        </thead>
+        <tbody>`;
+
+            selectedColors.forEach(colorId => {
+                let colorText = $('#color option:selected').filter(`[value="${colorId}"]`).text();
+
+                // Lấy danh sách hình ảnh từ imageMap với colorId
+                let images = imageMap.get(parseInt(colorId)) || [];
+
+                let mainImage = images.find(img => img.type === 'MAIN') || {id: '', imgUrl: ''};
+                let subImages = images.filter(img => img.type !== 'MAIN');
+
+
+                tableHtml += `
+        <tr data-color="${colorId}" style="text-align: center;">
+            <td>${colorText}</td>
+            <td>
+                <img src="${mainImage.imgUrl}" style="width: 100px; height: auto; border: 1px solid #ddd; padding: 5px; margin-bottom: 5px;">
+                <button type="button" class="btn btn-primary btn-sm btn-change-main-image mt-4" data-color="${colorId}">Thay đổi ảnh chính</button>
+            </td>
+            <td class="d-flex flex-column align-items-center">
+                <div class="d-flex flex-wrap justify-content-center mb-2">
+                    ${subImages.map((img, index) => `
+                        <div class="position-relative mb-2" style="margin-right: 5px;">
+                            <img src="${img.imgUrl}" alt="${colorText} - Sub ${index + 1}" style="width: 100px; height: auto; border: 1px solid #ddd; padding: 5px;">
+                            <button type="button" class="btn btn-danger btn-sm position-absolute delete-sub-image" style="top: -5px; right: -5px; padding: 2px 5px;" data-id="${img.id}">&times;</button>
+                        </div>
+                    `).join('')}
+                </div>
+                <button type="button" class="btn btn-success btn-sm btn-add-sub-image mt-2" data-color="${colorId}">Thêm ảnh phụ</button>
+            </td>
+        </tr>`;
+            });
+
+            tableHtml += '</tbody></table>';
+            $('.image-table').html(tableHtml);
+
+            // Xử lý sự kiện thay đổi ảnh chính
+            $('.btn-change-main-image').on('click', function() {
+                let colorId = $(this).data('color');
+                let images = imageMap.get(parseInt(colorId)) || [];
+                let mainImage = images.find(img => img.type === 'MAIN') || { id: '', imgUrl: '' };
+
+                // Tạo một input type=file để chọn ảnh
+                let fileInput = $('<input type="file" accept="image/*" style="display: none;">');
+                fileInput.on('change', function(event) {
+                    let file = event.target.files[0];
+                    if (file) {
+                        let reader = new FileReader();
+                        reader.onload = function(e) {
+                            let newMainImageUrl = e.target.result;
+                            // Cập nhật ảnh chính
+                            mainImage.imgUrl = newMainImageUrl;
+
+                            // Cập nhật imageMap
+                            images = images.map(img => img.type === 'MAIN' ? mainImage : img);
+                            imageMap.set(parseInt(colorId), images);
+
+                            updateImageTable(); // Cập nhật lại bảng
+                        };
+                        reader.readAsDataURL(file); // Đọc ảnh dưới dạng URL dữ liệu
+                    }
+                });
+
+                fileInput.click(); // Mở hộp thoại chọn tệp
+            });
+
+            // Xử lý sự kiện thêm ảnh phụ
+            $('.btn-add-sub-image').on('click', function() {
+                let colorId = $(this).data('color');
+                let images = imageMap.get(parseInt(colorId)) || [];
+                let mainImage = images.find(img => img.type === 'MAIN');
+                let subImages = images.filter(img => img.type !== 'MAIN');
+
+                if (subImages.length < 2) {
+                    // Tạo một input type=file để chọn ảnh phụ
+                    let fileInput = $('<input type="file" accept="image/*" style="display: none;">');
+                    fileInput.on('change', function(event) {
+                        let file = event.target.files[0];
+                        if (file) {
+                            let reader = new FileReader();
+                            reader.onload = function(e) {
+                                let newImageUrl = e.target.result;
+                                let newImageId = Date.now(); // Hoặc một cơ chế khác để tạo id duy nhất cho ảnh mới
+                                subImages.push({ id: newImageId, imgUrl: newImageUrl, type: 'SUB' });
+
+                                // Cập nhật imageMap
+                                images = [mainImage, ...subImages];
+                                imageMap.set(parseInt(colorId), images);
+
+                                updateImageTable(); // Cập nhật lại bảng
+                            };
+                            reader.readAsDataURL(file); // Đọc ảnh dưới dạng URL dữ liệu
+                        }
+                    });
+
+                    fileInput.click(); // Mở hộp thoại chọn tệp
+                } else {
+                    alert("Bạn đã đạt đến giới hạn số lượng hình ảnh phụ.");
+                }
+            });
+
+            // Xử lý sự kiện xóa ảnh phụ
+            $('.image-table').on('click', '.delete-sub-image', function() {
+                let colorId = $(this).closest('tr').data('color');
+                let imageId = $(this).data('id');
+
+                // Cập nhật imageMap
+                let images = imageMap.get(parseInt(colorId)) || [];
+                let mainImage = images.find(img => img.type === 'MAIN') || { id: '', imgUrl: '' };
+                let subImages = images.filter(img => img.type !== 'MAIN');
+
+                // Xóa ảnh phụ dựa trên imageId
+                subImages = subImages.filter(img => img.id !== imageId);
+
+                // Cập nhật lại images
+                images = [mainImage, ...subImages];
+                imageMap.set(parseInt(colorId), images);
+
+                // Cập nhật lại bảng hình ảnh
+                updateImageTable();
+            });
+        }
+
+        // Gọi hàm để cập nhật bảng hình ảnh
+        updateImageTable();
+
+
+        //Validate
+        $('#form-product').validate({
             rules: {
                 name: {
                     required: true,
@@ -586,386 +754,22 @@
             }
         });
 
-
-
-
-
-
-
-        // // Summernote
-        // $('#content').summernote({
-        //     height: 600,                 // set editor height
-        //     minHeight: null,             // set minimum height of editor
-        //     maxHeight: null,             // set maximum height of editor
-        //     focus: true,                 // set focus to editable area after initializing summernote
-        //     disableLinkTarget: true
-        // });
-
-        //Update product
-       /* let nameEl = document.getElementById("name")
-        let trailerEl = document.getElementById("trailer")
-        let descriptionEl = document.getElementById("description")
-        let statusEl = document.getElementById("status")
-        let releaseYearEl = document.getElementById("releaseYear")
-        let productTypeEl = document.getElementById("productType")
-        let countryEl = document.getElementById("country")
-        const btnCreateproduct = document.getElementById("btnUpdateproduct")
-        const btnDeleteproduct = document.getElementById("btnDeleteproduct")
-        btnCreateproduct.addEventListener("click", async (e)=>{
-            e.preventDefault()
-            console.log("Đã ấn nút")
-
-            if (!$('#form-product').valid()){
-                return;
-            }
-
-            const data = {
-                name: nameEl.value,
-                description: descriptionEl.value,
-                releaseYear: releaseYearEl.value,
-                productType: productTypeEl.value,
-                status : statusEl.value === "1",
-                trailer: trailerEl.value,
-                countryId: countryEl.value,
-                genreIds: $('#genre').val(),
-                actorIds: $('#actor').val(),
-                directorIds: $('#director').val(),
-            }
-            if (productTypeEl.value === "PHIM_LE" || productTypeEl.value === "PHIM_CHIEU_RAP" && episodes.length>1){
-                toastr.error("Nếu là phim lẻ thì chỉ có 1 tập phim. Vui lòng xem lại")
-                return;
-            }
-            // Gọi API
-            try {
-                let res = await axios.put(`/api/admin/products/${currentproduct.id}`, data);
-                toastr.success("Cập nhật product thành công")
-            } catch (e) {
-                console.log(e)
-                toastr.error(e.response.data.message);
-            }
-        })
-
-        btnDeleteproduct.addEventListener("click", async (e)=>{
-            const confirm = window.confirm("Bạn có chắc chắn muốn xóa ko")
+        const deleteReview =async (id)=>{
+            const confirm = window.confirm("Bạn có chắc chắn muốn xóa không")
             if(confirm){
                 try {
-                    const deleteproduct = await axios.delete(`/api/admin/products/${currentproduct.id}`)
-                    console.log("Sự kiện xóa product")
-                    toastr.success("Xóa thành công product")
-                    setTimeout(()=>{
-                        window.location.href='/admin/products'
-                    },1000)
-                } catch (error) {
-                    console.log(error)
-                }
-            }
-        })
-
-        $('#form-product').validate({
-            rules: {
-                name: {
-                    required: true,
-                    pattern: /^\s*\S.*$/, // Kiểm tra xem có ký tự nào không là khoảng trắng ở đầu không
-                },
-                releaseYear: {
-                    required: true,
-                    min: 1900,
-                    max: 2100,
-                },
-                description:{
-                    required: true,
-                    pattern: /^\s*\S.*$/, // Kiểm tra xem có ký tự nào không là khoảng trắng ở đầu không
-                }
-            },
-            messages: {
-                name: {
-                    required: "Vui lòng nhập tiêu đề",
-                    pattern: "Tiêu đề không được chỉ chứa khoảng trắng"
-                },
-                releaseYear: {
-                    required: "Vui lòng nhập năm phát hành",
-                    min: "Không được dưới năm 1900",
-                    max: "Không được trên năm 2100"
-                },
-                description:{
-                    required: "Vui lòng nhập mô tả",
-                    pattern: "Mô tả không được chỉ chứa khoảng trắng"
-                }
-            },
-            errorPlacement: function (error, element) {
-                if (element.attr("name") === "content") { // Kiểm tra nếu là trường nội dung
-                    error.appendTo(element.siblings("span")); // Hiển thị thông báo lỗi bên cạnh trường nội dung
-                } else {
-                    error.addClass('invalid-feedback');
-                    element.closest('.form-group').append(error);
-                }
-            },
-            highlight: function (element, errorClass, validClass) {
-                $(element).addClass('is-invalid');
-            },
-            unhighlight: function (element, errorClass, validClass) {
-                $(element).removeClass('is-invalid');
-            }
-        });
-
-        //Upload Image
-        const inputPosterEl = document.getElementById("input-poster")
-        const posterEl = document.getElementById("poster")
-        inputPosterEl.addEventListener("change",async (event) =>{
-            //lấy file upload
-            const files = event.target.files;
-
-            //Tạo đối tượng form data
-            const formData = new FormData();
-            formData.append("file",files[0])
-
-
-            //Gọi API
-            try {
-                let res = await axios.post(`/api/admin/products/${currentproduct.id}/upload-poster`,formData)
-                console.log(res)
-                posterEl.src = res.data;
-            }catch (e){
-                console.log(e)
-            }
-        })
-
-
-        //Modal create và update episode
-        let episodes = [[${episodes}]]
-        const modalEpisodeTitleCreateEl = document.getElementById("modal-title-create")
-        const nameEpisodeEl = document.getElementById("nameEpisode")
-        const ordersEpisodeEl = document.getElementById("ordersEpisode")
-        const btnCreateEpisodeEl = document.getElementById("btnCreateEpisode")
-
-        const modalEpisodeEl = document.getElementById("modal-create-ep")
-        const myModalEpisodeEl = new bootstrap.Modal(modalEpisodeEl,{
-            keyboard: false
-        })
-        let idEpisodeUpdate = null;
-
-        //Khi đóng modal thì reset hết giá trị
-        modalEpisodeEl.addEventListener('hidden.bs.modal', event => {
-            console.log("Su kien dong modal")
-            modalEpisodeTitleCreateEl.innerText="Tạo tập phim"
-            nameEpisodeEl.value= "";
-            ordersEpisodeEl.value = ""
-            btnCreateEpisodeEl.innerText="Tạo"
-            idEpisodeUpdate=null;
-        })
-
-        //Khi ấn nút edit
-        const openUpdateModal= (id)=>{
-            myModalEpisodeEl.show();
-            modalEpisodeTitleCreateEl.innerText="Cập nhật tập phim"
-            nameEpisodeEl.value= episodes.find(ep => ep.id===id).name;
-            ordersEpisodeEl.value = episodes.find(ep => ep.id===id).orders;
-            btnCreateEpisodeEl.innerText="Sửa"
-            idEpisodeUpdate=id;
-        }
-
-        const episodeFormEl = document.getElementById("episodeForm")
-        //khi ấn nút tạo hoặc sửa
-        episodeFormEl.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            console.log("Đã nghe ấn nút")
-
-            if (!$('#episodeForm').valid()){
-                return;
-            }
-
-            if (productTypeEl.value === "PHIM_LE" || productTypeEl.value === "PHIM_CHIEU_RAP" && episodes.length>=1){
-               toastr.error("Nếu là phim lẻ thì chỉ có 1 tập phim. Vui lòng xem lại")
-                return;
-            }
-
-            const data = {
-                name: nameEpisodeEl.value,
-                orders: ordersEpisodeEl.value,
-                productId: currentproduct.id
-            }
-
-            // Gọi API
-            if (idEpisodeUpdate!=null){
-                await updateEp(data);
-            }else {
-                await postEp(data);
-            }
-        })
-        //tạo episode
-        const postEp =async (data) => {
-            try {
-                let res = await axios.post("/api/admin/episodes", data);
-                episodes.push(res.data);
-                episodes.sort((a, b) => a.orders - b.orders);
-                renderEpisode(episodes);
-
-                // Dong modal
-                myModalEpisodeEl.hide();
-                toastr.success("Tạo mới thành công")
-
-            } catch (e) {
-                console.log(e)
-            }
-        }
-        //update episode
-        const updateEp=async (data) =>{
-            try {
-                let updateData = await axios.put(`/api/admin/episodes/${idEpisodeUpdate}`, data);
-
-                const editedEpisodeIndex = episodes.findIndex(ep => ep.id === idEpisodeUpdate);
-                console.log(idEpisodeUpdate)
-                console.log(editedEpisodeIndex)
-                if (editedEpisodeIndex !== -1) {
-                    episodes[editedEpisodeIndex] = updateData.data;
-                    episodes.sort((a, b) => a.orders - b.orders);
-                    renderEpisode(episodes);
-                }
-                // Dong modal
-                myModalEpisodeEl.hide();
-                toastr.success("Cập nhật thành công")
-            } catch (e) {
-                console.log(e)
-            }
-        }
-        //Xóa episode
-        const deleteEp =async (id)=>{
-            const confirm = window.confirm("Bạn có chắc chắn muốn xóa ko")
-            if(confirm){
-                try {
-                    const deleteEp = await axios.delete(`/api/admin/episodes/${id}`)
-                    console.log("Sự kiện xóa ep")
-                    episodes=episodes.filter(ep=>ep.id !==id);
-                    renderEpisode(episodes)
-
-                    // Dong modal
-                    myModalEpisodeEl.hide();
-                    toastr.success("Xóa thành công")
-                } catch (error) {
-                    console.log(error)
-                }
-            }
-        }
-
-        //Render danh sách Episode khi tạo mới hoặc update
-        const formatDate = dateStr => {
-            const date = new Date(dateStr);
-            const day = `0${date.getDate()}`.slice(-2); // 01 -> 01, 015 -> 15
-            const month = `0${date.getMonth() + 1}`.slice(-2);
-            const year = date.getFullYear();
-            return `${day}/${month}/${year}`;
-        }
-        const episodeListEl = document.getElementById("episodeList")
-        const renderEpisode = episodes =>{
-            let html=""
-            episodes.forEach(episode =>{
-                html+=`
-                <tr>
-                    <td>${episode.orders}</td>
-                    <td>${episode.name}</td>
-                    <td>${episode.videoURL==null? '': episode.videoURL}</td>
-                    <td>${episode.duration==null? '': episode.duration}</td>
-                    <td>${formatDate(episode.createdAt)}</td>
-                    <td>
-                        <button onclick="uploadVideo(${episode.id})" class="btn btn-sm btn-warning text-white">
-                            <i class="fas fa-upload"></i>
-                        </button>
-                        <input type="file" id="input-video-${episode.id}" class="d-none">
-                        <button class="btn btn-sm btn-primary" type="button" data-toggle="modal" data-target="#modal-trailer" onclick="previewVideo(${episode.id})">
-                            <i class="fas fa-play"></i>
-                        </button>
-                        <button class="btn btn-sm btn-success" onclick="openUpdateModal(${episode.id})">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteEp(${episode.id})">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </td>
-                </tr>
-                `
-            })
-            episodeListEl.innerHTML=html;
-            console.log("Đã render")
-        }
-        $.validator.addMethod("notEqualToArray", function(value, element, array) {
-            return array.indexOf(Number(value)) === -1;
-        }, "Thứ tự phim bị trùng");
-        //Validate episodeForm
-        $('#episodeForm').validate({
-            rules: {
-                nameEpisode: {
-                    required: true,
-                },
-                ordersEpisode: {
-                    required: true,
-                    notEqualToArray: episodes.map(e=>e.orders)
-                },
-            },
-            messages: {
-                nameEpisode:{
-                    required: "Không được để trống tên tập phim.",
-                },
-                ordersEpisode: {
-                    required: "Không được để trống thứ tự tập phim",
-                    notEqualToArray: "Thứ tự phim bị trùng"
-
-                },
-            },
-            errorElement: 'span',
-            errorPlacement: function (error, element) {
-                error.addClass('invalid-feedback');
-                element.closest('.form-group').append(error);
-            },
-            highlight: function (element, errorClass, validClass) {
-                $(element).addClass('is-invalid');
-            },
-            unhighlight: function (element, errorClass, validClass) {
-                $(element).removeClass('is-invalid');
-            }
-        });
-
-        //Upload video
-        const uploadVideo = (id)=>{
-            document.getElementById(`input-video-${id}`).click();
-            document.getElementById(`input-video-${id}`).addEventListener("change",async (event) =>{
-                //lấy file upload
-                const files = event.target.files;
-
-                //Tạo đối tượng form data
-                const formData = new FormData();
-                formData.append("file",files[0])
-                console.log(formData)
-
-                //Gọi API
-                try {
-                    let res = await axios.post(`/api/admin/episodes/${id}/upload-video`,formData)
-                    console.log(res)
-                    const index = episodes.findIndex(episode => episode.id === id);
-                    if (index !== -1) {
-                        episodes[index].videoURL = res.data.url;
-                        console.log(res.data.url)
-                        episodes[index].duration=res.data.duration
-                        console.log(res.data.duration)
-                        renderEpisode(episodes);
-                        toastr.success("Cập nhật video thành công")
+                    const deleteRv = await axios.delete(`/api/reviews/${currentProduct.id}/${id}`)
+                    console.log("Sự kiện xóa rv")
+                    const reviewRow = document.querySelector(`tr[data-id="${id}"]`);
+                    if (reviewRow) {
+                        reviewRow.remove();
                     }
-                }catch (e){
-                    console.log(e)
+                    toastr.success("Xóa thành công đánh giá")
+                } catch (e) {
+                    toastr.error(e.response.data.message)
                 }
-            })
-        }
-
-        //preview
-        const videoEl = document.getElementById("video")
-        const previewVideo =  (id)=>{
-            const index = episodes.findIndex(episode => episode.id === id);
-            if (index !== -1) {
-                console.log(episodes[index])
-                videoEl.src= episodes[index].videoURL
-                console.log("sự kiện phát preview")
             }
         }
-*/
     </script>
 </th:block>
 

@@ -1,6 +1,8 @@
 package com.example.demo_clothes_shop_23.controller;
 
 import com.example.demo_clothes_shop_23.entities.*;
+import com.example.demo_clothes_shop_23.model.enums.ImageType;
+import com.example.demo_clothes_shop_23.model.enums.OrdersStatus;
 import com.example.demo_clothes_shop_23.model.enums.SizeType;
 import com.example.demo_clothes_shop_23.service.*;
 import lombok.AllArgsConstructor;
@@ -28,6 +30,9 @@ public class AdminController {
     private final UserService userService;
     private final OrderService orderService;
     private final ReviewService reviewService;
+    private final ImageService imageService;
+    private final OrderDetailService orderDetailService;
+    private final CouponService couponService;
 
     //dashboard
     @GetMapping("/dashboard")
@@ -92,13 +97,23 @@ public class AdminController {
         sortedColor.addAll(colors);
 
         List<Quantity> quantities = quantityService.getByProductId(id);
+
         Map<String, Integer> stockMap = quantities.stream()
             .filter(q -> q.getValue() > 0)
             .collect(Collectors.toMap(
                 q -> q.getColor().getId() + "-" + q.getSize().getId(),
                 Quantity::getValue
             ));
+        List<Image> images = imageService.getByProductId(id);
 
+        Map<Integer, List<Image>> imageMap = images.stream()
+            .sorted(Comparator.comparing(img -> img.getType() == ImageType.MAIN ? 0 : 1))
+            .collect(Collectors.groupingBy(
+                img -> img.getColor().getId(),
+                Collectors.toList()
+            ));
+
+        model.addAttribute("imageMap", imageMap);
         model.addAttribute("stockMap", stockMap);
         model.addAttribute("sizeTypes", SizeType.values());
         model.addAttribute("colors",sortedColor);
@@ -129,17 +144,39 @@ public class AdminController {
     }
 
     @GetMapping("/users/{id}")
-    public String getDetailPage(@PathVariable int id, Model model) {
+    public String getUserDetailPage(@PathVariable int id, Model model) {
         model.addAttribute("user",userService.getById(id));
         model.addAttribute("ordersByUserId", orderService.getByUser_IdOrderByCreatedAtDesc(id));
         return "admin/user/user-detail";
     }
 
     @GetMapping("/users/create")
-    public String getCreatePage(Model model) {
-
-
+    public String getUserCreatePage(Model model) {
         return "admin/user/user-create";
+    }
+
+    //ORDER
+    @GetMapping("/orders")
+    public String getOrderIndexPage(Model model) {
+        model.addAttribute("orders",orderService.getAll());
+        return "admin/order/order-index";
+    }
+
+    @GetMapping("/orders/{codeOrder}")
+    public String getOrderDetailPage(@PathVariable String codeOrder, Model model) {
+        Orders order = orderService.getByCodeOrder(codeOrder);
+        model.addAttribute("order",order);
+        model.addAttribute("orderDetails",orderDetailService.getByOrderId(order.getId()));
+        model.addAttribute("orderStatus", OrdersStatus.values());
+        return "admin/order/order-detail";
+    }
+
+    @GetMapping("/orders/create")
+    public String getOrderCreatePage(Model model) {
+        model.addAttribute("users",userService.getAll());
+        model.addAttribute("coupons",couponService.getByActiveTrue());
+        model.addAttribute("products",productService.getAllByStatus(true));
+        return "admin/order/order-create";
     }
 
 

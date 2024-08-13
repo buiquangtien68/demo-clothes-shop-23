@@ -16,6 +16,10 @@ import java.util.List;
 public class CouponService {
     private CouponRepository couponRepository;
 
+    public List<Coupon> getByActiveTrue() {
+        return couponRepository.findByActive(true);
+    }
+
     public Coupon getCoupon(Integer userId,String couponCode) {
         // Tìm coupon theo mã và trạng thái hoạt động
         Coupon coupon = couponRepository.findByCodeAndActive(couponCode, true);

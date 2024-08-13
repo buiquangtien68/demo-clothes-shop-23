@@ -5,10 +5,7 @@ import com.example.demo_clothes_shop_23.exception.ResourceNotFoundException;
 import com.example.demo_clothes_shop_23.model.enums.DeliveryType;
 import com.example.demo_clothes_shop_23.model.enums.OrdersStatus;
 import com.example.demo_clothes_shop_23.model.enums.PaymentType;
-import com.example.demo_clothes_shop_23.repository.CouponRepository;
-import com.example.demo_clothes_shop_23.repository.OrdersDetailRepository;
-import com.example.demo_clothes_shop_23.repository.OrdersRepository;
-import com.example.demo_clothes_shop_23.repository.QuantityRepository;
+import com.example.demo_clothes_shop_23.repository.*;
 import com.example.demo_clothes_shop_23.request.CreateOrderRequest;
 import com.example.demo_clothes_shop_23.security.CustomUserDetails;
 import com.example.demo_clothes_shop_23.vnPay.config.PaymentConfig;
@@ -29,6 +26,11 @@ public class OrderService {
     private final OrdersRepository ordersRepository;
     private final OrdersDetailRepository ordersDetailRepository;
     private final QuantityRepository quantityRepository;
+    private final UserRepository userRepository;
+
+
+    public Object getAll() {
+        return ordersRepository.findAll();}
 
     public Orders getByCodeOrder(String codeOrder) {
         return ordersRepository.findByCodeOrder(codeOrder);
@@ -53,9 +55,10 @@ public class OrderService {
 
 
     public Orders createOrder(CreateOrderRequest createOrderRequest) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        User user = (User) userDetails.getUser();
+        User user = userRepository.findById(createOrderRequest.getUserId()).orElseThrow(
+            () -> new ResourceNotFoundException("User not found")
+        );
+
         if (createOrderRequest.getCouponCode() != null && !createOrderRequest.getCouponCode().isEmpty()) {
             Coupon coupon = couponRepository.findByCodeAndActive(createOrderRequest.getCouponCode(), true);
 
@@ -141,5 +144,25 @@ public class OrderService {
         order.setStatus(OrdersStatus.DA_HUY);
         ordersRepository.save(order);
         return order;
+    }
+
+    public void updateStatus(String status, Integer orderId) {
+        Orders order = ordersRepository.findById(orderId)
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng này"));
+        if (order.getStatus().equals(OrdersStatus.DA_HUY)) {
+            List<OrdersDetail> ordersDetails = ordersDetailRepository.findByOrdersId(orderId);
+            ordersDetails.forEach(ordersDetail -> {
+                Quantity quantity = quantityRepository.findByProductIdAndColorIdAndSizeId(
+                    ordersDetail.getProduct().getId(),
+                    ordersDetail.getColor().getId(),
+                    ordersDetail.getSize().getId()
+                );
+                quantity.setValue(quantity.getValue() + ordersDetail.getQuantity());
+                quantityRepository.save(quantity);
+            });
+            order.setStatus(OrdersStatus.DA_HUY);
+        }
+        order.setStatus(OrdersStatus.valueOf(status));
+        ordersRepository.save(order);
     }
 }

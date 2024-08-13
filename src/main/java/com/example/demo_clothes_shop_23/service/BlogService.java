@@ -1,10 +1,12 @@
 package com.example.demo_clothes_shop_23.service;
 
 import com.example.demo_clothes_shop_23.entities.Blog;
+import com.example.demo_clothes_shop_23.entities.Comment;
 import com.example.demo_clothes_shop_23.entities.Tag;
 import com.example.demo_clothes_shop_23.entities.User;
 import com.example.demo_clothes_shop_23.exception.ResourceNotFoundException;
 import com.example.demo_clothes_shop_23.repository.BlogRepository;
+import com.example.demo_clothes_shop_23.repository.CommentRepository;
 import com.example.demo_clothes_shop_23.request.UpsertBlogRequest;
 import com.example.demo_clothes_shop_23.security.CustomUserDetails;
 import com.github.slugify.Slugify;
@@ -29,6 +31,7 @@ public class BlogService {
     private final BlogRepository blogRepository;
     private final TagService tagService;
     private final FileService fileService;
+    private final CommentRepository commentRepository;
 
     public List<Blog> getAll() {
         return blogRepository.findAll();
@@ -127,6 +130,9 @@ public class BlogService {
         if (!blog.getUser().getId().equals(user.getId())) {
             throw new RuntimeException("User not authorized to update blog");
         }
+
+        List<Comment> comments = commentRepository.findByBlog_IdOrderByCreatedAtDesc(blog.getId());
+        commentRepository.deleteAll(comments);
 
         blogRepository.delete(blog);
     }

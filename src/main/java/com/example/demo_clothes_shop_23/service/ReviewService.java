@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -133,7 +134,7 @@ public class ReviewService {
         User user = (User) userDetails.getUser();
 
         //Kiểm tra xem review này có của user này ko
-        if (!review.getUser().getId().equals(user.getId())) {
+        if (!review.getUser().getId().equals(user.getId()) && !Objects.equals(user.getRole().toString(), "ADMIN")) {
             throw new RuntimeException("Người dùng không sở hữu đánh giá này");
         }
 
