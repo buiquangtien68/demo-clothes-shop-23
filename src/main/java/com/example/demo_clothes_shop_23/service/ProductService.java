@@ -105,7 +105,7 @@ public class ProductService {
     }
 
     public Product getOneProductByCategoryId(Integer categoryId) {
-        return productRepository.findByCategoryId(categoryId)
+        return productRepository.findByCategoryIdAndStatusTrue(categoryId)
             .stream()
             .findFirst()
             .orElse(null);
@@ -308,5 +308,13 @@ public class ProductService {
             product.setUpdatedAt(LocalDateTime.now());
             productRepository.save(product);
         });
+    }
+
+    public List<Product> getByDiscount_Id(Integer id) {
+        return productRepository.findByDiscount_Id(id);
+    }
+
+    public List<Product> getByCategoryId(Integer categoryId) {
+        return productRepository.findByCategoryId(categoryId);
     }
 }

@@ -33,6 +33,7 @@ public class AdminController {
     private final ImageService imageService;
     private final OrderDetailService orderDetailService;
     private final CouponService couponService;
+    private final DiscountService discountService;
 
     //dashboard
     @GetMapping("/dashboard")
@@ -177,6 +178,56 @@ public class AdminController {
         model.addAttribute("coupons",couponService.getByActiveTrue());
         model.addAttribute("products",productService.getAllByStatus(true));
         return "admin/order/order-create";
+    }
+
+    //DISCOUNT & COUPON
+    @GetMapping("/discounts")
+    public String getDiscountIndexPage(Model model) {
+        List<Discount> discounts = discountService.getAll();
+        Map<Integer, List<Product>> productsByDiscountId = discounts.stream()
+            .collect(Collectors.toMap(
+                Discount::getId,
+                discount -> {
+                    List<Product> products = productService.getByDiscount_Id(discount.getId());
+                    return products != null ? products : Collections.emptyList();
+                }
+            ));
+
+        model.addAttribute("discounts",discounts);
+        model.addAttribute("productsByDiscountId", productsByDiscountId);
+        return "admin/discount/discount-index";
+    }
+
+    @GetMapping("/discounts/{id}")
+    public String getDiscountDetailPage(@PathVariable Integer id, Model model) {
+        Discount discount = discountService.getDiscountById(id);
+        model.addAttribute("discount",discount);
+        model.addAttribute("productsByDiscount",productService.getByDiscount_Id(discount.getId()));
+        model.addAttribute("products",productService.getAll());
+       List<Category> categories = categoryService.getCategoriesWithParentId();
+        Map<Integer, List<Product>> productsByCategory = categories.stream()
+            .collect(Collectors.toMap(
+                Category::getId,
+                category -> {
+                    List<Product> products = productService.getByCategoryId(category.getId());
+                    return products != null ? products : Collections.emptyList();
+                }
+            ));
+        model.addAttribute("categories", categories);
+        model.addAttribute("productsByCategory", productsByCategory);
+        return "admin/discount/discount-detail";
+    }
+
+    @GetMapping("/discounts/create")
+    public String getDiscountCreatePage(Model model) {
+        return "admin/discount/discount-create";
+    }
+
+    @GetMapping("/coupons")
+    public String getCouponIndexPage(Model model) {
+        model.addAttribute("coupons",couponService.getAll());
+
+        return "admin/discount/coupon-index";
     }
 
 

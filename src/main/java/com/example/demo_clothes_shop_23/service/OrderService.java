@@ -149,7 +149,9 @@ public class OrderService {
     public void updateStatus(String status, Integer orderId) {
         Orders order = ordersRepository.findById(orderId)
             .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng này"));
-        if (order.getStatus().equals(OrdersStatus.DA_HUY)) {
+        OrdersStatus newStatus = OrdersStatus.valueOf(status);
+        // Nếu trạng thái mới là DA_HUY, xử lý số lượng sản phẩm và cập nhật trạng thái
+        if (newStatus == OrdersStatus.DA_HUY) {
             List<OrdersDetail> ordersDetails = ordersDetailRepository.findByOrdersId(orderId);
             ordersDetails.forEach(ordersDetail -> {
                 Quantity quantity = quantityRepository.findByProductIdAndColorIdAndSizeId(
@@ -160,9 +162,10 @@ public class OrderService {
                 quantity.setValue(quantity.getValue() + ordersDetail.getQuantity());
                 quantityRepository.save(quantity);
             });
-            order.setStatus(OrdersStatus.DA_HUY);
         }
-        order.setStatus(OrdersStatus.valueOf(status));
+
+        // Cập nhật trạng thái đơn hàng
+        order.setStatus(newStatus);
         ordersRepository.save(order);
     }
 }

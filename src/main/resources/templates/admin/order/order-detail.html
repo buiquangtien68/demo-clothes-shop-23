@@ -257,13 +257,42 @@
 
     <script th:inline="javascript">
         let order = [[${order}]]
+
+        document.addEventListener('DOMContentLoaded', function() {
+            let currentStatus =order.status;
+
+            // Lấy phần tử select
+            var orderStatusSelect = document.getElementById('orderStatus');
+
+            // Đặt giá trị cho select
+            orderStatusSelect.value = currentStatus;
+
+            // Nếu trạng thái là DA_HUY, thì disable select
+            if (currentStatus === 'DA_HUY') {
+                orderStatusSelect.disabled = true;
+            }
+        });
+
         document.getElementById("btnUpdateOrder").addEventListener("click",async () => {
             const status = document.getElementById("orderStatus").value;
-            try {
-                await axios.put(`/api/admin/orders/${order.id}/update/${status}`)
-                toastr.success("Cập nhật thành công!")
-            } catch (e) {
-                toastr.error(e.response.data.message)
+            if (status=="DA_HUY"){
+                const confirm = window.confirm("Bạn có chắc chắn muốn cập nhật trạng thái đơn hàng thành CANCELED?")
+                if(confirm){
+                    try {
+                        await axios.put(`/api/admin/orders/${order.id}/update/${status}`)
+                        toastr.success("Cập nhật thành công!")
+                        document.getElementById("orderStatus").disabled=true;
+                    } catch (e) {
+                        toastr.error(e.response.data.message)
+                    }
+                }
+            }else {
+                try {
+                    await axios.put(`/api/admin/orders/${order.id}/update/${status}`)
+                    toastr.success("Cập nhật thành công!")
+                } catch (e) {
+                    toastr.error(e.response.data.message)
+                }
             }
         })
     </script>

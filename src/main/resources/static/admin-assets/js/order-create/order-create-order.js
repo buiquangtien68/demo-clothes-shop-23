@@ -131,6 +131,10 @@ $('#btnCreateOrder').on('click', async function (e) {
     if (!$('#form-order').valid()) {
         return;
     }
+    if (selectedUserId==""){
+        toastr.error("Chưa chọn user")
+        return;
+    }
 
     // Lấy giá trị của "Giảm giá"
     const discountAmountText = document.getElementById('discount-amount').textContent.trim();
@@ -145,6 +149,7 @@ $('#btnCreateOrder').on('click', async function (e) {
     const totalPrice = parseFloat(document.getElementById('total-price').textContent.replace(/[^0-9]/g, '')) || 0;
     if (totalPrice <= 0) {
         toastr.error("Chưa có sản phẩm nào")
+        return;
     }
 
     const email = $('#email').val();
@@ -158,9 +163,17 @@ $('#btnCreateOrder').on('click', async function (e) {
     const delivery = $('#delivery').val();
     const notes = $('#orderNotes').val()
 
+    let couponCode;
+    let coupon = coupons.find(c => c.id === Number(selectedCouponId));
+    if (coupon){
+        couponCode=coupon.code;
+    }else {
+        couponCode="";
+    }
+
     const data = {
         userId: selectedUserId,
-        couponCode: coupons.find(c => c.id === Number(selectedCouponId)).code,
+        couponCode:  couponCode,
         receiverName: nameCustomer,
         email: email,
         phone: phone,

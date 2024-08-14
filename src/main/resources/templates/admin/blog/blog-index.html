@@ -25,7 +25,7 @@
 						<div class="col-sm-12">
 							<ol class="breadcrumb">
 								<li class="breadcrumb-item">
-									<a href="#">Dashboard</a>
+									<a th:href="@{/admin/dashboard}">Dashboard</a>
 								</li>
 								<li class="breadcrumb-item active">
 									Danh sách bài viết
@@ -70,7 +70,7 @@
 														cầu đào tạo từ xa</a>
 												</td>
 												<td>
-													<a href="#" th:text="${blog.getUser().getName()}">John Doe</a>
+													<a th:href="@{/admin/users/{id}(id=${blog.user.id})}" th:text="${blog.getUser().getName()}">John Doe</a>
 												</td>
 												<td th:text="${blog.getStatus() ? 'Công khai' : 'Nháp'}" >Công khai</td>
 												<td th:text="${#temporals.format(blog.createdAt, 'dd/MM/yyyy HH:mm:ss')}">06-07-2022</td>
