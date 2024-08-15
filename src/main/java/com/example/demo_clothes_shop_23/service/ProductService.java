@@ -3,7 +3,9 @@ package com.example.demo_clothes_shop_23.service;
 import com.example.demo_clothes_shop_23.entities.*;
 import com.example.demo_clothes_shop_23.exception.ResourceNotFoundException;
 import com.example.demo_clothes_shop_23.model.enums.ImageType;
+import com.example.demo_clothes_shop_23.model.response.ImageResponse;
 import com.example.demo_clothes_shop_23.repository.*;
+import com.example.demo_clothes_shop_23.request.CreateSubImageRequest;
 import com.example.demo_clothes_shop_23.request.UpsertProductRequest;
 import com.example.demo_clothes_shop_23.specifications.ProductSpecifications;
 import com.github.slugify.Slugify;
@@ -14,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -31,6 +34,7 @@ public class ProductService {
     private final SizeRepository sizeRepository;
     private final QuantityRepository quantityRepository;
     private final ImageRepository imageRepository;
+    private final FileServerService fileServerService;
 
     public List<Product> getAllByStatus(Boolean status) {
         return productRepository.findAllByStatus(status);
@@ -45,7 +49,7 @@ public class ProductService {
         return productRepository.findByCategoryIdOrderByCreatedAtDescExcludingProductId(categoryId,excludedMovieId).stream().limit(4).toList();
     }
 
-    public void updatePosters() {
+    public void updatePostersFakeData() {
         String sqlUpdatePoster = "UPDATE products p " +
                 "SET p.poster = (" +
                 "    SELECT i.img_url " +
@@ -220,6 +224,13 @@ public class ProductService {
             .map(i->sizeRepository.findById(i).orElseThrow(() -> new ResourceNotFoundException("Không thấy size")))
             .collect(Collectors.toSet());
 
+        product.getColors().forEach(oldColor->{
+            if (!colors.contains(oldColor)){
+                List<Image> images = imageRepository.findAllByColor_IdAndProduct_Id(oldColor.getId(), productId);
+                imageRepository.deleteAll(images);
+            }
+        });
+
         colors.forEach(color->{
             if (imageRepository.findAllByColor_IdAndProduct_Id(color.getId(), productId).isEmpty()) {
                 for (int i = 0; i < 3; i++) {
@@ -316,5 +327,54 @@ public class ProductService {
 
     public List<Product> getByCategoryId(Integer categoryId) {
         return productRepository.findByCategoryId(categoryId);
+    }
+
+    public String updatePoster(Integer productId, MultipartFile file) {
+        Product product = productRepository.findById(productId)
+            .orElseThrow(()->new ResourceNotFoundException("Không tìm thấy sản phẩm"));
+
+        ImageResponse imageResponse = fileServerService.uploadFile(file);
+        product.setPoster(imageResponse.getUrl());
+        productRepository.save(product);
+        return product.getPoster();
+    }
+
+    public Image updateMainImage(Integer mainImageId, MultipartFile file) {
+        Image image = imageRepository.findById(mainImageId).orElseThrow(
+            ()-> new ResourceNotFoundException("Không tìm thấy ảnh")
+        );
+        ImageResponse imageResponse = fileServerService.uploadFile(file);
+        image.setImgUrl(imageResponse.getUrl());
+        image.setUpdatedAt(LocalDateTime.now());
+        imageRepository.save(image);
+        return image;
+    }
+
+    public Image createSubImage(CreateSubImageRequest createSubImageRequest) {
+        ImageResponse imageResponse = fileServerService.uploadFile(createSubImageRequest.getFormData());
+
+        Color color = colorRepository.findById(createSubImageRequest.getColorId()).orElseThrow(
+            ()->new ResourceNotFoundException("Không tìm thấy màu")
+        );
+
+        Product product = productRepository.findById(createSubImageRequest.getProductId())
+            .orElseThrow(()->new ResourceNotFoundException("Không tìm thấy sản phẩm"));
+        Image image = Image.builder()
+            .imgUrl(imageResponse.getUrl())
+            .type(ImageType.SUP)
+            .color(color)
+            .product(product)
+            .createdAt(LocalDateTime.now())
+            .updatedAt(LocalDateTime.now())
+            .build();
+        imageRepository.save(image);
+        return image;
+    }
+
+    public void deleteImage(Integer imageId) {
+        Image image = imageRepository.findById(imageId).orElseThrow(
+            ()->new ResourceNotFoundException("Không tìm thấy ảnh")
+        );
+        imageRepository.delete(image);
     }
 }

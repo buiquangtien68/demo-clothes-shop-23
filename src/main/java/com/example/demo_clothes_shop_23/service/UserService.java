@@ -7,6 +7,7 @@ import com.example.demo_clothes_shop_23.exception.BadRequestException;
 import com.example.demo_clothes_shop_23.exception.ResourceNotFoundException;
 import com.example.demo_clothes_shop_23.model.enums.TokenType;
 import com.example.demo_clothes_shop_23.model.enums.UserRole;
+import com.example.demo_clothes_shop_23.model.response.ImageResponse;
 import com.example.demo_clothes_shop_23.repository.TokenConfirmRepository;
 import com.example.demo_clothes_shop_23.repository.UserRepository;
 import com.example.demo_clothes_shop_23.request.CreateUserRequest;
@@ -15,6 +16,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.security.core.token.TokenService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,6 +29,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final TokenConfirmRepository tokenConfirmRepository;
     private final MailService mailService;
+    private final FileServerService fileServerService;
 
     public List<User> getAll() {
         return userRepository.findAll();
@@ -83,5 +86,15 @@ public class UserService {
         user.setEnabled(updateUserRequest.getEnabled());
         user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
+    }
+
+    public String updateAvatar(Integer userId, MultipartFile file) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy user"));
+
+        ImageResponse imageResponse = fileServerService.uploadFile(file);
+        user.setAvatar(imageResponse.getUrl());
+        userRepository.save(user);
+        return user.getAvatar();
     }
 }

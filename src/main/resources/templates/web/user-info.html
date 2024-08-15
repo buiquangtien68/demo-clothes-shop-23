@@ -15,6 +15,8 @@
             #avatar{
                 width: 200px;
                 height: 200px;
+                object-fit: cover;
+                border-radius: 50%;
             }
             .changePassword-text {
                 text-align: center;
@@ -143,7 +145,8 @@
                                 <!-- Nội dung của tab tài khoản -->
                                 <div class="text-center mb-3">
                                     <img id="avatar" class="rounded-circle mb-2" th:src="${#authentication.principal.user.avatar}" alt="Avatar" ><br>
-                                    <p style="cursor: pointer" class="text-black-50">Thay đổi ảnh đại diện</p>
+                                    <label style="cursor: pointer" for="btnUpdateAvatar">Thay đổi ảnh đại diện</label>
+                                    <input type="file" id="btnUpdateAvatar" hidden="hidden">
                                 </div>
                                 <form id="form-updateInfo">
                                     <div class="form-group mb-3">

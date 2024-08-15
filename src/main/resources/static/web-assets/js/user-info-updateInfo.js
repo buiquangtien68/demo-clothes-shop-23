@@ -69,3 +69,25 @@ $('#form-updateInfo').on('submit', async (e) => {
         toastr.error(e.response.data.message);
     }
 });
+
+const avatarPreview = document.getElementById("avatar")
+const btnUpdateAvatarEl = document.getElementById("btnUpdateAvatar");
+btnUpdateAvatarEl.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+
+    // create form data with key file and value is file in input
+    const formData = new FormData();
+    formData.append('file', file);
+
+    axios.post(`/api/auth/${user.id}/update-avatar`, formData)
+        .then(res => {
+            if (res.status === 200) {
+                avatarPreview.src = res.data;
+                toastr.success('Cập nhật avatar thành công');
+            }
+        })
+        .catch(e => {
+            console.log(e)
+            toastr.error(e.response.data.message);
+        });
+});

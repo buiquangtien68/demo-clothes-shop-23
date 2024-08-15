@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <style>
+    </style>
 </head>
 <body>
 <nav class="main-header navbar navbar-expand navbar-white navbar-light">
@@ -21,7 +23,7 @@
             <a class="nav-link py-0 d-flex align-items-center" data-toggle="dropdown" href="#">
                 <div class="user-panel">
                     <div class="image">
-                        <img th:src="${#authentication.principal.user.avatar}" class="img-circle border" alt="User Image">
+                        <img id="avatar" style=" width: 40px; height: 40px; object-fit: cover; border-radius: 50%; " th:src="${#authentication.principal.user.avatar}" class="img-circle border" alt="User Image">
                     </div>
                 </div>
             </a>

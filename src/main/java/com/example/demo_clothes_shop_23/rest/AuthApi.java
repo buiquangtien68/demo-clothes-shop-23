@@ -3,17 +3,20 @@ package com.example.demo_clothes_shop_23.rest;
 import com.example.demo_clothes_shop_23.entities.User;
 import com.example.demo_clothes_shop_23.request.*;
 import com.example.demo_clothes_shop_23.service.AuthService;
+import com.example.demo_clothes_shop_23.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthApi {
     private final AuthService authService;
+    private final UserService userService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
@@ -55,5 +58,10 @@ public class AuthApi {
     public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest) {
         authService.changePassword(changePasswordRequest);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/{id}/update-avatar")
+    public ResponseEntity<?> updateAvatar(@RequestParam("file") MultipartFile file, @PathVariable Integer id) {
+        return ResponseEntity.ok(userService.updateAvatar(id, file));
     }
 }

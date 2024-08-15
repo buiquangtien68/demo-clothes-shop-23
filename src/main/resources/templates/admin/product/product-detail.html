@@ -13,6 +13,12 @@
         <link rel="stylesheet" href="/admin-assets/plugins/select2/css/select2.min.css" />
         <link rel="stylesheet" href="/admin-assets/dist/css/style.css">
         <style>
+
+            .thumbnail-preview-container img {
+                max-width: 100%; /* Hoặc chiều rộng cụ thể, ví dụ 200px */
+                max-height: 200px; /* Hoặc chiều cao cụ thể */
+                object-fit: cover; /* Giúp hình ảnh không bị kéo dãn, giữ tỉ lệ và cắt nếu cần */
+            }
             /* Tùy chỉnh kích thước và kiểu dáng của các label màu */
             .color-label {
                 height: 15px;
@@ -155,6 +161,15 @@
                                                                     <label>Giá tiền</label>
                                                                     <input type="number" class="form-control" id="price" name="price"/>
                                                                 </div>
+                                                                <div class="form-group">
+                                                                    <div class="thumbnail-preview-container mb-3">
+                                                                        <img class="m-0" th:src="${product.poster}" alt="" id="poster">
+                                                                    </div>
+                                                                    <label for="input-poster" class="btn btn-info btn-flat" data-toggle="modal" data-target="#modal-xl">
+                                                                        Chọn hình ảnh
+                                                                    </label>
+                                                                    <input type="file" id="input-poster" class="d-none">
+                                                                </div>
                                                             </div>
 
                                                             <div class="col-md-4">
@@ -204,19 +219,7 @@
                                                                         </select>
                                                                     </div>
                                                                 </div>
-
-
-                                                                <!--  <div class="form-group">
-                                                                      <div class="thumbnail-preview-container mb-3">
-                                                                          <img src="" alt="" id="poster">
-                                                                      </div>
-                                                                      <label for="input-poster" class="btn btn-info btn-flat" data-toggle="modal" data-target="#modal-xl">
-                                                                          Chọn hình ảnh
-                                                                      </label>
-                                                                      <input type="file" id="input-poster" class="d-none">
-                                                                  </div>-->
                                                             </div>
-
 
                                                         </div>
                                                     </div>
@@ -242,11 +245,6 @@
                                 <div class="product__details__tab__content">
                                     <div class="row">
                                         <div class="col-lg-12">
-                                            <div class="col-6 mb-2 mt-2">
-                                                <button type="button" class="btn btn-info px-4" id="btnUpdateImage">
-                                                    Cập nhật
-                                                </button>
-                                            </div>
                                             <div class="card">
                                                 <div class="card-body">
                                                     <div class="row image-table"></div>
@@ -503,20 +501,21 @@
 
         imageMap = newImageMap;
 
+        // Hàm để cập nhật bảng hình ảnh
         function updateImageTable() {
             let selectedColors = $('#color').val() || [];
 
             // Xóa nội dung cũ
             let tableHtml = `
-    <table class="table table-bordered" style="width: 100%; border-collapse: collapse;">
-        <thead>
-            <tr>
-                <th>Màu sắc</th>
-                <th>Hình ảnh chính</th>
-                <th>Hình ảnh phụ</th>
-            </tr>
-        </thead>
-        <tbody>`;
+<table class="table table-bordered" style="width: 100%; border-collapse: collapse;">
+    <thead>
+        <tr>
+            <th>Màu sắc</th>
+            <th>Hình ảnh chính</th>
+            <th>Hình ảnh phụ</th>
+        </tr>
+    </thead>
+    <tbody>`;
 
             selectedColors.forEach(colorId => {
                 let colorText = $('#color option:selected').filter(`[value="${colorId}"]`).text();
@@ -524,42 +523,41 @@
                 // Lấy danh sách hình ảnh từ imageMap với colorId
                 let images = imageMap.get(parseInt(colorId)) || [];
 
-                let mainImage = images.find(img => img.type === 'MAIN') || {id: '', imgUrl: ''};
+                let mainImage = images.find(img => img.type === 'MAIN') || { id: '', imgUrl: '' };
                 let subImages = images.filter(img => img.type !== 'MAIN');
 
-
                 tableHtml += `
-        <tr data-color="${colorId}" style="text-align: center;">
-            <td>${colorText}</td>
-            <td>
-                <img src="${mainImage.imgUrl}" style="width: 100px; height: auto; border: 1px solid #ddd; padding: 5px; margin-bottom: 5px;">
-                <button type="button" class="btn btn-primary btn-sm btn-change-main-image mt-4" data-color="${colorId}">Thay đổi ảnh chính</button>
-            </td>
-            <td class="d-flex flex-column align-items-center">
-                <div class="d-flex flex-wrap justify-content-center mb-2">
-                    ${subImages.map((img, index) => `
-                        <div class="position-relative mb-2" style="margin-right: 5px;">
-                            <img src="${img.imgUrl}" alt="${colorText} - Sub ${index + 1}" style="width: 100px; height: auto; border: 1px solid #ddd; padding: 5px;">
-                            <button type="button" class="btn btn-danger btn-sm position-absolute delete-sub-image" style="top: -5px; right: -5px; padding: 2px 5px;" data-id="${img.id}">&times;</button>
-                        </div>
-                    `).join('')}
-                </div>
-                <button type="button" class="btn btn-success btn-sm btn-add-sub-image mt-2" data-color="${colorId}">Thêm ảnh phụ</button>
-            </td>
-        </tr>`;
+    <tr data-color="${colorId}" style="text-align: center;">
+        <td>${colorText}</td>
+        <td>
+            <img src="${mainImage.imgUrl}" style="width: 100px; height: auto; border: 1px solid #ddd; padding: 5px; margin-bottom: 5px;">
+            <button type="button" class="btn btn-primary btn-sm btn-change-main-image mt-4" data-color="${colorId}">Thay đổi ảnh chính</button>
+        </td>
+        <td class="d-flex flex-column align-items-center">
+            <div class="d-flex flex-wrap justify-content-center mb-2">
+                ${subImages.map((img, index) => `
+                    <div class="position-relative mb-2" style="margin-right: 5px;">
+                        <img src="${img.imgUrl}" alt="${colorText} - Sub ${index + 1}" style="width: 100px; height: auto; border: 1px solid #ddd; padding: 5px;">
+                        <button type="button" class="btn btn-danger btn-sm position-absolute delete-sub-image" style="top: -5px; right: -5px; padding: 2px 5px;" data-id="${img.id}">&times;</button>
+                    </div>
+                `).join('')}
+            </div>
+            <button type="button" class="btn btn-success btn-sm btn-add-sub-image mt-2" data-color="${colorId}">Thêm ảnh phụ</button>
+        </td>
+    </tr>`;
             });
 
             tableHtml += '</tbody></table>';
             $('.image-table').html(tableHtml);
 
             // Xử lý sự kiện thay đổi ảnh chính
-            $('.btn-change-main-image').on('click', function() {
+           /* $('.btn-change-main-image').on('click', function() {
                 let colorId = $(this).data('color');
                 let images = imageMap.get(parseInt(colorId)) || [];
                 let mainImage = images.find(img => img.type === 'MAIN') || { id: '', imgUrl: '' };
 
                 // Tạo một input type=file để chọn ảnh
-                let fileInput = $('<input type="file" accept="image/*" style="display: none;">');
+                let fileInput = $('<input type="file" accept="image/!*" style="display: none;">');
                 fileInput.on('change', function(event) {
                     let file = event.target.files[0];
                     if (file) {
@@ -589,17 +587,28 @@
                 let mainImage = images.find(img => img.type === 'MAIN');
                 let subImages = images.filter(img => img.type !== 'MAIN');
 
-                if (subImages.length < 2) {
+                // Kiểm tra số lượng ảnh phụ có URL hợp lệ
+                let validSubImages = subImages.filter(img => img.imgUrl);
+
+                if (validSubImages.length < 2) {
                     // Tạo một input type=file để chọn ảnh phụ
-                    let fileInput = $('<input type="file" accept="image/*" style="display: none;">');
+                    let fileInput = $('<input type="file" accept="image/!*" style="display: none;">');
                     fileInput.on('change', function(event) {
                         let file = event.target.files[0];
                         if (file) {
                             let reader = new FileReader();
                             reader.onload = function(e) {
                                 let newImageUrl = e.target.result;
-                                let newImageId = Date.now(); // Hoặc một cơ chế khác để tạo id duy nhất cho ảnh mới
-                                subImages.push({ id: newImageId, imgUrl: newImageUrl, type: 'SUB' });
+                                let emptyImage = subImages.find(img => !img.imgUrl); // Tìm ảnh có imgUrl rỗng để thay thế
+
+                                if (emptyImage) {
+                                    // Cập nhật URL của ảnh rỗng
+                                    emptyImage.imgUrl = newImageUrl;
+                                } else {
+                                    // Thêm ảnh mới nếu không có ảnh nào rỗng
+                                    let newImageId = Date.now(); // Hoặc một cơ chế khác để tạo id duy nhất cho ảnh mới
+                                    subImages.push({ id: newImageId, imgUrl: newImageUrl, type: 'SUB' });
+                                }
 
                                 // Cập nhật imageMap
                                 images = [mainImage, ...subImages];
@@ -627,8 +636,8 @@
                 let mainImage = images.find(img => img.type === 'MAIN') || { id: '', imgUrl: '' };
                 let subImages = images.filter(img => img.type !== 'MAIN');
 
-                // Xóa ảnh phụ dựa trên imageId
-                subImages = subImages.filter(img => img.id !== imageId);
+                // Xóa ảnh phụ dựa trên imageId, chỉ cần cập nhật imgUrl thành rỗng
+                subImages = subImages.map(img => img.id === imageId ? { ...img, imgUrl: '' } : img);
 
                 // Cập nhật lại images
                 images = [mainImage, ...subImages];
@@ -636,12 +645,122 @@
 
                 // Cập nhật lại bảng hình ảnh
                 updateImageTable();
+            });*/
+            $('.btn-change-main-image').on('click', function() {
+                let colorId = $(this).data('color');
+                let images = imageMap.get(parseInt(colorId)) || [];
+                let mainImage = images.find(img => img.type === 'MAIN') || { id: '', imgUrl: '' };
+
+                // Tạo một input type=file để chọn ảnh
+                let fileInput = $('<input type="file" accept="image/*" style="display: none;">');
+                fileInput.on('change', function(event) {
+                    let file = event.target.files[0];
+                    if (file) {
+                        // Tạo FormData và thêm file vào nó
+                        const formData = new FormData();
+                        formData.append('file', file);
+
+                        // Gửi file đến server
+                        axios.post(`/api/admin/products/images/${mainImage.id}/upload-main`, formData)
+                            .then(response => {
+                                 // URL của ảnh mới từ server
+                                // Cập nhật ảnh chính
+                                mainImage.imgUrl = response.data.imgUrl;
+
+                                // Cập nhật imageMap
+                                images = images.map(img => img.type === 'MAIN' ? mainImage : img);
+                                imageMap.set(parseInt(colorId), images);
+
+                                updateImageTable(); // Cập nhật lại bảng
+                            })
+                            .catch(error => {
+                                console.error('Có lỗi xảy ra khi tải ảnh lên:', error);
+                            });
+                    }
+                });
+
+                fileInput.click(); // Mở hộp thoại chọn tệp
             });
+            $('.btn-add-sub-image').on('click', function() {
+                let colorId = $(this).data('color');
+                let images = imageMap.get(parseInt(colorId)) || [];
+                let mainImage = images.find(img => img.type === 'MAIN');
+                let subImages = images.filter(img => img.type !== 'MAIN');
+
+                if (subImages.length < 2) {
+                    // Tạo một input type=file để chọn ảnh phụ
+                    let fileInput = $('<input type="file" accept="image/*" style="display: none;">');
+                    fileInput.on('change', async function (event) {
+                        let file = event.target.files[0];
+                        if (file) {
+                            // Tạo FormData và thêm file vào nó
+                            const formData = new FormData();
+                            formData.append('file', file);
+                            formData.append('productId', currentProduct.id); // Thêm productId vào FormData
+                            formData.append('colorId', colorId); // Thêm colorId vào FormData
+
+                            try {
+                                // Gửi file đến server
+                                const response = await axios.post('/api/admin/products/images/upload-sub', formData, {
+                                    headers: {
+                                        'Content-Type': 'multipart/form-data'
+                                    }
+                                });
+
+                                let newImageUrl = response.data.imgUrl; // URL của ảnh mới từ server
+                                let newImageId = response.data.id;
+
+                                // Cập nhật ảnh phụ
+                                subImages.push({id: newImageId, imgUrl: newImageUrl, type: 'SUB'});
+
+                                // Cập nhật imageMap
+                                images = [mainImage, ...subImages];
+                                imageMap.set(parseInt(colorId), images);
+
+                                updateImageTable(); // Cập nhật lại bảng
+
+                            } catch (error) {
+                                console.error('Có lỗi xảy ra khi tải ảnh lên:', error.response.data.message);
+                            }
+                        }
+                    });
+
+                    fileInput.click(); // Mở hộp thoại chọn tệp
+                } else {
+                    alert("Bạn đã đạt đến giới hạn số lượng hình ảnh phụ.");
+                }
+            });
+
+
+            $('.image-table').on('click', '.delete-sub-image', async function () {
+                let colorId = $(this).closest('tr').data('color');
+                let imageId = $(this).data('id');
+
+                // Gửi yêu cầu xóa ảnh phụ
+                try{
+                    await axios.delete(`/api/admin/products/images/${imageId}`)
+                    // Cập nhật imageMap sau khi xóa ảnh thành công
+                    let images = imageMap.get(parseInt(colorId)) || [];
+                    let mainImage = images.find(img => img.type === 'MAIN') || {id: '', imgUrl: ''};
+                    let subImages = images.filter(img => img.type !== 'MAIN');
+
+                    // Xóa ảnh phụ dựa trên imageId
+                    subImages = subImages.filter(img => img.id !== imageId);
+
+                    // Cập nhật lại images
+                    images = [mainImage, ...subImages];
+                    imageMap.set(parseInt(colorId), images);
+
+                    // Cập nhật lại bảng hình ảnh
+                    updateImageTable();
+                } catch(error){
+                }
+            });
+
         }
 
         // Gọi hàm để cập nhật bảng hình ảnh
         updateImageTable();
-
 
         //Validate
         $('#form-product').validate({
@@ -747,13 +866,16 @@
             try {
                 let res = await axios.put(`/api/admin/products/update/${currentProduct.id}`, data);
                 toastr.success("Cập nhật sản phẩm thành công");
-
+                setTimeout(()=>{
+                    window.location.href='/admin/products'
+                },1000)
             } catch (e) {
                 console.log(e);
                 toastr.error(e.response?.data?.message || "Có lỗi xảy ra!");
             }
         });
 
+        //Xóa review
         const deleteReview =async (id)=>{
             const confirm = window.confirm("Bạn có chắc chắn muốn xóa không")
             if(confirm){
@@ -770,6 +892,69 @@
                 }
             }
         }
+
+        //Cập nhật post
+        const posterPreview = document.getElementById("poster")
+        const btnUpdatePosterEl = document.getElementById("input-poster");
+        btnUpdatePosterEl.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+
+            // create form data with key file and value is file in input
+            const formData = new FormData();
+            formData.append('file', file);
+
+            axios.post(`/api/admin/products/${currentProduct.id}/update-poster`, formData)
+                .then(res => {
+                    if (res.status === 200) {
+                        posterPreview.src = res.data;
+                        toastr.success('Cập nhật poster thành công');
+                    }
+                })
+                .catch(e => {
+                    console.log(e)
+                    toastr.error(e.response.data.message);
+                });
+        });
+
+       /* //Cập nhật hình anh
+        function gatherImageData() {
+            let data = [];
+            imageMap.forEach((images, colorId) => {
+                images.forEach(img => {
+                    data.push({
+                        colorId: colorId,
+                        imgId: img.id,
+                        imgUrl: img.imgUrl,
+                        imgType: img.type
+                    });
+                });
+            });
+            return data;
+        }
+
+        // Xử lý sự kiện nhấn nút "Cập nhật"
+        $('#btnUpdateImage').on('click', function() {
+            let updatedData = gatherImageData();
+
+            // Chuẩn bị dữ liệu để gửi
+            let imageData = {
+                images: updatedData
+            };
+            console.log(imageData)
+
+           /!* // Gửi dữ liệu lên server
+            axios.post('/api/admin/products/update-images', payload)
+                .then(response => {
+                    if (response.status === 200) {
+                        toastr.success('Cập nhật hình ảnh thành công');
+                        // Bạn có thể thực hiện các hành động bổ sung ở đây, ví dụ: làm mới bảng hoặc biểu mẫu
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                    toastr.error('Có lỗi xảy ra trong quá trình cập nhật');
+                });*!/
+        });*/
     </script>
 </th:block>
 

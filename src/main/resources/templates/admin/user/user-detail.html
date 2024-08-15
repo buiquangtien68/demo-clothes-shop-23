@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/layout :: layout(~{:: title},~{:: #css},~{:: .content-wrapper},~{:: #js})}">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"  xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="~{admin/layout/layout :: layout(~{:: title},~{:: #css},~{:: .content-wrapper},~{:: #js})}">
 
 <head>
     <meta charset="utf-8" />
@@ -21,6 +21,12 @@
         <link rel="stylesheet" href="/admin-assets/plugins/select2/css/select2.min.css" />
         <link rel="stylesheet" href="/admin-assets/dist/css/style.css">
         <style>
+            #avatar-preview {
+                width: 200px; /* or any size you prefer */
+                height: 200px; /* or any size you prefer */
+                object-fit: cover; /* This ensures the image covers the area and is cropped if necessary */
+                border-radius: 50%; /* Optional: Makes the avatar round */
+            }
         </style>
 
 
@@ -82,12 +88,12 @@
                                     <div class="row">
                                         <div class="col-12">
                                             <div class="text-center mb-3">
-                                                <img id="avatar"
+                                                <img id="avatar-preview"
                                                      class="rounded-circle mb-2"
-                                                     style="width: 200px; height: 200px"
                                                      th:src="${user.getAvatar()}"
                                                      alt="Avatar" ><br>
-                                                <p style="cursor: pointer" class="text-black-50">Thay đổi ảnh đại diện</p>
+                                                <label style="cursor: pointer" for="btnUpdateAvatar">Thay đổi ảnh đại diện</label>
+                                                <input type="file" id="btnUpdateAvatar" hidden="hidden">
                                             </div>
                                             <form id="form-user">
                                                 <div class="card">
@@ -283,7 +289,11 @@
     <script src="/admin-assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
     <script src="/admin-assets/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
     <script src="/admin-assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
-
+    <div sec:authorize="isAuthenticated()">
+        <script th:inline="javascript">
+            let currentUser = [[${#authentication.principal.user}]];
+        </script>
+    </div>
     <script th:inline="javascript">
         let user = [[${user}]]
 
@@ -360,6 +370,33 @@
                 // Xử lý lỗi
                 toastr.error(e.response?.data?.message || "Có lỗi xảy ra");
             }
+        });
+
+        //Thêm ảnh
+        const avatar = document.getElementById("avatar")
+        const avatarPreview = document.getElementById("avatar-preview")
+        const btnUpdateAvatarEl = document.getElementById("btnUpdateAvatar");
+        btnUpdateAvatarEl.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+
+            // create form data with key file and value is file in input
+            const formData = new FormData();
+            formData.append('file', file);
+
+            axios.post(`/api/auth/${user.id}/update-avatar`, formData)
+                .then(res => {
+                    if (res.status === 200) {
+                        avatarPreview.src = res.data;
+                        if (user.id==currentUser.id){
+                            avatar.src=res.data;
+                        }
+                        toastr.success('Cập nhật avatar thành công');
+                    }
+                })
+                .catch(e => {
+                    console.log(e)
+                    toastr.error(e.response.data.message);
+                });
         });
 
     </script>

@@ -754,7 +754,7 @@ class DemoClothesShop23ApplicationTests {
 			}
 			productRepository.save(product);
 		}*/
-		productService.updatePosters();
+		productService.updatePostersFakeData();
 	}
 
 	@Test
