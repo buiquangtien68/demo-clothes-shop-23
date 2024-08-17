@@ -11,6 +11,12 @@
 
     <th:block id="css">
         <style>
+            .avatar{
+                width: 50px;
+                height: 50px;
+                object-fit: cover;
+                border-radius: 50%;
+            }
             .login-link:hover{
                 color: red!important;
             }
@@ -60,14 +66,14 @@
                                 </ul>
                             </div>
                             <div class="blog__details__text">
-                                <p>[[${blog.content}]]</p>
+                                <p th:utext="${blog.content}"></p>
                             </div>
                             <div class="blog__details__option">
                                 <div class="row">
                                     <div class="col-lg-6 col-md-6 col-sm-6">
                                         <div class="blog__details__author">
                                             <div class="blog__details__author__pic">
-                                                <img th:src="${blog.user.avatar}" alt="">
+                                                <img class="avatar" th:src="${blog.user.avatar}" alt="">
                                             </div>
                                             <div class="blog__details__author__text">
                                                 <h5>[[${blog.user.name}]]</h5>
@@ -128,7 +134,7 @@
                     <div class="comment-list">
                         <div class="comment-info rounded-5 p-3 mt-3" style="background-color: #f3f2ee" th:each="comment :${comments}">
                             <div class="d-flex align-items-center">
-                                <img th:src="${comment.getUser().getAvatar()}" alt="Avatar" class="rounded-circle " style="width: 50px; height: 50px;">
+                                <img th:src="${comment.getUser().getAvatar()}" alt="Avatar" class="avatar rounded-circle ">
                                 <div class="mt-2 ml-2" >
                                     <h5 class=" ml-1 mt-1" th:text="${comment.getUser().getName()}">Người Bình Luận</h5>
                                 </div>
@@ -164,7 +170,7 @@
             let comments = [[${comments}]]
             let blogId = [[${blog.id}]]
         </script>
-        <script src="/web-assets/js/comment.js"></script>
+        <script src="/web-assets/js/blog/comment.js"></script>
     </th:block>
 
 </body>

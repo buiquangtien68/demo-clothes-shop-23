@@ -20,6 +20,13 @@
         <!--Dateranger-->
         <link rel="stylesheet" href="/admin-assets/plugins/daterangepicker/daterangepicker.css">
 
+        <style>
+            .thumbnail-preview-container img {
+                max-width: 100%; /* Hoặc chiều rộng cụ thể, ví dụ 200px */
+                max-height: 200px; /* Hoặc chiều cao cụ thể */
+                object-fit: cover; /* Giúp hình ảnh không bị kéo dãn, giữ tỉ lệ và cắt nếu cần */
+            }
+        </style>
     </th:block>
 
 
@@ -133,6 +140,15 @@
                                                     </div>
                                                 <button type="button" id="clear-all" class="btn btn-danger mt-2">Xóa tất cả</button>
                                                 <button type="button" id="select-by-category" class="btn btn-primary mt-2">Chọn theo danh mục con</button>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="thumbnail-preview-container mb-3">
+                                                    <img class="m-0" th:src="${discount.imageUrl}" alt="" id="poster">
+                                                </div>
+                                                <label for="input-poster" class="btn btn-info btn-flat" data-toggle="modal" data-target="#modal-xl">
+                                                    Chọn hình ảnh
+                                                </label>
+                                                <input type="file" id="input-poster" class="d-none">
                                             </div>
 
                                         </div>
@@ -370,6 +386,29 @@
             }
 
         })
+
+        //Cập nhật post
+        const posterPreview = document.getElementById("poster")
+        const btnUpdatePosterEl = document.getElementById("input-poster");
+        btnUpdatePosterEl.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+
+            // create form data with key file and value is file in input
+            const formData = new FormData();
+            formData.append('file', file);
+
+            axios.post(`/api/admin/discounts/${discount.id}/update-thumbnail`, formData)
+                .then(res => {
+                    if (res.status === 200) {
+                        posterPreview.src = res.data;
+                        toastr.success('Cập nhật thumbnail thành công');
+                    }
+                })
+                .catch(e => {
+                    console.log(e)
+                    toastr.error(e.response.data.message);
+                });
+        });
 
     </script>
 </th:block>

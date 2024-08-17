@@ -21,8 +21,6 @@ public class UpsertProductRequest {
     @NotEmpty(message = "K được để trống")
     Long price;
     @NotEmpty(message = "K được để trống")
-    Long newPrice;
-    @NotEmpty(message = "K được để trống")
     Integer categoryId;
     @NotEmpty(message = "K được để trống")
     List<Integer> colorIds;

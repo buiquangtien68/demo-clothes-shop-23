@@ -95,6 +95,9 @@
             .shop__sidebar__price .active{
                 color: #111111 !important;
             }
+            .hidden {
+                display: none;
+            }
         </style>
     </th:block>
 </head>
@@ -172,8 +175,7 @@
 
                                         </div>
                                     </div>
-
-
+                                    <!--Price-->
                                     <div class="card">
                                         <div class="card-heading">
                                             <a data-toggle="collapse" data-target="#collapseThree">Giá</a>
@@ -185,12 +187,13 @@
                                                         <li><a id="price-1" onclick="changePrice(1)" data-start-price="0.0" data-end-price="300000.0">0.0 VNĐ - 300000.0 VNĐ</a></li>
                                                         <li><a id="price-2" onclick="changePrice(2)" data-start-price="300000.0" data-end-price="500000.0">300000.0 VNĐ - 500000.0 VNĐ</a></li>
                                                         <li><a id="price-3" onclick="changePrice(3)" data-start-price="500000.0" data-end-price="1000000.0">500000.0 VNĐ - 1000000.0 VNĐ</a></li>
-                                                        <li><a id="price-4" onclick="changePrice(4)" data-start-price="1000000.0">1000000.0 VNĐ trở lên</a></li>
+                                                        <li><a id="price-4" onclick="changePrice(4)" data-start-price="1000000.0" data-end-price="100000000.0">1000000.0 VNĐ trở lên</a></li>
                                                     </ul>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
+                                    <!--Size-->
                                     <div class="card">
                                         <div class="card-heading">
                                             <a data-toggle="collapse" data-target="#collapseFour">Size</a>
@@ -226,8 +229,7 @@
                                             </div>
                                         </div>
                                     </div>
-
-
+                                    <!--Color-->
                                     <div class="card">
                                         <div class="card-heading">
                                             <a data-toggle="collapse" data-target="#collapseFive">Màu sắc</a>
@@ -241,6 +243,11 @@
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
+                                    <div class="card">
+                                        <button class="p-2 text-white btn-danger border-0 rounded-2 hidden" id="btnClearSort">
+                                            Bỏ chọn <i class="fas fa-times"></i>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -350,7 +357,7 @@
             </script>
         </div>
         <script src="/web-assets/js/favorite.js"></script>
-        <script src="/web-assets/js/shop-sort.js"></script>
+        <script src="/web-assets/js/shop/shop-sort.js"></script>
         <script th:inline="javascript">
             document.addEventListener('DOMContentLoaded', function() {
                 // Định dạng tất cả các giá

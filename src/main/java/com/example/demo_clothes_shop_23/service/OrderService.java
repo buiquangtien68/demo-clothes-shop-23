@@ -53,6 +53,19 @@ public class OrderService {
         return ordersRepository.findByUser_IdOrderByCreatedAtDesc(userId);
     }
 
+    public List<Orders> getOrdersCreatedThisMonth() {
+        LocalDateTime now = LocalDateTime.now();
+        int currentMonth = now.getMonthValue();
+        int currentYear = now.getYear();
+        return ordersRepository.findOrdersCreatedThisMonth(currentMonth, currentYear);
+    }
+
+    public Long getTotalFinalTotalCreatedThisMonth() {
+        LocalDateTime now = LocalDateTime.now();
+        int currentMonth = now.getMonthValue();
+        int currentYear = now.getYear();
+        return ordersRepository.findTotalFinalTotalCreatedThisMonth(currentMonth, currentYear, OrdersStatus.DA_GIAO);
+    }
 
     public Orders createOrder(CreateOrderRequest createOrderRequest) {
         User user = userRepository.findById(createOrderRequest.getUserId()).orElseThrow(

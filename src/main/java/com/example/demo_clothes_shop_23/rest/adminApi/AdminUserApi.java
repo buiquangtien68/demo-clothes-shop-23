@@ -20,7 +20,7 @@ public class AdminUserApi {
     }
 
     @PutMapping("/{id}/update")
-    public ResponseEntity<?> updateUser(@RequestBody UpdateUserRequest updateUserRequest, @PathVariable String id) {
+    public ResponseEntity<?> updateUser(@RequestBody UpdateUserRequest updateUserRequest, @PathVariable Integer id) {
         userService.updateUser(updateUserRequest,id);
         return ResponseEntity.ok().build();
     }

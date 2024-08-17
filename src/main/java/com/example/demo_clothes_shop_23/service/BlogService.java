@@ -5,6 +5,7 @@ import com.example.demo_clothes_shop_23.entities.Comment;
 import com.example.demo_clothes_shop_23.entities.Tag;
 import com.example.demo_clothes_shop_23.entities.User;
 import com.example.demo_clothes_shop_23.exception.ResourceNotFoundException;
+import com.example.demo_clothes_shop_23.model.response.ImageResponse;
 import com.example.demo_clothes_shop_23.repository.BlogRepository;
 import com.example.demo_clothes_shop_23.repository.CommentRepository;
 import com.example.demo_clothes_shop_23.request.UpsertBlogRequest;
@@ -30,8 +31,8 @@ import java.util.Map;
 public class BlogService {
     private final BlogRepository blogRepository;
     private final TagService tagService;
-    private final FileService fileService;
     private final CommentRepository commentRepository;
+    private final FileServerService fileServerService;
 
     public List<Blog> getAll() {
         return blogRepository.findAll();
@@ -69,6 +70,13 @@ public class BlogService {
             .stream()
             .limit(3)
             .toList();
+    }
+
+    public List<Blog> getBlogsCreatedThisMonth() {
+        LocalDateTime now = LocalDateTime.now();
+        int currentMonth = now.getMonthValue();
+        int currentYear = now.getYear();
+        return blogRepository.findBlogsCreatedThisMonth(currentMonth, currentYear);
     }
 
 
@@ -139,16 +147,10 @@ public class BlogService {
 
     public String uploadThumbnail(Integer id, MultipartFile file) {
         Blog blog = blogRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Blog not found"));
-        try {
-            Map data = fileService.uploadFile(file);
-            String url = (String) data.get("url");
-            blog.setThumbnail(url);
-            blogRepository.save(blog);
-
-            return url;
-        }catch (IOException e) {
-            throw new RuntimeException("Error while uploading thumbnail");
-        }
+        ImageResponse imageResponse = fileServerService.uploadFile(file);
+        blog.setThumbnail(imageResponse.getUrl());
+        blogRepository.save(blog);
+        return imageResponse.getUrl();
     }
 
     public List<Blog> getByTagId(Integer tagId) {

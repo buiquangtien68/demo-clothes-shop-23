@@ -9,6 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/admin/products")
 @AllArgsConstructor
@@ -23,8 +26,8 @@ public class AdminProductApi {
 
     @PutMapping("/update/{productId}")
     public ResponseEntity<?> updateProduct(@PathVariable Integer productId, @RequestBody UpsertProductRequest upsertProductRequest) {
-        productService.updateProduct(productId,upsertProductRequest);
-        return ResponseEntity.ok().build();
+        Map<Integer, List<Image>> imageMap = productService.updateProduct(productId,upsertProductRequest);
+        return ResponseEntity.ok().body(imageMap);
     }
 
     @PostMapping("/{productId}/update-poster")

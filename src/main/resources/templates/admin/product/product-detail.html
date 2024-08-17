@@ -308,6 +308,7 @@
     //Summernote
     <script src="/admin-assets/plugins/summernote/summernote-bs4.min.js"></script>
 
+    <!--Select2-->
     <script src="/admin-assets/plugins/select2/js/select2.full.min.js"></script>
 
     <script th:inline="javascript">
@@ -488,18 +489,17 @@
 
 
 
-        let imageMap = new Map(); // Khởi tạo map để lưu trữ ảnh
+
 
         // Chuyển đổi dữ liệu từ server thành Map
-        let imageMapFromServer = [[${imageMap}]]; // Giả sử imageMapFromServer là dạng này
-        let newImageMap = new Map();
+        let imageMapFromServer = [[${imageMap}]];
+        let imageMap = new Map();
 
         Object.keys(imageMapFromServer).forEach(colorId => {
             let images = imageMapFromServer[colorId];
-            newImageMap.set(parseInt(colorId), images);
+            imageMap.set(parseInt(colorId), images);
         });
 
-        imageMap = newImageMap;
 
         // Hàm để cập nhật bảng hình ảnh
         function updateImageTable() {
@@ -687,7 +687,7 @@
                 let mainImage = images.find(img => img.type === 'MAIN');
                 let subImages = images.filter(img => img.type !== 'MAIN');
 
-                if (subImages.length < 2) {
+                if (subImages.length < 4) {
                     // Tạo một input type=file để chọn ảnh phụ
                     let fileInput = $('<input type="file" accept="image/*" style="display: none;">');
                     fileInput.on('change', async function (event) {
@@ -855,7 +855,6 @@
                 name: document.getElementById('name').value,
                 description: document.getElementById('description').value,
                 price: document.getElementById('price').value,
-                newPrice: document.getElementById('price').value,
                 categoryId: document.getElementById('categoryChild').value,
                 colorIds: $('#color').val(),
                 sizeIds: $('#size').val(),
@@ -866,9 +865,12 @@
             try {
                 let res = await axios.put(`/api/admin/products/update/${currentProduct.id}`, data);
                 toastr.success("Cập nhật sản phẩm thành công");
-                setTimeout(()=>{
-                    window.location.href='/admin/products'
-                },1000)
+                imageMapFromServer=res.data;
+                Object.keys(imageMapFromServer).forEach(colorId => {
+                    let images = imageMapFromServer[colorId];
+                    imageMap.set(parseInt(colorId), images);
+                });
+                updateImageTable()
             } catch (e) {
                 console.log(e);
                 toastr.error(e.response?.data?.message || "Có lỗi xảy ra!");
@@ -915,46 +917,6 @@
                     toastr.error(e.response.data.message);
                 });
         });
-
-       /* //Cập nhật hình anh
-        function gatherImageData() {
-            let data = [];
-            imageMap.forEach((images, colorId) => {
-                images.forEach(img => {
-                    data.push({
-                        colorId: colorId,
-                        imgId: img.id,
-                        imgUrl: img.imgUrl,
-                        imgType: img.type
-                    });
-                });
-            });
-            return data;
-        }
-
-        // Xử lý sự kiện nhấn nút "Cập nhật"
-        $('#btnUpdateImage').on('click', function() {
-            let updatedData = gatherImageData();
-
-            // Chuẩn bị dữ liệu để gửi
-            let imageData = {
-                images: updatedData
-            };
-            console.log(imageData)
-
-           /!* // Gửi dữ liệu lên server
-            axios.post('/api/admin/products/update-images', payload)
-                .then(response => {
-                    if (response.status === 200) {
-                        toastr.success('Cập nhật hình ảnh thành công');
-                        // Bạn có thể thực hiện các hành động bổ sung ở đây, ví dụ: làm mới bảng hoặc biểu mẫu
-                    }
-                })
-                .catch(error => {
-                    console.error(error);
-                    toastr.error('Có lỗi xảy ra trong quá trình cập nhật');
-                });*!/
-        });*/
     </script>
 </th:block>
 

@@ -4,6 +4,7 @@ import com.example.demo_clothes_shop_23.entities.*;
 import com.example.demo_clothes_shop_23.model.enums.ImageType;
 import com.example.demo_clothes_shop_23.model.enums.OrdersStatus;
 import com.example.demo_clothes_shop_23.model.enums.SizeType;
+import com.example.demo_clothes_shop_23.model.enums.UserRole;
 import com.example.demo_clothes_shop_23.service.*;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -34,10 +36,18 @@ public class AdminController {
     private final OrderDetailService orderDetailService;
     private final CouponService couponService;
     private final DiscountService discountService;
+    private final BannerService bannerService;
+    private final CostService costService;
 
     //dashboard
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
+        model.addAttribute("currentMonth", LocalDateTime.now().getMonthValue());
+        model.addAttribute("totalFinal", orderService.getTotalFinalTotalCreatedThisMonth());
+        model.addAttribute("orders", orderService.getOrdersCreatedThisMonth());
+        model.addAttribute("users", userService.getUsersCreatedThisMonth());
+        model.addAttribute("costs", costService.getCostsCreatedThisMonth());
+        model.addAttribute("blogs", blogService.getBlogsCreatedThisMonth());
         return "admin/dashboard/dashboard";
     }
 
@@ -230,5 +240,45 @@ public class AdminController {
         return "admin/discount/coupon-index";
     }
 
+    //BANNER
+    @GetMapping("/banners")
+    public String getBannerIndexPage(Model model) {
+        model.addAttribute("banners",bannerService.getAll());
+        List<Integer> selectedBannerId = bannerService.getBannerByStatus(true).stream()
+                .map(Banner::getId)
+                    .toList();
+        model.addAttribute("selectedBannerId", selectedBannerId);
+        return "admin/banner/banner-index";
+    }
 
+    @GetMapping("/banners/{id}")
+    public String getBannerDetailPage(@PathVariable int id, Model model) {
+        model.addAttribute("banner",bannerService.getById(id));
+        return "admin/banner/banner-detail";
+    }
+
+    @GetMapping("/banners/create")
+    public String getBannerCreatePage(Model model) {
+        return "admin/banner/banner-create";
+    }
+
+    //COST
+    @GetMapping("/costs")
+    public String getCostIndexPage(Model model) {
+        model.addAttribute("costs",costService.getAll());
+        return "admin/cost/cost-index";
+    }
+
+    @GetMapping("/costs/{id}")
+    public String getCostDetailPage(@PathVariable int id, Model model) {
+        model.addAttribute("cost",costService.getById(id));
+        model.addAttribute("users",userService.getByRole(UserRole.ADMIN));
+        return "admin/cost/cost-detail";
+    }
+
+    @GetMapping("/costs/create")
+    public String getCostCreatePage(Model model) {
+        model.addAttribute("users",userService.getByRole(UserRole.ADMIN));
+        return "admin/cost/cost-create";
+    }
 }

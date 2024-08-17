@@ -35,6 +35,7 @@ public class ProductService {
     private final QuantityRepository quantityRepository;
     private final ImageRepository imageRepository;
     private final FileServerService fileServerService;
+    private  final ImageService imageService;
 
     public List<Product> getAllByStatus(Boolean status) {
         return productRepository.findAllByStatus(status);
@@ -146,7 +147,7 @@ public class ProductService {
             .slug(slugify.slugify(upsertProductRequest.getName()))
             .description(upsertProductRequest.getDescription())
             .price(upsertProductRequest.getPrice())
-            .newPrice(upsertProductRequest.getNewPrice())
+            .newPrice(upsertProductRequest.getPrice())
             .rating(0.0)
             .status(upsertProductRequest.getStatus())
             .category(category)
@@ -208,7 +209,7 @@ public class ProductService {
     }
 
 
-    public void updateProduct(Integer productId, UpsertProductRequest upsertProductRequest) {
+    public Map<Integer, List<Image>> updateProduct(Integer productId, UpsertProductRequest upsertProductRequest) {
         Product product = productRepository.findById(productId).orElseThrow(
             () -> new ResourceNotFoundException("Không tìm thấy sản phẩm")
         );
@@ -282,43 +283,56 @@ public class ProductService {
                 .updatedAt(LocalDateTime.now())
                 .build();
             quantityRepository.save(quantityEntity);
-
-            if (product.getDiscount()!=null){
-                if (Objects.equals(product.getDiscount().getType().toString(), "PERCENT")){
-                    // Lấy giá sản phẩm và tính toán giá mới sau khi giảm giá
-                    Long price = product.getPrice();
-                    Long discountAmount = product.getDiscount().getAmount();
-                    Long newPrice = price * (1 - discountAmount / 100);
-                    product.setNewPrice(newPrice);
-
-                }else if (Objects.equals(product.getDiscount().getType().toString(), "SAME_PRICE")){
-                    // Lấy giá sản phẩm và tính toán giá mới sau khi giảm giá
-                    Long discountAmount = product.getDiscount().getAmount();
-
-                    product.setNewPrice(discountAmount);
-                }else {
-                    // Lấy giá sản phẩm và tính toán giá mới sau khi giảm giá
-                    Long price = product.getPrice();
-                    Long discountAmount = product.getDiscount().getAmount();
-                    Long newPrice =  price - discountAmount;
-
-                    product.setNewPrice(newPrice);
-                }
-            } else{
-                product.setNewPrice(product.getPrice());
-            }
-
-            product.setName(upsertProductRequest.getName());
-            product.setSlug(slugify.slugify(upsertProductRequest.getName()));
-            product.setDescription(upsertProductRequest.getDescription());
-            product.setPrice(upsertProductRequest.getPrice());
-            product.setStatus(upsertProductRequest.getStatus());
-            product.setCategory(category);
-            product.setColors(colors);
-            product.setSizes(sizes);
-            product.setUpdatedAt(LocalDateTime.now());
-            productRepository.save(product);
         });
+
+        product.setPrice(upsertProductRequest.getPrice());
+        productRepository.save(product);
+
+        if (product.getDiscount()!=null){
+            if (Objects.equals(product.getDiscount().getType().toString(), "PERCENT")){
+                // Lấy giá sản phẩm và tính toán giá mới sau khi giảm giá
+                Long price = product.getPrice();
+                Long discountAmount = product.getDiscount().getAmount();
+                double discountPercent = discountAmount / 100.0;
+                Long newPrice = Math.round(price * (1 - discountPercent));
+                product.setNewPrice(newPrice);
+
+            }else if (Objects.equals(product.getDiscount().getType().toString(), "SAME_PRICE")){
+                // Lấy giá sản phẩm và tính toán giá mới sau khi giảm giá
+                Long discountAmount = product.getDiscount().getAmount();
+
+                product.setNewPrice(discountAmount);
+            }else {
+                // Lấy giá sản phẩm và tính toán giá mới sau khi giảm giá
+                Long price = product.getPrice();
+                Long discountAmount = product.getDiscount().getAmount();
+                Long newPrice =  price - discountAmount;
+
+                product.setNewPrice(newPrice);
+            }
+        } else{
+            product.setNewPrice(product.getPrice());
+        }
+
+        product.setName(upsertProductRequest.getName());
+        product.setSlug(slugify.slugify(upsertProductRequest.getName()));
+        product.setDescription(upsertProductRequest.getDescription());
+        product.setStatus(upsertProductRequest.getStatus());
+        product.setCategory(category);
+        product.setColors(colors);
+        product.setSizes(sizes);
+        product.setUpdatedAt(LocalDateTime.now());
+        productRepository.save(product);
+
+        List<Image> images = imageService.getByProductId(productId);
+
+        Map<Integer, List<Image>> imageMap = images.stream()
+            .sorted(Comparator.comparing(img -> img.getType() == ImageType.MAIN ? 0 : 1))
+            .collect(Collectors.groupingBy(
+                img -> img.getColor().getId(),
+                Collectors.toList()
+            ));
+        return imageMap;
     }
 
     public List<Product> getByDiscount_Id(Integer id) {

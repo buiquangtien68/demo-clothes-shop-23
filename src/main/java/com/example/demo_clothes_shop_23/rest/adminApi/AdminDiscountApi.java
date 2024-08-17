@@ -5,6 +5,7 @@ import com.example.demo_clothes_shop_23.service.DiscountService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/admin/discounts")
@@ -22,6 +23,11 @@ public class AdminDiscountApi {
     public ResponseEntity<?> updateDiscount(@RequestBody UpsertDiscountRequest upsertDiscountRequest, @PathVariable Integer discountId) {
         discountService.updateDiscount(upsertDiscountRequest, discountId);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{discountId}/update-thumbnail")
+    public ResponseEntity<?> updateThumbnail(@RequestParam("file") MultipartFile file, @PathVariable Integer discountId) {
+        return ResponseEntity.ok(discountService.updateThumbnail(discountId, file));
     }
 
 }

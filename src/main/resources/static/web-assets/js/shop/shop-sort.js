@@ -275,3 +275,44 @@ const changePrice = (id) => {
         window.location.href = url.toString();
     }
 };
+
+// Hàm để lấy tham số từ URL
+function getQueryParams() {
+    const params = new URLSearchParams(window.location.search);
+    const queryParams = {};
+    for (const [key, value] of params.entries()) {
+        queryParams[key] = value;
+    }
+    return queryParams;
+}
+
+// Kiểm tra các tham số và điều chỉnh hiển thị nút
+function checkParamsAndToggleButton() {
+    const params = getQueryParams();
+    const excludeParams = ['page', 'pageSize', 'sortProduct'];
+    const hasOtherParams = Object.keys(params).some(param => !excludeParams.includes(param));
+
+    const btnClearSort = document.getElementById('btnClearSort');
+    if (hasOtherParams) {
+        btnClearSort.classList.remove('hidden');
+    } else {
+        btnClearSort.classList.add('hidden');
+    }
+
+    // Lưu giá trị của sortProduct nếu có
+    const sortProduct = params['sortProduct'];
+    btnClearSort.setAttribute('data-sortProduct', sortProduct || '');
+}
+
+// Xử lý sự kiện nhấp chuột cho nút "Bỏ chọn"
+document.getElementById('btnClearSort').addEventListener('click', function() {
+    const sortProduct = this.getAttribute('data-sortProduct');
+    let baseUrl = 'http://localhost:8080/product-shop';
+    if (sortProduct) {
+        baseUrl += `?sortProduct=${encodeURIComponent(sortProduct)}`;
+    }
+    window.location.href = baseUrl;
+});
+
+// Gọi hàm khi trang đã được tải
+window.onload = checkParamsAndToggleButton;

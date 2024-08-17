@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Tạo user</title>
+    <title>Tạo phiếu chi</title>
 
    <th:block id="css">
        <!--Easymde-->
@@ -18,18 +18,6 @@
        <link rel="stylesheet" href="/admin-assets/plugins/select2/css/select2.min.css" />
        <link rel="stylesheet" href="/admin-assets/dist/css/style.css">
        <style>
-           .form-group{
-               position: relative;
-           }
-           .icon-toggle-password {
-               position: absolute;
-               top: 75%;
-               right: 10px;
-               transform: translateY(-50%);
-               cursor: pointer;
-               font-size: 1rem;
-               color: #888;
-           }
        </style>
 
 
@@ -50,10 +38,10 @@
                                 <a href="#">Dashboard</a>
                             </li>
                             <li class="breadcrumb-item">
-                                <a th:href="@{/admin/users}">Danh sách user</a>
+                                <a th:href="@{/admin/costs}">Danh sách phiếu chi</a>
                             </li>
                             <li class="breadcrumb-item active">
-                                Tạo user
+                                Tạo phiếu chi
                             </li>
                         </ol>
                     </div>
@@ -66,39 +54,36 @@
             <div class="container-fluid">
                 <div class="row py-2">
                     <div class="col-6">
-                        <button type="button" class="btn btn-info px-4" id="btnCreateUser">
+                        <button type="button" class="btn btn-info px-4" id="btnCreateBanner">
                             Lưu
                         </button>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-12">
-                        <form id="form-user">
+                        <form id="form-banner">
                             <div class="card">
                                 <div class="card-body">
                                     <div class="row">
-                                        <div class="col-md-9">
+                                        <div class="col-md-8">
                                             <div class="form-group">
-                                                <label>Tên tài khoản</label>
-                                                <input type="text" class="form-control" id="input-name" name="name"/>
+                                                <label>Mục đích chi</label>
+                                                <input type="text" class="form-control" id="name" name="name" placeholder="Nhập mục đích chi"/>
                                             </div>
                                             <div class="form-group">
-                                                <label>Email</label>
-                                                <input type="text" id="input-email" class="form-control" name="email"/>
+                                                <label>Số tiền</label>
+                                                <input type="number" class="form-control" id="amount" name="amount" placeholder="Nhập số tiền"/>
                                             </div>
                                             <div class="form-group">
-                                                <label>Mật khẩu</label>
-                                                <input type="password" class="form-control" id="input-password" name="password" placeholder="Mật khẩu">
-                                                <span class="icon-toggle-password" onclick="togglePassword('input-password', this)">
-                                                     <i class="fa fa-eye" aria-hidden="true"></i>
-                                                </span>
+                                                <label>Ghi chú</label>
+                                                <textarea rows="3" class="form-control" id="description" name="description" placeholder="Nhập ghi chú"></textarea>
                                             </div>
                                             <div class="form-group">
-                                                <label>Quyền</label>
-                                                <select id="input-role" class="form-control" name="role">
-                                                    <option value="">Chọn quyền</option>
-                                                    <option value="ADMIN">ADMIN</option>
-                                                    <option value=USER>USER</option>
+                                                <label>Người chi</label>
+                                                <select id="user" class="form-control" name="user">
+                                                    <option value="" >Chọn người chi</option>
+                                                    <option th:each="user : ${users}" th:value="${user.id}" th:text="${user.name}" >
+                                                    </option>
                                                 </select>
                                             </div>
                                         </div>
@@ -120,63 +105,37 @@
     <script src="/admin-assets/plugins/select2/js/select2.full.min.js"></script>
 
     <script th:inline="javascript">
-        /// Hàm bật/tắt mật khẩu
-        function togglePassword(inputId, iconElement) {
-            var passwordInput = document.getElementById(inputId);
-            var eyeIcon = iconElement.querySelector('i');
-
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                eyeIcon.classList.remove('fa-eye');
-                eyeIcon.classList.add('fa-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                eyeIcon.classList.remove('fa-eye-slash');
-                eyeIcon.classList.add('fa-eye');
-            }
-        }
-
-        // Hàm kiểm tra và ẩn hiện biểu tượng mắt
-        function togglePasswordVisibility() {
-            const passwordInputs = document.querySelectorAll('.register-form-input');
-            passwordInputs.forEach(input => {
-                const icon = input.querySelector('.icon-toggle-password');
-                if (icon) {
-                    const hasError = $(input).find('.invalid-feedback').length > 0;
-                    icon.classList.toggle('hidden', hasError);
-                }
-            });
-        }
-        $('#form-user').validate({
+        $('#form-banner').validate({
             rules: {
                 name: {
                     required: true,
                 },
-                email: {
+                amount: {
                     required: true,
-                    email: true
+                    min: 1,
                 },
-                password: {
-                    required: true,
+                description:{
+                    required: true
                 },
-                role: {
+                user:{
                     required: true
                 }
             },
             messages: {
                 name: {
-                    required: "Tên tài khoản không được để trống",
+                    required: "Tên banner không được để trống",
                 },
-                email: {
-                    required: "Email không được để trống",
-                    email: "Email không hợp lệ"
+                amount: {
+                    required: "Số tiền không được để trống!",
+                    min: "Số tiền phải lớn hơn 0"
                 },
-                password: {
-                    required: "Mật khẩu không được để trống",
+                description:{
+                    required: "Mô tả không được để trống!"
                 },
-                role: {
-                    required: "Vui lòng chọn quyền"
+                user:{
+                    required: "Người chi không được để trống!"
                 }
+
             },
             errorElement: 'span',
             errorPlacement: function (error, element) {
@@ -191,31 +150,30 @@
             }
         });
 
-        const btnCreateUserEl = document.getElementById("btnCreateUser");
+        const btnCreateBannerEl = document.getElementById("btnCreateBanner");
 
-        btnCreateUserEl.addEventListener('click', async (e) => {
+        btnCreateBannerEl.addEventListener('click', async (e) => {
             e.preventDefault();
             console.log("Form submission attempted");
 
             // Kiểm tra tính hợp lệ của form
-            if (!$('#form-user').valid()) {
+            if (!$('#form-banner').valid()) {
                 return;
             }
 
             // Lấy dữ liệu từ form
             const data = {
-                name: document.getElementById('input-name').value,
-                email: document.getElementById('input-email').value,
-                password: document.getElementById('input-password').value,
-                roleString: document.getElementById('input-role').value
+                name: document.getElementById('name').value,
+                amount: document.getElementById('amount').value,
+                description: document.getElementById('description').value,
+                user: document.getElementById('user').value
             };
-            console.log(data.name)
 
             try {
-                let res = await axios.put("/api/admin/users/create", data);
-                toastr.success("Tạo user thành công");
+                let res = await axios.put("/api/admin/costs/create", data);
+                toastr.success("Tạo phiếu chi thành công");
                 setTimeout(()=>{
-                    window.location.href='/admin/users'
+                    window.location.href='/admin/costs'
                 },1000)
             } catch (e) {
                 // Xử lý lỗi
@@ -223,9 +181,6 @@
                 toastr.error(e.response.data.message || "Có lỗi xảy ra");
             }
         });
-
-
-
     </script>
 </th:block>
 </body>

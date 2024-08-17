@@ -41,6 +41,17 @@ public class UserService {
         );
     }
 
+    public List<User> getUsersCreatedThisMonth() {
+        LocalDateTime now = LocalDateTime.now();
+        int currentMonth = now.getMonthValue();
+        int currentYear = now.getYear();
+        return userRepository.findUsersCreatedThisMonth(currentMonth, currentYear);
+    }
+
+    public List<User> getByRole(UserRole role) {
+        return userRepository.findByRole(role);
+    }
+
     public void createUser(CreateUserRequest createUserRequest) {
         //Cần kiểm tra user đã tồn tại hay chưa
         if (userRepository.findByEmail(createUserRequest.getEmail()).isPresent()){
@@ -77,8 +88,8 @@ public class UserService {
         mailService.sendMail2(user, "Xác thực tài khoản", link);
     }
 
-    public void updateUser(UpdateUserRequest updateUserRequest, String id) {
-        User user = userRepository.findById(Integer.parseInt(id)).orElseThrow(
+    public void updateUser(UpdateUserRequest updateUserRequest, Integer id) {
+        User user = userRepository.findById(id).orElseThrow(
             () -> new ResourceNotFoundException("Không thấy user này")
         );
         user.setName(updateUserRequest.getName());

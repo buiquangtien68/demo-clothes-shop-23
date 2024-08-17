@@ -3,11 +3,14 @@ package com.example.demo_clothes_shop_23.service;
 import com.example.demo_clothes_shop_23.entities.Discount;
 import com.example.demo_clothes_shop_23.entities.Product;
 import com.example.demo_clothes_shop_23.model.enums.DiscountType;
+import com.example.demo_clothes_shop_23.model.response.ImageResponse;
 import com.example.demo_clothes_shop_23.repository.DiscountRepository;
 import com.example.demo_clothes_shop_23.repository.ProductRepository;
 import com.example.demo_clothes_shop_23.request.UpsertDiscountRequest;
 import lombok.AllArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,6 +25,7 @@ import java.util.Objects;
 public class DiscountService {
     private final DiscountRepository discountRepository;
     private final ProductRepository productRepository;
+    private final FileServerService fileServerService;
 
     public List<Discount> getAll() {
         return discountRepository.findAll();
@@ -107,9 +111,11 @@ public class DiscountService {
                     DiscountType discountType = DiscountType.valueOf(upsertDiscountRequest.getType());
                     if (discountType==DiscountType.PERCENT){
                         // Lấy giá sản phẩm và tính toán giá mới sau khi giảm giá
-                        double price = product.getPrice();
-                        double discountAmount = product.getDiscount().getAmount();
-                        double newPrice = price * (1 - discountAmount / 100);
+                        Long price = product.getPrice();
+                        Long discountAmount = product.getDiscount().getAmount();
+                        double discountPercent = discountAmount / 100.0;
+                        Long newPrice = Math.round(price * (1 - discountPercent));
+                        product.setNewPrice(newPrice);
 
                         product.setNewPrice((long) newPrice);
                     }else if (discountType==DiscountType.SAME_PRICE){
@@ -138,5 +144,31 @@ public class DiscountService {
         } catch (DateTimeParseException e) {
             throw new IllegalArgumentException("Ngày tháng không hợp lệ");
         }
+    }
+
+    @Scheduled(cron = "0 0 0 * * ?")  // Mỗi ngày vào lúc 0h00
+    public void checkExpiredDiscounts() {
+        LocalDateTime now = LocalDateTime.now();
+        List<Discount> expiredDiscounts = discountRepository.findByEndDateBefore(now);
+
+        for (Discount discount : expiredDiscounts) {
+            discount.setActive(false);
+            discountRepository.save(discount);
+            List<Product> oldProducts = productRepository.findByDiscount_Id(discount.getId());
+            oldProducts.forEach(product -> {
+                product.setDiscount(null);
+                product.setNewPrice(product.getPrice());
+                productRepository.save(product);
+            });
+        }
+    }
+
+    public String updateThumbnail(Integer discountId, MultipartFile file) {
+        Discount discount = discountRepository.findById(discountId).orElseThrow(
+            () -> new RuntimeException("Discount not found"));
+        ImageResponse imageResponse = fileServerService.uploadFile(file);
+        discount.setImageUrl(imageResponse.getUrl());
+        discountRepository.save(discount);
+        return discount.getImageUrl();
     }
 }

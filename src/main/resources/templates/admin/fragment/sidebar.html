@@ -27,6 +27,28 @@
                 </li>
                 <li class="nav-item">
                     <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-receipt"></i>
+                        <p>
+                            Quản lý phiếu chi
+                            <i class="fas fa-angle-left right"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a th:href="@{/admin/costs}" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Danh sách phiếu chi</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a th:href="@{/admin/costs/create}" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Tạo phiếu chi</p>
+                            </a>
+                        </li>
+                    </ul>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-tshirt"></i>
                         <p>
                             Quản lý sản phẩm
@@ -163,6 +185,28 @@
                         </li>
                     </ul>
                 </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-user"></i>
+                        <p>
+                            Quản lý banner
+                            <i class="fas fa-angle-left right"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a th:href="@{/admin/banners}" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Danh sách banner</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a th:href="@{/admin/banners/create}" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Tạo banner</p>
+                            </a>
+                        </li>
+                    </ul>
             </ul>
         </nav>
     </div>

@@ -764,11 +764,13 @@ class DemoClothesShop23ApplicationTests {
 			if (product.getDiscount()!=null){
 				if (Objects.equals(product.getDiscount().getType().toString(), "PERCENT")){
 					// Lấy giá sản phẩm và tính toán giá mới sau khi giảm giá
-					double price = product.getPrice();
-					double discountAmount = product.getDiscount().getAmount();
-					double newPrice = price * (1 - discountAmount / 100);
+					Long price = product.getPrice();
+					Long discountAmount = product.getDiscount().getAmount();
+					double discountPercent = discountAmount / 100.0;
+					Long newPrice = Math.round(price * (1 - discountPercent));
+					product.setNewPrice(newPrice);
 
-					product.setNewPrice((long) newPrice);
+					product.setNewPrice(newPrice);
 					productRepository.save(product);
 				}else if (Objects.equals(product.getDiscount().getType().toString(), "SAME_PRICE")){
 					// Lấy giá sản phẩm và tính toán giá mới sau khi giảm giá
